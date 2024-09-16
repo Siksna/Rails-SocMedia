@@ -1,0 +1,100 @@
+<html>
+<% #https://rutikkpatel.medium.com/crud-in-rails-7-by-rutik-patel-a2bbc942d069 %>
+
+
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+
+  <%= link_to 'Twitters', root_path, class:"navbar-brand" %>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+       
+        <li class="nav-item">
+         <%= link_to "Par mums", home_about_path, class:"nav-link" %>
+        </li>
+
+
+           <% if user_signed_in? %>
+
+
+            <li class="nav-item">
+         <%= link_to "Draugi", friends_path, class:"nav-link" %>
+        </li>
+  
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+           
+        
+
+          Adminiem
+          </a>
+          <ul class="dropdown-menu">
+            <li><%= link_to "Personu dati", friends_personas_path, class:"dropdown-item" %></li>
+            <li><a class="dropdown-item" href="#">2</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">3</a></li>
+          </ul>
+        </li>
+        
+
+        
+     
+<% end %>
+      </ul>
+<div class="d-flex">
+      <form class="d-flex" role="search">
+        <input class="form-control me-2" type="search" placeholder="Meklēt" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Meklēt</button>
+      </form>
+
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+      <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+           <% if user_signed_in? %>
+          <i class="fa-sharp fa-solid fa-user"></i>
+          <% else %>
+        <i class="fa-sharp fa-solid fa-right-to-bracket"></i>
+          <% end %>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+  <% if user_signed_in? %>
+
+        <li>
+         <%= button_to "Iziet", destroy_user_session_path, method: :delete, class:"dropdown-item" %>
+        </li>
+        <li>
+         <%= link_to "Rediģēt profilu", edit_user_registration_path, class:"dropdown-item" %>
+        </li>
+        
+      <% else %>
+
+     
+      <li>
+      <%= link_to "Reģistrēties", new_user_registration_path, class:"dropdown-item" %>
+      </li>
+      <li>
+         <%= link_to "Pieslēgties", new_user_session_path, class:"dropdown-item" %>
+        </li>
+        
+        <% end %>
+
+        </ul>
+        </ul>
+        </div>
+
+    </div>
+  </div>
+</nav> 
+</html>

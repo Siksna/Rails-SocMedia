@@ -1,0 +1,49 @@
+<h2>Lietotāja rediģēšana</h2>
+
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+  <%= render "devise/shared/error_messages", resource: resource %>
+
+  <div class="field form-group">
+    <%= f.label :epasts %><br />
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class:"form-control" %>
+  </div>
+
+  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+    <div>Pašlaik tiek gaidīts apstiprinājums priekš: <%= resource.unconfirmed_email %></div>
+  <% end %>
+
+  <div class="field form-group">
+    <%= f.label :parole %><br />
+    <%= f.password_field :password, autocomplete: "new-password", class:"form-control", placeholder:"(atstājiet tukšu, ja nevēlaties to mainīt)" %>
+    <% if @minimum_password_length %>
+      <em><%= @minimum_password_length %> rakstzīmes minimums</em>
+    <% end %>
+  </div>
+
+  <div class="field form-group">
+    <%= f.label :paroles_apstiprinasana %><br />
+    <%= f.password_field :password_confirmation, autocomplete: "new-password",class:"form-control" %>
+  </div>
+
+  <div class="field form-group">
+    <%= f.label :pašreizējā_parole %><br />
+    <%= f.password_field :current_password, autocomplete: "current-password" , class:"form-control", placeholder:"(mums ir nepieciešama jūsu pašreizējā parole, lai apstiprinātu izmaiņas)"%>
+  </div>
+
+  <div class="actions">
+    <%= f.submit "Saglabāt", class:"btn btn-success border-0 rounded-pill shadow p-2 m-2" %>
+  </div>
+<% end %>
+
+
+<div class="card">
+  <h5 class="card-header">Dzēst manu kontu</h5>
+  <div class="card-body">
+    <h5 class="card-title">Neapmierināti?</h5>
+     <%= button_to "Dzēst manu kontu", registration_path(resource_name), data: { confirm: "Pārliecināti?", turbo_confirm: "Vai tiešām parliecināti?" }, method: :delete, class:"btn btn-danger border-0 rounded-pill shadow p-2 m-2" %></div> 
+  </div>
+
+   <%= link_to "Atpakaļ", :back, class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
+</div>
+
+
