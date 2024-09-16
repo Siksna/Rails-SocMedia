@@ -91,42 +91,53 @@
       postElement.onclick = function() {
         window.location.href = `/messages/${message.id}`;
       };
-
+    
       const textElement = document.createElement('p');
       textElement.textContent = message.content;
       postElement.appendChild(textElement);
-
+    
+      if (message.file) {
+        const fileLink = document.createElement('a');
+        fileLink.href = message.file_url;
+        fileLink.textContent = 'Nolādēt failu';
+        postElement.appendChild(fileLink);
+      }
+    
       return postElement;
     }
-
     function postComment() {
       const inputField = document.getElementById('inputField');
       const text = inputField.value.trim();
       const fileInput = document.getElementById('fileInput');
       const file = fileInput.files[0];
-
-      if (text || file) {
-        fetch('/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': document.querySelector('[name=csrf-token]').content
-          },
-          body: JSON.stringify({ message: { content: text } })
-        })
-        .then(response => response.json())
-        .then(data => {
-          const newPost = createPostElement(data);
-          const postContainer = document.getElementById('post-container');
-          postContainer.insertBefore(newPost, postContainer.firstChild); 
-
-          inputField.value = '';
-          fileInput.value = '';
-          document.getElementById('fileInfo').style.display = 'none'; 
-        })
-        .catch(error => console.error('Kļūda sūtot komentu:', error));
+    
+      const formData = new FormData();
+      formData.append('message[content]', text);
+      if (file) {
+        formData.append('message[file]', file);
       }
+    
+      fetch('/messages', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('[name=csrf-token]').content
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        const newPost = createPostElement(data);
+        const postContainer = document.getElementById('post-container');
+        postContainer.insertBefore(newPost, postContainer.firstChild);
+    
+        inputField.value = '';
+        fileInput.value = '';
+        document.getElementById('fileInfo').style.display = 'none';
+      })
+      .catch(error => console.error('Kļūda publicējot komentu:', error));
     }
+    
+
 
     document.addEventListener('DOMContentLoaded', function() {
       fetchMessages();

@@ -22,11 +22,11 @@ class MessagesController < ApplicationController
     def create
         @message = Message.new(message_params)
         if @message.save
-          render json: @message, status: :created
+          file_url = url_for(@message.file) if @message.file.attached?
+          render json: @message.as_json.merge(file_url: file_url), status: :created
         else
           render json: @message.errors, status: :unprocessable_entity
         end
-      
       end
   
     def edit
@@ -54,7 +54,7 @@ class MessagesController < ApplicationController
       end
   
       def message_params
-        params.require(:message).permit(:content)
+        params.require(:message).permit(:content, :file)
       end
   end
   
