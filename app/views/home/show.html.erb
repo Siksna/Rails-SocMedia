@@ -1,0 +1,19 @@
+<h1>Ziņu detaļas</h1>
+
+<p> <%= @message.content %></p>
+
+<hr>
+
+<h3>Komenti:</h3>
+<ul>
+  <% @message.replies.each do |reply| %>
+    <li><%= reply.content %></li>
+  <% end %>
+</ul>
+
+
+<h4>Tava ziņa:</h4>
+<%= form_with model: [@message, @message.replies.build], local: true do |form| %>
+  <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit..." %><br>
+  <%= form.submit "Reply" %>
+<% end %>

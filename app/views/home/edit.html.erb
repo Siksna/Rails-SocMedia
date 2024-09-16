@@ -1,0 +1,11 @@
+<h1>rediģēt ziņu</h1>
+
+<%= form_with model: @message, local: true do |form| %>
+  <div class="form-group">
+    <%= form.label :content %>
+    <%= form.text_area :content, class: "form-control" %>
+  </div>
+  <%= form.submit 'Update Message', class: "btn btn-primary" %>
+<% end %>
+
+<%= link_to 'Back', messages_path, class: "btn btn-secondary" %>

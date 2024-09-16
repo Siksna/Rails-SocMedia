@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_13_093934) do
+ActiveRecord::Schema[7.2].define(version: 2024_09_16_122735) do
   create_table "friends", force: :cascade do |t|
     t.string "vards"
     t.string "uzvards"
@@ -21,6 +21,20 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_13_093934) do
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.index ["user_id"], name: "index_friends_on_user_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "replies", force: :cascade do |t|
+    t.text "content"
+    t.integer "message_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id"], name: "index_replies_on_message_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -34,4 +48,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_13_093934) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "replies", "messages"
 end

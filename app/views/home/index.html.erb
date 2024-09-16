@@ -22,6 +22,14 @@
       margin-bottom: 10px;
       display: none;
     }
+    .post {
+      cursor: pointer;
+      border: 1px solid lightgray;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: white;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -48,7 +56,6 @@
   </div>
 
   <script>
-   
     function displayFileName() {
       const fileInput = document.getElementById('fileInput');
       const fileInfo = document.getElementById('fileInfo');
@@ -62,49 +69,69 @@
       }
     }
 
-   
+    function fetchMessages() {
+      fetch('/messages')
+        .then(response => response.json())
+        .then(data => {
+          const postContainer = document.getElementById('post-container');
+          postContainer.innerHTML = ''; 
+
+          data.forEach(message => {
+            const postElement = createPostElement(message);
+            postContainer.appendChild(postElement); 
+          });
+        })
+        .catch(error => console.log('Kļūda iegūstot ziņas:', error));
+    }
+
+    function createPostElement(message) {
+      const postElement = document.createElement('div');
+      postElement.className = 'post';
+      postElement.id = `post-${message.id}`;
+      postElement.onclick = function() {
+        window.location.href = `/messages/${message.id}`;
+      };
+
+      const textElement = document.createElement('p');
+      textElement.textContent = message.content;
+      postElement.appendChild(textElement);
+
+      return postElement;
+    }
+
     function postComment() {
       const inputField = document.getElementById('inputField');
-      const fileInput = document.getElementById('fileInput');
       const text = inputField.value.trim();
+      const fileInput = document.getElementById('fileInput');
       const file = fileInput.files[0];
 
       if (text || file) {
-        const newPost = document.createElement('div');
-        newPost.className = 'post';
+        fetch('/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('[name=csrf-token]').content
+          },
+          body: JSON.stringify({ message: { content: text } })
+        })
+        .then(response => response.json())
+        .then(data => {
+          const newPost = createPostElement(data);
+          const postContainer = document.getElementById('post-container');
+          postContainer.insertBefore(newPost, postContainer.firstChild); 
 
-        if (text) {
-          const textElement = document.createElement('p');
-          textElement.textContent = text;
-          newPost.appendChild(textElement);
-        }
-
-        if (file) {
-          const fileReader = new FileReader();
-          fileReader.onload = function(event) {
-            if (file.type.startsWith('image/')) {
-              const imgElement = document.createElement('img');
-              imgElement.src = event.target.result;
-              newPost.appendChild(imgElement);
-            } else {
-              const fileElement = document.createElement('p');
-              fileElement.textContent = `Uploaded file: ${file.name}`;
-              newPost.appendChild(fileElement);
-            }
-          };
-          fileReader.readAsDataURL(file);
-        }
-
-        const postContainer = document.getElementById('post-container');
-        postContainer.appendChild(newPost);
-
-        inputField.value = '';
-        fileInput.value = '';
-        document.getElementById('fileInfo').style.display = 'none'; 
+          inputField.value = '';
+          fileInput.value = '';
+          document.getElementById('fileInfo').style.display = 'none'; 
+        })
+        .catch(error => console.error('Kļūda sūtot komentu:', error));
       }
     }
 
-   
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchMessages();
+    });
+
     document.getElementById('inputField').addEventListener('keydown', function(event) {
       if (event.key === 'Enter') {
         postComment();

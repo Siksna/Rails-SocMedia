@@ -6,6 +6,12 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :messages do
+    resources :replies, only: [:create]
+  end
+  
+  resources :messages, only: [:index, :show, :create]
+
   devise_for :users
   resources :friends
   get "friends/index"
