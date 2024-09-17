@@ -10,7 +10,7 @@ Rails.application.routes.draw do
     resources :replies, only: [:create]
   end
   
-  resources :messages, only: [:index, :show, :create]
+  resources :messages, only: [:index, :show, :create, :delete]
 
   devise_for :users
   resources :friends

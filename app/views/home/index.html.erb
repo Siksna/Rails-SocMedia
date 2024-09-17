@@ -96,47 +96,46 @@
       textElement.textContent = message.content;
       postElement.appendChild(textElement);
     
-      if (message.file) {
-        const fileLink = document.createElement('a');
-        fileLink.href = message.file_url;
-        fileLink.textContent = 'Nolādēt failu';
-        postElement.appendChild(fileLink);
-      }
+      if (message.file_url) {
+  const fileLink = document.createElement('a');
+  fileLink.href = message.file_url;
+  fileLink.textContent = 'Nolādēt failu';
+  postElement.appendChild(fileLink);
+}
     
       return postElement;
     }
-    function postComment() {
-      const inputField = document.getElementById('inputField');
-      const text = inputField.value.trim();
-      const fileInput = document.getElementById('fileInput');
-      const file = fileInput.files[0];
-    
-      const formData = new FormData();
-      formData.append('message[content]', text);
-      if (file) {
-        formData.append('message[file]', file);
-      }
-    
-      fetch('/messages', {
-        method: 'POST',
-        headers: {
-          'X-CSRF-Token': document.querySelector('[name=csrf-token]').content
-        },
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        const newPost = createPostElement(data);
-        const postContainer = document.getElementById('post-container');
-        postContainer.insertBefore(newPost, postContainer.firstChild);
-    
-        inputField.value = '';
-        fileInput.value = '';
-        document.getElementById('fileInfo').style.display = 'none';
-      })
-      .catch(error => console.error('Kļūda publicējot komentu:', error));
-    }
-    
+   function postComment() {
+  const inputField = document.getElementById('inputField');
+  const text = inputField.value.trim();
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+
+  const formData = new FormData();
+  formData.append('message[content]', text);
+  if (file) {
+    formData.append('message[file]', file);
+  }
+
+  fetch('/messages', {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('[name=csrf-token]').content
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    const newPost = createPostElement(data);
+    const postContainer = document.getElementById('post-container');
+    postContainer.insertBefore(newPost, postContainer.firstChild);
+
+    inputField.value = '';
+    fileInput.value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+  })
+  .catch(error => console.error('Kļūda publicējot komentu:', error));
+}
 
 
     document.addEventListener('DOMContentLoaded', function() {

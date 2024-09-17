@@ -3,7 +3,7 @@ class MessagesController < ApplicationController
   
     def index
         @messages = Message.all.order(created_at: :desc)
-        render json: @messages
+        render json: @messages.map { |message| message_data(message) }
         render 'home/index'
       end
   
@@ -20,14 +20,13 @@ class MessagesController < ApplicationController
     end
   
     def create
-        @message = Message.new(message_params)
-        if @message.save
-          file_url = url_for(@message.file) if @message.file.attached?
-          render json: @message.as_json.merge(file_url: file_url), status: :created
-        else
-          render json: @message.errors, status: :unprocessable_entity
-        end
+      @message = Message.new(message_params)
+      if @message.save
+        render json: message_data(@message), status: :created
+      else
+        render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
       end
+    end
   
     def edit
         render 'home/edit'
@@ -55,6 +54,15 @@ class MessagesController < ApplicationController
   
       def message_params
         params.require(:message).permit(:content, :file)
+      end
+
+
+      def message_data(message)
+        {
+          id: message.id,
+          content: message.content,
+          file_url: url_for(message.file) if message.file.attached?
+        }
       end
   end
   
