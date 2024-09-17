@@ -2,10 +2,9 @@ class MessagesController < ApplicationController
     before_action :set_message, only: [:show, :edit, :update, :destroy]
   
     def index
-        @messages = Message.all.order(created_at: :desc)
-        render json: @messages.map { |message| message_data(message) }
-        render 'home/index'
-      end
+      @messages = Message.all.order(created_at: :desc)
+      render json: @messages.map { |message| message_data(message) }
+    end
   
     def show
         @message = Message.find(params[:id])
@@ -58,11 +57,17 @@ class MessagesController < ApplicationController
 
 
       def message_data(message)
-        {
+        data = {
           id: message.id,
-          content: message.content,
-          file_url: url_for(message.file) if message.file.attached?
+          content: message.content
         }
+      
+        if message.file.attached?
+          data[:file_url] = url_for(message.file)
+        end
+      
+        data
       end
+      
   end
   

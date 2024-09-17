@@ -9,10 +9,11 @@
 
 
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid" >
 
-  <%= link_to 'Twitters', root_path, class:"navbar-brand" %>
+  <%= link_to 'Twitters', root_path, class: "navbar-brand", data: { turbo: 'false' } %>
+
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -55,7 +56,7 @@
 <div class="d-flex">
       <form class="d-flex" role="search">
         <input class="form-control me-2" type="search" placeholder="Meklēt" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Meklēt</button>
+        <button class="btn btn-outline-success" type="submit ">Meklēt</button>
       </form>
 
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">

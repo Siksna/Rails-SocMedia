@@ -1,19 +1,50 @@
 <h1>Ziņu detaļas</h1>
 
-<p> <%= @message.content %></p>
+<p><%= @message.content %></p>
+
+<% if @message.file.attached? %>
+  <div>
+    <%= image_tag @message.file, alt: 'Nolādēta bilde', style: 'max-width: 100%; height: auto;' %>
+  </div>
+<% end %>
 
 <hr>
+
+<h4>Tava ziņa:</h4>
+<%= form_with model: [@message, @message.replies.build], local: true do |form| %>
+  <% if @reply.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@reply.errors.count, "error") %> Neļāva saglabāt šo failu:</h2>
+      <ul>
+        <% @reply.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", autocomplete: "off" %><br>
+  <%= form.file_field :file %><br>
+  <%= form.submit "Atbildēt" %>
+<% end %>
 
 <h3>Komenti:</h3>
 <ul>
   <% @message.replies.each do |reply| %>
-    <li><%= reply.content %></li>
+    <li>
+      <p><%= reply.content %></p>
+      <% if reply.file.attached? %>
+        <div>
+          <% if reply.file.content_type.start_with?('image/') %>
+            <%= image_tag reply.file, alt: 'Nolādētā bilde', style: 'max-width: 100%; height: auto;' %>
+          <% else %>
+            <%= link_to 'Nolādēt failu', rails_blob_path(reply.file, disposition: 'attachment') %>
+          <% end %>
+          
+        </div>
+
+      <% end %>
+    </li>
   <% end %>
 </ul>
 
-
-<h4>Tava ziņa:</h4>
-<%= form_with model: [@message, @message.replies.build], local: true do |form| %>
-  <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", autocomplete: "off" %><br>
-  <%= form.submit "Reply" %>
-<% end %>

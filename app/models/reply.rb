@@ -1,4 +1,13 @@
 class Reply < ApplicationRecord
   belongs_to :message
-  validates :content, presence: true
+  has_one_attached :file
+
+
+  private
+
+  def validate_presence_of_content_or_file
+    if content.blank? && file.blank?
+      errors.add(:base, 'Nevar publicēt ja nav pievienots teksts vai fails')
+    end
+  end
 end

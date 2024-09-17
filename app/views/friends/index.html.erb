@@ -19,7 +19,7 @@
       <table class="table table-dark table-hover table-bordered border-secondary">
         <thead class="table-light">
           <tr>
-            <th class="text-center fw-bold"> Id </th>
+           
             <th class="text-center fw-bold"> Vards </th>
             <th class="text-center fw-bold"> Uzvards </th>
             <th class="text-center fw-bold"> Epasts </th>
@@ -32,7 +32,7 @@
           <% @friends.each do |e| %>
             <% if e.user == current_user %>
               <tr style="cursor: pointer;" onclick="window.location='<%= friend_path(e) %>'">
-                <td class="text-center"> <%= e.user_id %> </td>
+                
                 <td class="text-center"> <%= e.vards %> </td>
                 <td class="text-center"> <%= e.uzvards %> </td>
                 <td class="text-center"> <%= e.epasts %> </td>
