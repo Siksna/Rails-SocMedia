@@ -45,6 +45,11 @@ Salabot ka faili var uploadoti tikt galvenaja lapa
 kad refresho majaslapu zinas nepazud galvenaja majaslapa
  */
 
+
+
+ /*
+Izdzest visas ziņas: rake messages:clear (git bash)
+ */
  
  body {
     margin-bottom: 150px;
