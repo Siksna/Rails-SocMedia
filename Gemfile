@@ -14,6 +14,8 @@ gem "bootsnap", require: false
 
 gem 'devise', '~> 4.9', '>= 4.9.4'
 
+
+
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 

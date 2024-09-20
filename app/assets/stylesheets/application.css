@@ -51,51 +51,275 @@ kad refresho majaslapu zinas nepazud galvenaja majaslapa
 Izdzest visas ziņas: rake messages:clear (git bash)
  */
  
- body {
-    margin-bottom: 150px;
-  }
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-  .post {
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-  }
-  .input-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-  }
-  .input-container input[type="text"] {
-    width: 60%;
-    margin-right: 10px;
-  }
-  
-  .file-upload {
-    display: inline-block;
-    padding: 6px 12px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background-color: rgb(170, 30, 30);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    margin-right: 10px;
-    position: relative;
-  }
-  .file-upload input[type="file"] {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-  }
-  
+ 
+ img {
+  max-width: 100%;
+}
+
+.input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.input-container input[type="text"] {
+  width: 60%;
+  margin-right: 10px;
+}
+
+
+.mainbtn {
+  padding: 6px 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background-color: rgb(170, 30, 30);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.mainbtn:hover{
+  background-color: rgb(140, 30, 30);
+}
+
+.file-info {
+  background-color: lightgrey;
+  padding: 5px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: none;
+}
+.post {
+  cursor: pointer;
+  border: 1px solid lightgray;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: white;
+  border-radius: 5px;
+  max-width:50rem;
+}
+
+body{
+padding: 3rem 0 10rem 0;
+}
+
+#post-container{
+  margin: 0 auto;
+    width: 50%;
+}
+
+/* Zinu detalam*/
+
+.card-container {
+  max-width: 70%;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+  position: relative;
+}
+
+.card-container h1 {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  color: white;
+  transition: background-color 0.3s ease;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  color: white;
+  transition: background-color 0.3s ease;
+  font-size: 14px;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.message-content {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.message-image img {
+  max-width: 100%;
+ 
+}
+
+
+.message-image, .reply-file {
+
+height: 500px;
+background-color: #000; 
+display: flex;
+justify-content: center;
+align-items: center;
+overflow: hidden;
+border-radius: 8px; /* Optional: adds rounded corners */
+margin-bottom: 20px;
+}
+
+.message-image{
+ width: 100%; 
+}
+
+.reply-file{
+width: 80%;
+margin:1rem auto 0 auto;
+
+}
+
+.message-image img, .reply-file img {
+width: 100%;
+height: 100%;
+object-fit: contain;
+}
+
+hr {
+  margin: 20px 0;
+}
+
+.reply-form .input-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.reply-form input[type="text"] {
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.file-upload {
+  margin: 0.5rem;
+  position: relative;
+  background-color: rgb(170, 40, 40);
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.file-upload input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-upload i {
+  cursor: pointer;
+}
+
+
+.file-upload:hover {
+  background-color: rgb(120 40 40);
+}
+
+.reply-form .file-upload input[type="file"] {
+  display: none;
+}
+
+.reply-form button {
+  background-color: rgb(170 40 40);
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.reply-form button:hover {
+  background-color: rgb(120 40 40);
+}
+
+.replies ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.replies li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
+.replies li:last-child {
+  border-bottom: none;
+}
+
+.replies p {
+  margin: 0;
+}
+
+.replies .reply-file img {
+  max-width: 100%;
+  border-radius: 5px;
+}
+
+
+/* failu pirmsskats */
+.file-preview {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.preview-img, .preview-video {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.remove-file-btn {
+  background-color: rgb(170, 30, 30);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  padding: 5px 10px;
+  cursor: pointer;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+}
+
+.remove-file-btn:hover {
+  background-color: rgb(140, 30, 30);
+}
+

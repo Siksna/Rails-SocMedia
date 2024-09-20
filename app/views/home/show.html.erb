@@ -1,66 +1,77 @@
-<h1>Ziņu detaļas</h1>
 
 
-<li class="nav-item dropdown">
-<a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-</a>
-<ul class="dropdown-menu">
-    <li><%= link_to 'Rediģēt ziņu', edit_message_path(@message), class: 'dropdown-item btn btn-primary' %></li>
-  <li><hr class="dropdown-divider"></li>
-  <li><%= button_to 'Dzēst ziņu', message_path(@message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
-  </ul>
-</li>
-
-
-<p><%= @message.content %></p>
-
-<% if @message.file.attached? %>
-  <div>
-    <%= image_tag @message.file, alt: 'Nolādēta bilde', style: 'max-width: 100%; height: auto;' %>
+<div class="card-container">
+  <div class="nav-item dropdown">
+    <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
+    <ul class="dropdown-menu">
+      <li><%= link_to 'Rediģēt ziņu', edit_message_path(@message), class: 'dropdown-item btn btn-primary' %></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><%= button_to 'Dzēst ziņu', message_path(@message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
+    </ul>
   </div>
-<% end %>
 
+  <p class="message-content"><%= @message.content %></p>
 
-<hr>
-<h4>Tava ziņa:</h4>
-<%= form_with model: [@message, @message.replies.build], local: true do |form| %>
-  <% if @reply.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@reply.errors.count, "error") %> Neļāva saglabāt šo failu:</h2>
-      <ul>
-        <% @reply.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+  <% if @message.file.attached? %>
+    <div class="message-media">
+      <% if @message.file.content_type.start_with?('image/') %>
+        <%= image_tag @message.file, alt: 'Nolādēta bilde' %>
+      <% elsif @message.file.content_type.start_with?('video/') %>
+        <video width="100%" controls>
+          <source src="<%= url_for(@message.file) %>" type="<%= @message.file.content_type %>">
+          Your browser does not support the video tag.
+        </video>
+      <% else %>
+        <%= link_to 'Nolādēt failu', rails_blob_path(@message.file, disposition: 'attachment') %>
+      <% end %>
     </div>
   <% end %>
-
-  <div class="d-flex">
-  <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", autocomplete: "off" %><br>
-  <%= form.file_field :file %><br>
-  <%= form.submit "Atbildēt" %>
-  </div>
-<% end %>
+</div>
 
 
-<h4>Komenti:</h4>
-<ul>
-  <% @message.replies.each do |reply| %>
-    <% if reply.id.present? %>
-      <li class="nav-item dropdown">
-        <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
+
+
+  <div class="card-container">
+  <div class="reply-form">
+  <div id="replyFilePreview" class="file-preview"></div>
+  <%= form_with model: [@message, @message.replies.build], local: true do |form| %>
+    <div class="input-container">
+      <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", autocomplete: "off", class: "form-control", id: "replyInputField" %>
+      
+      <label class="file-upload">
+        <i class="fas fa-paperclip"></i>
+        <%= form.file_field :file, id: "replyFileInput", onchange: "displayReplyFileName()" %>
+      </label>
+      <button><i class="fas fa-paper-plane"></i></button>
+    </div>
+  <% end %>
+</div>
+
+
+  <hr>
+
+  <div class="replies">
+  <h4>Komenti:</h4>
+  <ul>
+    <% @message.replies.each do |reply| %>
+      <% if reply.id.present? %>
+        <li>
+          <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
         <ul class="dropdown-menu">
-<%= link_to 'Rediģēt atbildi', edit_message_reply_path(@message, reply), class: 'dropdown-item btn btn-primary' %>
-          <li><hr class="dropdown-divider"></li>
+          <%= link_to 'Rediģēt atbildi', edit_message_reply_path(@message, reply), class: 'dropdown-item btn btn-primary' %>
           <li><%= button_to 'Dzēst atbildi', message_reply_path(@message, reply), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
-          </ul>
-      </li>
-      <li>
+        </ul>
+      
         <p><%= reply.content %></p>
         <% if reply.file.attached? %>
-          <div>
+          <div class="reply-file">
             <% if reply.file.content_type.start_with?('image/') %>
-              <%= image_tag reply.file, alt: 'Nolādētā bilde', style: 'max-width: 100%; height: auto;' %>
+              <%= image_tag reply.file, alt: 'Nolādētā bilde' %>
+            <% elsif reply.file.content_type.start_with?('video/') %>
+              <video width="100%" controls>
+                <source src="<%= url_for(reply.file) %>" type="<%= reply.file.content_type %>">
+                Your browser does not support the video tag.
+              </video>
             <% else %>
               <%= link_to 'Nolādēt failu', rails_blob_path(reply.file, disposition: 'attachment') %>
             <% end %>
@@ -68,7 +79,8 @@
         <% end %>
       </li>
     <% end %>
-    <br>
-  <% end %>
-</ul>
+    <% end %>
+  </ul>
+</div>
 
+</div>
