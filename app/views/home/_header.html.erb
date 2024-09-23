@@ -10,10 +10,7 @@
 <head>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-<style>
 
-
-</style>
   </head>
 
 
@@ -69,17 +66,29 @@
         <button class="mainbtn btn-outline-success" type="submit ">Meklēt</button>
       </form>
 
+      <% def random_color %>
+      "#" + "%06x" % (rand * 0xffffff)
+    <% end %>
+
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
       <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-           <% if user_signed_in? %>
-          <i class="fa-sharp fa-solid fa-user"></i>
-          <% else %>
-        <i class="fa-sharp fa-solid fa-right-to-bracket"></i>
-          <% end %>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
+  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <% if user_signed_in? %>
+      <% if current_user.profile_picture.attached? %>
+        <%= image_tag current_user.profile_picture, alt: "Profile Picture", class: "profile-picture-icon" %>
+      <% else %>
+        <div class="default-profile-picture" style="background-color: <%= random_color %>;">
+          <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
+        </div>
+      <% end %>
+    <% else %>
+      <i class="fa-sharp fa-solid fa-right-to-bracket"></i>
+    <% end %>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end">
+   
+
   <% if user_signed_in? %>
 
         <li>

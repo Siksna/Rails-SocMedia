@@ -323,3 +323,29 @@ hr {
   background-color: rgb(140, 30, 30);
 }
 
+/* Profila bilde */
+.default-profile-picture {
+  width: 40px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-picture-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.navbar .dropdown-toggle::after {
+  display: none;
+}
+
+#preview-image {
+  max-width: none; 
+  width: auto;
+  height: auto;
+}

@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   
   resources :messages, only: [:index, :show, :create, :delete]
 
+
   devise_for :users
   resources :friends
   get "friends/index"

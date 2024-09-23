@@ -229,3 +229,56 @@ document.getElementById('inputField').addEventListener('keydown', function(event
     postComment();
   }
 });
+
+
+
+
+/* bildes pirmskats */
+document.addEventListener('DOMContentLoaded', function () {
+  let cropper;
+  const imageInput = document.getElementById('profile_picture_input');
+  const previewImage = document.getElementById('preview-image');
+  const previewContainer = document.getElementById('preview-container');
+  const form = document.querySelector('form'); 
+
+  if (imageInput && previewImage && previewContainer && form) {
+    imageInput.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImage.src = e.target.result;
+          previewImage.style.display = 'block';
+
+          if (cropper) {
+            cropper.destroy();
+          }
+
+          cropper = new Cropper(previewImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const canvas = document.getElementById('canvas');
+
+      if (cropper) {
+        const croppedImageDataURL = cropper.getCroppedCanvas().toDataURL();
+
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'user[profile_picture]';
+        hiddenInput.value = croppedImageDataURL;
+
+        this.appendChild(hiddenInput);
+        this.submit();
+      }
+    });
+  }
+});
+
