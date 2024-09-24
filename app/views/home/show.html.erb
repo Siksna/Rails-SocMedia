@@ -10,22 +10,28 @@
     </ul>
   </div>
 
-  <p class="message-content"><%= @message.content %></p>
+  <div class="message-header d-flex align-items-center mb-3">
+  <img src="<%= @message.user.profile_picture %>" alt="<%= @message.user.username %>'s profile picture" class="rounded-circle me-2" style="width: 50px; height: 50px;">
+  <span class="fw-bold"><%= @message.user.username %></span>
+</div>
 
-  <% if @message.file.attached? %>
-    <div class="message-media">
-      <% if @message.file.content_type.start_with?('image/') %>
-        <%= image_tag @message.file, alt: 'Nolādēta bilde' %>
-      <% elsif @message.file.content_type.start_with?('video/') %>
-        <video width="100%" controls>
-          <source src="<%= url_for(@message.file) %>" type="<%= @message.file.content_type %>">
-          Your browser does not support the video tag.
-        </video>
-      <% else %>
-        <%= link_to 'Nolādēt failu', rails_blob_path(@message.file, disposition: 'attachment') %>
-      <% end %>
-    </div>
-  <% end %>
+<p class="message-content"><%= @message.content %></p>
+
+<% if @message.file.attached? %>
+  <div class="message-media">
+    <% if @message.file.content_type.start_with?('image/') %>
+      <%= image_tag @message.file, alt: 'Attached image' %>
+    <% elsif @message.file.content_type.start_with?('video/') %>
+      <video width="100%" controls>
+        <source src="<%= url_for(@message.file) %>" type="<%= @message.file.content_type %>">
+        Jūsu pārlūkprogramma neatbalsta video tagu.
+      </video>
+    <% else %>
+      <%= link_to 'Download File', rails_blob_path(@message.file, disposition: 'attachment') %>
+    <% end %>
+  </div>
+<% end %>
+
 </div>
 
 
@@ -52,9 +58,12 @@
 
   <div class="replies">
   <h4>Komenti:</h4>
-  <ul>
+  <ul class="reply-list">
     <% @message.replies.each do |reply| %>
       <% if reply.id.present? %>
+      <img src="<%= reply.user.profile_picture %>" alt="<%= reply.user.username %>'s profile picture" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+      <div>
+      <span class="fw-bold"><%= reply.user.username %></span>
         <li>
           <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
         <ul class="dropdown-menu">

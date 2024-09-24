@@ -325,8 +325,8 @@ hr {
 
 /* Profila bilde */
 .default-profile-picture {
-  width: 40px;
-  height: 25px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -334,8 +334,8 @@ hr {
 }
 
 .profile-picture-icon {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   object-fit: cover;
   border-radius: 50%;
 }
@@ -344,8 +344,18 @@ hr {
   display: none;
 }
 
+#preview-container {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 50%;
+  position: relative;
+  border: 2px solid #ddd;
+}
+
 #preview-image {
-  max-width: none; 
-  width: auto;
+  display: block;
+  max-width: 100%;
   height: auto;
+  object-fit: cover; 
 }
