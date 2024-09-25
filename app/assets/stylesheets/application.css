@@ -1,57 +1,4 @@
-/*
- * This is a manifest file that'll be compiled into application.css, which will include all the files
- * listed below.
- *
- * Any CSS (and SCSS, if configured) file within this directory, lib/assets/stylesheets, or any plugin's
- * vendor/assets/stylesheets directory can be referenced here using a relative path.
- *
- * You're free to add application-wide styles to this file and they'll appear at the bottom of the
- * compiled file so the styles you add here take precedence over styles defined in any other CSS
- * files in this directory. Styles in this file should be added after the last require_* statement.
- * It is generally better to create a new file per style scope.
- *
- *= require_tree .
- *= require_self
- */
 
-
-
- /*
-VEICAMAIS SARAKSTS LISTS:
-Salabot lai delete poga paprasa confirmation kad nospiez delete
-
-Home index page pogas lai vienmer ir sarkanas un lai post poga nepazud kad hovero
-
-meklesanas poga vienmer sarkana visos pagos
-
-dropdowni strada neparladejot majaslapu
-
-izmeri prieks bildem jabut limiteti
-
-Kad nospiez iziet paprasit vai tiesam izreģistrēties no konta
-
-varbut kautko pa tiem draugu failiem salabot lai var ielogoties tajos kontos????
-
-To dropdown pogu prieks iziesanas un ieiesanas kontos vizuali uzlabot
-
-Kad radas izveletais fails, vizuali izlabot to layout
-
-Izveidot lai var vairakus failus reize uploadot, max 4
-
-Komentaros laut failus uploadot
-
-Salabot ka faili var uploadoti tikt galvenaja lapa
-
-kad refresho majaslapu zinas nepazud galvenaja majaslapa
- */
-
-
-
- /*
-Izdzest visas ziņas: rake messages:clear (git bash)
- */
- 
- 
  img {
   max-width: 100%;
 }
@@ -178,7 +125,7 @@ display: flex;
 justify-content: center;
 align-items: center;
 overflow: hidden;
-border-radius: 8px; /* Optional: adds rounded corners */
+border-radius: 8px; 
 margin-bottom: 20px;
 }
 

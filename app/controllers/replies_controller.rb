@@ -3,11 +3,13 @@ class RepliesController < ApplicationController
   before_action :set_reply, only: [:edit, :update, :destroy]
 
   def create
+    @message = Message.find(params[:message_id])
     @reply = @message.replies.build(reply_params)
+    @reply.user = current_user  
     if @reply.save
-      redirect_to message_path(@message), notice: 'Atbilde nosūtīta.'
+      redirect_to @message, notice: 'Reply was successfully created.'
     else
-      redirect_to message_path(@message), alert: 'Kļūda, radās problēma nosūtot atbildi.'
+      render :new
     end
   end
 

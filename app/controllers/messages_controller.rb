@@ -1,10 +1,15 @@
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
 
-  def index
-    @messages = Message.all.order(created_at: :desc)
-    render json: @messages.map { |message| message_data(message) }
-  end
+ 
+
+ def index
+  @messages = Message.includes(:user).all.order(created_at: :desc)
+  render json: @messages.map { |message| message_data(message) }
+  # render json: @messages.as_json(include: { user: { only: [:username, :profile_picture_url] } } ) 
+end
+
+  
 
   def show
     @message = Message.find(params[:id])
@@ -19,15 +24,20 @@ class MessagesController < ApplicationController
   end
 
   def create
-    @message = Message.new(message_params)
+    @message = current_user.messages.new(message_params)
     if @message.save
-      render json: message_data(@message), status: :created
+      render json: @message, status: :created
     else
-      render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
+      render json: @message.errors, status: :unprocessable_entity
     end
   end
+  
 
   def edit
+    @message = Message.find(params[:id])
+    if @message.user != current_user
+      redirect_to messages_path, alert: 'Jūs nēsat autorizēts rediģēt šo ziņu.'
+    end
     render 'home/edit'
   end
 
@@ -44,8 +54,13 @@ class MessagesController < ApplicationController
 
 
   def destroy
+    @message = Message.find(params[:id])
+  if @message.user == current_user
     @message.destroy
-    redirect_to root_path, notice: 'Ziņa veiksmīgi dzēsta.'
+    redirect_to messages_path, notice: 'Ziņa veiksmīgi dzēsta.'
+  else
+    redirect_to messages_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
+  end
   end
 
   private

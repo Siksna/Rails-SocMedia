@@ -80,16 +80,13 @@ function createPostElement(message) {
     window.location.href = `/messages/${message.id}`;
   };
 
-  
-  //PIEVIENOTAIS
   const userInfoElement = document.createElement('div');
   userInfoElement.className = 'user-info';
 
- 
   if (message.user) {
     const profileImage = document.createElement('img');
-    profileImage.src = message.user.profile_picture_url || ''; 
-    profileImage.alt = `${message.user.username}'s profile picture`;
+    profileImage.src = message.user.profile_picture_url || 'default_profile.png';
+    profileImage.alt = `${message.user.username} profila bilde`;
     profileImage.className = 'profile-pic'; 
 
     const usernameElement = document.createElement('span');
@@ -98,13 +95,18 @@ function createPostElement(message) {
     userInfoElement.appendChild(profileImage);
     userInfoElement.appendChild(usernameElement);
   } else {
-    console.warn('Nav lietotāja informācija atrasta priekš ziņas:', message);
+    const placeholderImage = document.createElement('img');
+    placeholderImage.src = 'app/assets/images/default_profile.png';
+    placeholderImage.className = 'profile-pic'; 
+
+    const defaultUsernameElement = document.createElement('span');
+    defaultUsernameElement.textContent = 'Anonīms'; 
+
+    userInfoElement.appendChild(placeholderImage);
+    userInfoElement.appendChild(defaultUsernameElement);
   }
 
   postElement.appendChild(userInfoElement);
-
-  // PIEVIENOTAIS 
-  
 
   const textElement = document.createElement('p');
   textElement.textContent = message.content || 'Nav datu';
@@ -114,7 +116,7 @@ function createPostElement(message) {
     if (message.file_url.match(/\.(jpg|jpeg|png|gif)$/i)) {
       const img = document.createElement('img');
       img.src = message.file_url;
-      img.alt = 'Attached image';
+      img.alt = 'Pievienota bilde';
       postElement.appendChild(img);
 
     } else if (message.file_url.match(/\.(mp4|webm|ogg)$/i)) {
@@ -134,6 +136,7 @@ function createPostElement(message) {
 
   return postElement;
 }
+
 
 
 

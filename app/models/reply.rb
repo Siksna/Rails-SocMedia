@@ -1,7 +1,8 @@
 class Reply < ApplicationRecord
   belongs_to :message
   has_one_attached :file
-
+  
+  belongs_to :user
 
   private
 

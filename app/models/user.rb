@@ -6,10 +6,15 @@ class User < ApplicationRecord
 
   has_many :friends
 
+  has_many :messages, dependent: :destroy
+
+  has_many :replies, dependent: :destroy
 
   before_create :set_profile_color
 
-  #validates :username, presence: true, uniqueness: true
+  
+
+  validates :username, presence: true
 
   private
 
