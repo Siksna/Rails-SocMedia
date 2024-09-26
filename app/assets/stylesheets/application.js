@@ -86,21 +86,21 @@ function createPostElement(message) {
   if (message.user) {
     const profileImage = document.createElement('img');
     profileImage.src = message.user.profile_picture_url || 'default_profile.png';
-    profileImage.alt = `${message.user.username} profila bilde`;
-    profileImage.className = 'profile-pic'; 
+    profileImage.alt = `${message.user.username}`;
+    profileImage.className = 'profile-pic';
 
     const usernameElement = document.createElement('span');
-    usernameElement.textContent = message.user.username || 'Nezināms lietotājs'; 
+    usernameElement.textContent = message.user.username || 'Anonīms';
 
     userInfoElement.appendChild(profileImage);
     userInfoElement.appendChild(usernameElement);
   } else {
     const placeholderImage = document.createElement('img');
     placeholderImage.src = 'app/assets/images/default_profile.png';
-    placeholderImage.className = 'profile-pic'; 
+    placeholderImage.className = 'profile-pic';
 
     const defaultUsernameElement = document.createElement('span');
-    defaultUsernameElement.textContent = 'Anonīms'; 
+    defaultUsernameElement.textContent = 'Anonīms';
 
     userInfoElement.appendChild(placeholderImage);
     userInfoElement.appendChild(defaultUsernameElement);
@@ -118,14 +118,12 @@ function createPostElement(message) {
       img.src = message.file_url;
       img.alt = 'Pievienota bilde';
       postElement.appendChild(img);
-
     } else if (message.file_url.match(/\.(mp4|webm|ogg)$/i)) {
       const video = document.createElement('video');
       video.src = message.file_url;
-      video.controls = true; 
-      video.style.width = '100%'; 
+      video.controls = true;
+      video.style.width = '100%';
       postElement.appendChild(video);
-
     } else {
       const fileLink = document.createElement('a');
       fileLink.href = message.file_url;
@@ -136,6 +134,8 @@ function createPostElement(message) {
 
   return postElement;
 }
+
+
 
 
 
@@ -234,45 +234,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function postComment() {
   const inputField = document.getElementById('inputField');
-  const text = inputField.value.trim();
   const fileInput = document.getElementById('fileInput');
+  const messageContent = inputField.value;
   const file = fileInput.files[0];
-  const previewContainer = document.getElementById('filePreview');
 
-  if (!text && !file) {
-    alert('Lūdzu, ievadiet ziņu vai pievienojiet failu, lai publicētu.'); // Alert message
+  if (messageContent.trim() === "") {
+    alert("Lūdzu ievadiet ziņu.");
     return;
   }
 
   const formData = new FormData();
-  if (text) {
-    formData.append('message[content]', text);
-  }
+  formData.append('message[content]', messageContent);
+  
   if (file) {
     formData.append('message[file]', file);
   }
 
   fetch('/messages', {
     method: 'POST',
+    body: formData,
     headers: {
-      'X-CSRF-Token': document.querySelector('[name=csrf-token]').content
-    },
-    body: formData
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
   })
-    .then(response => response.json())
-    .then(data => {
-      const newPost = createPostElement(data);
-      const postContainer = document.getElementById('post-container');
-      postContainer.insertBefore(newPost, postContainer.firstChild);
-
-      inputField.value = '';
-      fileInput.value = '';
-      document.getElementById('fileInfo').style.display = 'none';
-
-      previewContainer.innerHTML = '';
-    })
-    .catch(error => console.error('Kļūda publicējot komentu:', error));
+  .then(response => {
+    if (response.ok) {
+      
+      location.reload();
+    } else {
+      alert("Neizdevās ievietot ziņu.");
+    }
+  })
+  .catch(error => {
+    console.error('Kļūda:', error);
+  });
 }
+
+
 
 
 function postReply() {
@@ -333,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const imageInput = document.getElementById('profile_picture_input');
   const previewImage = document.getElementById('preview-image');
   const previewContainer = document.getElementById('preview-container');
-  const form = document.querySelector('form'); 
+  const form = document.querySelector('form');
 
   if (imageInput && previewImage && previewContainer && form) {
     imageInput.addEventListener('change', function(event) {
@@ -366,8 +364,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
-      const canvas = document.getElementById('canvas');
-
       if (cropper) {
         const croppedImageDataURL = cropper.getCroppedCanvas({
           width: 200, 
@@ -380,9 +376,10 @@ document.addEventListener('DOMContentLoaded', function () {
         hiddenInput.value = croppedImageDataURL; 
 
         this.appendChild(hiddenInput);
-        this.submit();
       }
+      this.submit(); 
     });
   }
 });
+
 

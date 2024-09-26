@@ -1,6 +1,6 @@
 <div class="card-container">
   <div class="message-header d-flex align-items-center mb-3">
-    <img src="<%= @message.user&.profile_picture || 'default_profile.png' %>" alt="<%= @message.user&.username || 'Anonīms' %>'s profile picture" class="rounded-circle me-2" style="width: 50px; height: 50px;">
+<%= image_tag @message.user.profile_picture, alt: @message.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' if @message.user.profile_picture.attached? %>
     <span class="fw-bold"><%= @message.user&.username || 'Anonīms' %></span>
 
     <div class="nav-item dropdown ms-auto">
@@ -56,7 +56,7 @@
         <% if reply.id.present? %>
           <li>
             <div class="reply-header d-flex align-items-center mb-2">
-              <img src="<%= reply.user&.profile_picture || 'default_profile.png' %>" alt="<%= reply.user&.username || 'Anonīms' %>'s profile picture" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+<%= image_tag reply.user.profile_picture, alt: reply.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' if reply.user.profile_picture.attached? %>
               <span class="fw-bold"><%= reply.user&.username || 'Anonīms' %></span>
               <div class="nav-item dropdown ms-auto">
                 <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>

@@ -3,11 +3,13 @@ class MessagesController < ApplicationController
 
  
 
- def index
-  @messages = Message.includes(:user).all.order(created_at: :desc)
-  render json: @messages.map { |message| message_data(message) }
-  # render json: @messages.as_json(include: { user: { only: [:username, :profile_picture_url] } } ) 
-end
+  def index
+    @messages = Message.includes(:user).all.order(created_at: :desc)
+    messages_data = @messages.map { |message| message_data(message) }
+    Rails.logger.debug(messages_data.inspect)  # Log the message data
+    render json: messages_data
+  end
+  
 
   
 
@@ -76,11 +78,19 @@ end
   def message_data(message)
     data = {
       id: message.id,
-      content: message.content
+      content: message.content,
+      user: message.user ? {
+        username: message.user.username,
+        profile_picture_url: message.user.profile_picture.attached? ? url_for(message.user.profile_picture) : 'default_profile.png'
+      } : {
+        username: 'Anonīms',
+        profile_picture_url: 'default_profile.png'
+      }
     }
-
-    data[:file_url] = url_for(message.file) if message.file.attached?
-
+  
+    data[:file_url] = message.file.attached? ? url_for(message.file) : nil
+  
     data
   end
+  
 end
