@@ -85,7 +85,7 @@ function createPostElement(message) {
 
   if (message.user) {
     const profileImage = document.createElement('img');
-    profileImage.src = message.user.profile_picture_url || 'default_profile.png';
+    profileImage.src = message.user.profile_picture_url || '/assets/default_profile.png';
     profileImage.alt = `${message.user.username}`;
     profileImage.className = 'profile-pic';
 
@@ -113,7 +113,7 @@ function createPostElement(message) {
   postElement.appendChild(textElement);
 
   if (message.file_url) {
-    if (message.file_url.match(/\.(jpg|jpeg|png|gif)$/i)) {
+    if (message.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
       const img = document.createElement('img');
       img.src = message.file_url;
       img.alt = 'Pievienota bilde';
@@ -150,7 +150,7 @@ function createReplyElement(reply) {
   replyElement.appendChild(textElement);
 
   if (reply.file_url) {
-    if (reply.file_url.match(/\.(jpg|jpeg|png|gif)$/i)) {
+    if (reply.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
       const img = document.createElement('img');
       img.src = reply.file_url;
       img.alt = 'Attached image';
@@ -262,6 +262,7 @@ function postComment() {
       
       location.reload();
     } else {
+      window.location.href = '/users/sign_in';
       alert("Neizdevās ievietot ziņu.");
     }
   })
@@ -330,56 +331,76 @@ document.addEventListener('DOMContentLoaded', function () {
   let cropper;
   const imageInput = document.getElementById('profile_picture_input');
   const previewImage = document.getElementById('preview-image');
-  const previewContainer = document.getElementById('preview-container');
   const form = document.querySelector('form');
 
-  if (imageInput && previewImage && previewContainer && form) {
-    imageInput.addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          previewImage.src = e.target.result; 
-          previewImage.style.display = 'block';
-
-          if (cropper) {
-            cropper.destroy();
-          }
-
-          cropper = new Cropper(previewImage, {
-            aspectRatio: 1, 
-            viewMode: 1,
-            autoCropArea: 1,
-            minCropBoxWidth: 100,
-            minCropBoxHeight: 100,
-            cropBoxResizable: true,
-            movable: true,
-            rotatable: false,
-            scalable: true
-          });
-        };
-        reader.readAsDataURL(file); 
-      }
-    });
-
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      if (cropper) {
-        const croppedImageDataURL = cropper.getCroppedCanvas({
-          width: 200, 
-          height: 200,
-        }).toDataURL(); 
-
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'user[profile_picture]';
-        hiddenInput.value = croppedImageDataURL; 
-
-        this.appendChild(hiddenInput);
-      }
-      this.submit(); 
+  // Initialize cropper for the preloaded image
+  if (previewImage.src && !previewImage.src.includes('default_profile.png')) {
+    cropper = new Cropper(previewImage, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+      minCropBoxWidth: 100,
+      minCropBoxHeight: 100,
+      cropBoxResizable: true,
+      movable: true,
+      rotatable: false,
+      scalable: true
     });
   }
+
+  // When a new image is uploaded
+  imageInput.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // Force reload of the image by adding a unique query parameter
+        const newImageSrc = e.target.result + '?' + new Date().getTime();
+
+        previewImage.src = newImageSrc; 
+        previewImage.style.display = 'block';
+
+        if (cropper) {
+          cropper.destroy(); // Destroy previous cropper instance
+        }
+
+        // Initialize cropper for the new image
+        cropper = new Cropper(previewImage, {
+          aspectRatio: 1,
+          viewMode: 1,
+          autoCropArea: 1,
+          minCropBoxWidth: 100,
+          minCropBoxHeight: 100,
+          cropBoxResizable: true,
+          movable: true,
+          rotatable: false,
+          scalable: true
+        });
+      };
+      reader.readAsDataURL(file); // Read the uploaded file and set as the preview image
+    }
+  });
+
+  // Form submit event
+  form.addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent default form submission
+    if (cropper) {
+      const croppedImageDataURL = cropper.getCroppedCanvas({
+        width: 200,
+        height: 200
+      }).toDataURL(); // Get cropped image data
+
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = 'user[profile_picture]';
+      hiddenInput.value = croppedImageDataURL;
+
+      form.appendChild(hiddenInput);
+    }
+
+    form.submit(); // Submit the form
+  });
 });
+
 
 

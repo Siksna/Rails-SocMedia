@@ -1,6 +1,7 @@
 class RepliesController < ApplicationController
   before_action :set_message, only: [:create, :edit, :update, :destroy]
   before_action :set_reply, only: [:edit, :update, :destroy]
+  before_action :authorize_user!, only: [:edit, :update, :destroy]
 
   def create
     @message = Message.find(params[:message_id])
@@ -14,16 +15,20 @@ class RepliesController < ApplicationController
   end
 
   def edit
-   
+    render 'home/_edit_replies'
   end
 
   def update
-    if @reply.update(reply_params)
-      redirect_to message_path(@message), notice: 'Atbilde atjaunināta.'
-    else
-      render :edit
-    end
+  if params[:reply][:remove_file] == '1'
+    @reply.file.purge
   end
+
+  if @reply.update(reply_params)
+    redirect_to message_path(@message), notice: 'Atbilde atjaunināta.'
+  else
+    render :edit
+  end
+end
 
   def destroy
     @reply.destroy
@@ -42,5 +47,11 @@ class RepliesController < ApplicationController
 
   def reply_params
     params.require(:reply).permit(:content, :file)
+  end
+
+  def authorize_user!
+    unless @reply.user == current_user
+      redirect_to message_path(@message), alert: 'Jūs nēsat autorizēts rediģēt vai dzēst šo atbildi.'
+    end
   end
 end

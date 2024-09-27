@@ -1,12 +1,12 @@
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
-
+  before_action :authorize_user!, only: [:edit, :update, :destroy]
  
 
   def index
     @messages = Message.includes(:user).all.order(created_at: :desc)
     messages_data = @messages.map { |message| message_data(message) }
-    Rails.logger.debug(messages_data.inspect)  # Log the message data
+    Rails.logger.debug(messages_data.inspect)
     render json: messages_data
   end
   
@@ -16,9 +16,10 @@ class MessagesController < ApplicationController
   def show
     @message = Message.find(params[:id])
     @reply = Reply.new
-    @replies = @message.replies
+    @replies = @message.replies.order(created_at: :desc)
     render 'home/show'
   end
+  
 
   def new
     @message = Message.new

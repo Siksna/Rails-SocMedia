@@ -11,9 +11,13 @@
   <div class="field form-group">
     <%= f.label :profile_picture, "Profila bilde" %><br />
     <%= f.file_field :profile_picture, accept: "image/*", id: "profile_picture_input" %>
-    <div id="preview-container" class="mt-2" style="width: 200px; height: 200px; overflow: hidden; border-radius: 50%; border: 2px solid #ddd; position: relative;">
-  <img id="preview-image" style="display: none; width: 100%; height: 100%; object-fit: cover;" />
+   <div id="preview-container" class="mt-2" style="width: 200px; height: 200px; overflow: hidden; border-radius: 50%; border: 2px solid #ddd; position: relative;">
+  <img id="preview-image" 
+       src="<%= resource.profile_picture.present? ? url_for(resource.profile_picture) : asset_path('default_profile.png') %>"
+       alt="Profila bilde"
+       style="width: 100%; height: 100%; object-fit: cover;" />
 </div>
+
 <canvas id="canvas" style="display: none;"></canvas>
 
   </div>
