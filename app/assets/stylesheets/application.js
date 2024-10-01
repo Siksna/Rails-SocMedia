@@ -84,19 +84,26 @@ function createPostElement(message) {
   userInfoElement.className = 'user-info';
 
   if (message.user) {
+    const profileLink = document.createElement('a');
+    profileLink.href = `/profiles/${message.user.id}`; 
+
     const profileImage = document.createElement('img');
     profileImage.src = message.user.profile_picture_url || '/assets/default_profile.png';
     profileImage.alt = `${message.user.username}`;
     profileImage.className = 'profile-pic';
 
-    const usernameElement = document.createElement('span');
-    usernameElement.textContent = message.user.username || 'Anonīms';
+    profileLink.appendChild(profileImage);
+    userInfoElement.appendChild(profileLink);
 
-    userInfoElement.appendChild(profileImage);
-    userInfoElement.appendChild(usernameElement);
+    const usernameLink = document.createElement('a');
+    usernameLink.href = `/profiles/${message.user.id}`; 
+    usernameLink.textContent = message.user.username || 'Anonīms';
+    usernameLink.className = 'username-link';
+
+    userInfoElement.appendChild(usernameLink);
   } else {
     const placeholderImage = document.createElement('img');
-    placeholderImage.src = 'app/assets/images/default_profile.png';
+    placeholderImage.src = '/assets/default_profile.png';
     placeholderImage.className = 'profile-pic';
 
     const defaultUsernameElement = document.createElement('span');
@@ -134,6 +141,7 @@ function createPostElement(message) {
 
   return postElement;
 }
+
 
 
 
@@ -333,7 +341,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const previewImage = document.getElementById('preview-image');
   const form = document.querySelector('form');
 
-  // Initialize cropper for the preloaded image
   if (previewImage.src && !previewImage.src.includes('default_profile.png')) {
     cropper = new Cropper(previewImage, {
       aspectRatio: 1,
@@ -348,23 +355,20 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // When a new image is uploaded
   imageInput.addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = function(e) {
-        // Force reload of the image by adding a unique query parameter
         const newImageSrc = e.target.result + '?' + new Date().getTime();
 
         previewImage.src = newImageSrc; 
         previewImage.style.display = 'block';
 
         if (cropper) {
-          cropper.destroy(); // Destroy previous cropper instance
+          cropper.destroy(); 
         }
 
-        // Initialize cropper for the new image
         cropper = new Cropper(previewImage, {
           aspectRatio: 1,
           viewMode: 1,
@@ -377,18 +381,18 @@ document.addEventListener('DOMContentLoaded', function () {
           scalable: true
         });
       };
-      reader.readAsDataURL(file); // Read the uploaded file and set as the preview image
+      reader.readAsDataURL(file);
     }
   });
 
-  // Form submit event
+
   form.addEventListener('submit', function(e) {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     if (cropper) {
       const croppedImageDataURL = cropper.getCroppedCanvas({
         width: 200,
         height: 200
-      }).toDataURL(); // Get cropped image data
+      }).toDataURL(); 
 
       const hiddenInput = document.createElement('input');
       hiddenInput.type = 'hidden';
@@ -398,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
       form.appendChild(hiddenInput);
     }
 
-    form.submit(); // Submit the form
+    form.submit(); 
   });
 });
 

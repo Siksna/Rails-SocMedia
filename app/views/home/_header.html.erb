@@ -91,11 +91,15 @@
   <% if user_signed_in? %>
 
         <li>
-         <%= button_to "Iziet", destroy_user_session_path, method: :delete, class:"dropdown-item" %>
+       <%= link_to "Rediģēt profilu", edit_user_registration_path, class:"dropdown-item" %>
+
         </li>
         <li>
-         <%= link_to "Rediģēt profilu", edit_user_registration_path, class:"dropdown-item" %>
-        </li>
+          <%= button_to "Iziet", destroy_user_session_path, method: :delete, class:"dropdown-item" %>
+  </li>
+  <li>
+            <%= link_to "Mans profils", profile_path(current_user), class:"dropdown-item" %>
+  </li>
         
       <% else %>
 

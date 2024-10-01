@@ -10,7 +10,8 @@ Rails.application.routes.draw do
     resources :replies, only: [:create, :edit, :update, :destroy]
   end
   
-  
+  resources :profiles, only: [:show]
+
   
   resources :messages, only: [:index, :show, :create, :delete]
 

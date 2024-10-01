@@ -1,0 +1,14 @@
+<h1><%= @user.username %> profils</h1>
+
+<div class="profile-info">
+  
+  <div class="profile-picture">
+    <%= image_tag @user.profile_picture || 'default_profile.png', alt: @user.username, class: "profile-pic" %>
+  </div>
+
+  <div class="user-details">
+    <p>Lietotājvārds: <%= @user.username %></p>
+    <p>Epasts: <%= @user.email %></p>
+   
+  </div>
+</div>

@@ -1,19 +1,21 @@
 <div class="card-container">
-  <div class="message-header d-flex align-items-center mb-3">
-    <%= image_tag @message.user.profile_picture, alt: @message.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' if @message.user.profile_picture.attached? %>
-    <span class="fw-bold"><%= @message.user&.username || 'Anonīms' %></span>
+<div class="message-header d-flex align-items-center mb-3">
+<%= link_to profile_path(@message.user) do %>
+  <%= image_tag @message.user.profile_picture, alt: @message.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' if @message.user.profile_picture.attached? %>
+<% end %>
+<%= link_to @message.user&.username || 'Anonīms', profile_path(@message.user), class: 'fw-bold' %>
 
-    <% if @message.user == current_user %>
-    <div class="nav-item dropdown ms-auto">
-      <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
-      <ul class="dropdown-menu">
-        <li><%= link_to 'Rediģēt ziņu', edit_message_path(@message), class: 'dropdown-item btn btn-primary' %></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><%= button_to 'Dzēst ziņu', message_path(@message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
-      </ul>
-    </div>
-    <% end %>
+<% if @message.user == current_user %>
+  <div class="nav-item dropdown ms-auto">
+    <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
+    <ul class="dropdown-menu">
+      <li><%= link_to 'Rediģēt ziņu', edit_message_path(@message), class: 'dropdown-item btn btn-primary' %></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><%= button_to 'Dzēst ziņu', message_path(@message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
+    </ul>
   </div>
+<% end %>
+</div>
 
   <p class="message-content"><%= @message.content %></p>
 
@@ -54,67 +56,69 @@
   <div class="replies">
     <h4>Komenti:</h4>
     <ul class="reply-list">
-      <% @replies.where(parent_id: nil).each do |reply| %> <!-- Only top-level replies -->
-        <li>
-          <div class="reply-header d-flex align-items-center mb-2">
-            <%= image_tag reply.user.profile_picture, alt: reply.user.username, class: 'rounded-circle me-2', style: 'width: 45px; height: 45px; object-fit:cover;' if reply.user.profile_picture.attached? %>
-            <span class="fw-bold"><%= reply.user&.username || 'Anonīms' %></span>
-
-            <% if reply.user == current_user %>
-              <div class="nav-item dropdown ms-auto">
-                <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
-                <ul class="dropdown-menu">
-                  <li><%= link_to 'Rediģēt atbildi', edit_message_reply_path(@message, reply), class: 'dropdown-item btn btn-primary' %></li>
-                  <li><%= button_to 'Dzēst atbildi', message_reply_path(@message, reply), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
-                </ul>
-              </div>
-            <% end %>
+  <% @replies.where(parent_id: nil).each do |reply| %> <!-- Only top-level replies -->
+    <li>
+      <div class="reply-header d-flex align-items-center mb-2">
+        <%= link_to profile_path(reply.user) do %>
+          <%= image_tag reply.user.profile_picture, alt: reply.user.username, class: 'rounded-circle me-2', style: 'width: 45px; height: 45px; object-fit:cover;' if reply.user.profile_picture.attached? %>
+        <% end %>
+        <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user), class: 'fw-bold' %>
+        
+        <% if reply.user == current_user %>
+          <div class="nav-item dropdown ms-auto">
+            <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
+            <ul class="dropdown-menu">
+              <li><%= link_to 'Rediģēt atbildi', edit_message_reply_path(@message, reply), class: 'dropdown-item btn btn-primary' %></li>
+              <li><%= button_to 'Dzēst atbildi', message_reply_path(@message, reply), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
+            </ul>
           </div>
+        <% end %>
+      </div>
 
-          <p><%= reply.content %></p>
+      <p><%= reply.content %></p>
 
-          <% if reply.file.attached? %>
-            <div class="reply-file">
-              <% if reply.file.content_type.start_with?('image/') %>
-                <%= image_tag reply.file, alt: 'Nolādētā bilde' %>
-              <% elsif reply.file.content_type.start_with?('video/') %>
-                <video width="100%" controls>
-                  <source src="<%= url_for(reply.file) %>" type="<%= reply.file.content_type %>">
-                  Jūsu pārlūkprogramma neatbalsta video tagu. 
-                </video>
-              <% else %>
-                <%= link_to 'Nolādēt failu', rails_blob_path(reply.file, disposition: 'attachment') %>
-              <% end %>
-            </div>
+      <% if reply.file.attached? %>
+        <div class="reply-file">
+          <% if reply.file.content_type.start_with?('image/') %>
+            <%= image_tag reply.file, alt: 'Nolādētā bilde' %>
+          <% elsif reply.file.content_type.start_with?('video/') %>
+            <video width="100%" controls>
+              <source src="<%= url_for(reply.file) %>" type="<%= reply.file.content_type %>">
+              Jūsu pārlūkprogramma neatbalsta video tagu. 
+            </video>
+          <% else %>
+            <%= link_to 'Nolādēt failu', rails_blob_path(reply.file, disposition: 'attachment') %>
           <% end %>
-
-          <!-- Show reply count and button -->
-          <button class="btn btn-sm btn-link" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
-            <i class="fa-regular fa-message"></i>
-            <%= pluralize(reply.children.count, 'koments', 'komenti') %>
-          </button>
-
-          <div id="replyToReply<%= reply.id %>" class="collapse">
-            <%= form_with model: [@message, @message.replies.build], local: true do |form| %>
-              <%= form.hidden_field :parent_id, value: reply.id %> 
-              <div class="input-container">
-                <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", class: "form-control" %>
-                <label class="file-upload">
-                  <i class="fas fa-paperclip"></i>
-                  <%= form.file_field :file %>
-                </label>
-                <button><i class="fas fa-paper-plane"></i></button>
-              </div>
-            <% end %>
-
-            <% if reply.children.any? %>
-              <ul class="reply-list" style="padding-left: 3rem;"> 
-                <%= render partial: 'home/reply', collection: reply.children, as: :reply %>
-              </ul>
-            <% end %>
-          </div>
-        </li>
+        </div>
       <% end %>
-    </ul>
+
+      <button class="btn btn-sm btn-link" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
+        <i class="fa-regular fa-message"></i>
+        <%= pluralize(reply.children.count, 'koments', 'komenti') %>
+      </button>
+
+      <div id="replyToReply<%= reply.id %>" class="collapse">
+        <%= form_with model: [@message, @message.replies.build], local: true do |form| %>
+          <%= form.hidden_field :parent_id, value: reply.id %> 
+          <div class="input-container">
+            <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", class: "form-control" %>
+            <label class="file-upload">
+              <i class="fas fa-paperclip"></i>
+              <%= form.file_field :file %>
+            </label>
+            <button><i class="fas fa-paper-plane"></i></button>
+          </div>
+        <% end %>
+
+        <% if reply.children.any? %>
+          <ul class="reply-list" style="padding-left: 3rem;"> 
+            <%= render partial: 'home/reply', collection: reply.children, as: :reply %>
+          </ul>
+        <% end %>
+      </div>
+    </li>
+  <% end %>
+</ul>
+
   </div>
 </div>

@@ -1,7 +1,10 @@
 <li>
   <div class="reply-header d-flex align-items-center mb-2">
-    <%= image_tag reply.user.profile_picture, alt: reply.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' if reply.user.profile_picture.attached? %>
-    <span class="fw-bold"><%= reply.user&.username || 'Anonīms' %></span>
+    <%= link_to image_tag(reply.user.profile_picture, alt: reply.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;'), profile_path(reply.user) if reply.user.profile_picture.attached? %>
+    
+    <span class="fw-bold">
+      <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user) %>
+    </span>
 
     <% if reply.user == current_user %>
       <div class="nav-item dropdown ms-auto">
@@ -16,7 +19,6 @@
 
   <p><%= reply.content %></p>
 
-  <!-- Display files for nested replies if attached -->
   <% if reply.file.attached? %>
     <div class="reply-file">
       <% if reply.file.content_type.start_with?('image/') %>
@@ -32,7 +34,6 @@
     </div>
   <% end %>
 
-  <!-- Recursive child replies -->
   <% if reply.children.any? %>
     <ul class="reply-list">
       <%= render partial: 'replies/reply', collection: reply.children, as: :reply %>

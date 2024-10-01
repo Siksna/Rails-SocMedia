@@ -81,6 +81,7 @@ class MessagesController < ApplicationController
       id: message.id,
       content: message.content,
       user: message.user ? {
+        id: message.user.id, 
         username: message.user.username,
         profile_picture_url: message.user.profile_picture.attached? ? url_for(message.user.profile_picture) : 'default_profile.png'
       } : {
@@ -93,5 +94,6 @@ class MessagesController < ApplicationController
   
     data
   end
+  
   
 end
