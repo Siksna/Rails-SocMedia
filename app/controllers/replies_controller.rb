@@ -7,8 +7,10 @@ class RepliesController < ApplicationController
     @message = Message.find(params[:message_id])
     @reply = @message.replies.build(reply_params)
     @reply.user = current_user  
+    @reply.parent_id = params[:reply][:parent_id]
+
     if @reply.save
-      redirect_to @message, notice: 'Reply was successfully created.'
+      redirect_to @message, notice: 'Atbilde veiksmīgi izveidota.'
     else
       render :new
     end
@@ -46,7 +48,7 @@ end
   end
 
   def reply_params
-    params.require(:reply).permit(:content, :file)
+    params.require(:reply).permit(:content, :file, :parent_id)
   end
 
   def authorize_user!

@@ -4,7 +4,8 @@ class Reply < ApplicationRecord
   
   belongs_to :user
 
-
+  belongs_to :parent, class_name: 'Reply', optional: true
+  has_many :children, class_name: 'Reply', foreign_key: 'parent_id', dependent: :destroy
   attr_accessor :remove_file
   private
 

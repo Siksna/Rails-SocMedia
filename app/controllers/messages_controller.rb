@@ -16,7 +16,7 @@ class MessagesController < ApplicationController
   def show
     @message = Message.find(params[:id])
     @reply = Reply.new
-    @replies = @message.replies.order(created_at: :desc)
+    @replies = @message.replies.includes(:user, :children).where(parent_id: nil).order(created_at: :desc)
     render 'home/show'
   end
   

@@ -198,7 +198,7 @@ hr {
   display: none;
 }
 
-.reply-form button {
+.reply-form button, .input-container button {
   background-color: rgb(170 40 40);
   color: white;
   padding: 6px 12px;
@@ -208,7 +208,7 @@ hr {
   transition: background-color 0.3s ease;
 }
 
-.reply-form button:hover {
+.reply-form button:hover, .input-container button:hover {
   background-color: rgb(120 40 40);
 }
 
