@@ -1,14 +1,99 @@
-<h1><%= @user.username %> profils</h1>
-
 <div class="profile-info">
-  
   <div class="profile-picture">
-    <%= image_tag @user.profile_picture || 'default_profile.png', alt: @user.username, class: "profile-pic" %>
+    <%= link_to profile_path(@user) do %>
+      <%= image_tag @user.profile_picture.attached? ? @user.profile_picture : 'default_profile.png', alt: @user.username, class: "profile-pic" %>
+    <% end %>
   </div>
+  <h1 class="profile-username"><%= @user.username %></h1>
 
   <div class="user-details">
-    <p>Lietotājvārds: <%= @user.username %></p>
-    <p>Epasts: <%= @user.email %></p>
-   
+    <p>Email: <%= @user.email %></p>
   </div>
+</div>
+
+<hr>
+
+<div class="user-activity">
+  <% if (@posts + @replies).any? %>
+    <% (@posts + @replies).sort_by(&:created_at).reverse.each do |activity| %>
+      <div class="activity-item" onclick="window.location='<%= message_path(activity.is_a?(Message) ? activity : activity.message) %>';">
+        
+        <% if activity.is_a?(Reply) && activity.parent_id.nil? %>
+          <div class="original-message">
+            <div class="activity-header">
+              <%= link_to profile_path(activity.message.user) do %>
+                <%= image_tag activity.message.user.profile_picture.attached? ? activity.message.user.profile_picture : 'default_profile.png', alt: activity.message.user.username, class: 'profile-pic-activity' %>
+              <% end %>
+              <span class="activity-username"><%= activity.message.user.username %></span>
+              <small class="activity-time"><%= time_ago_in_words(activity.message.created_at) %> ago</small>
+            </div>
+            <p><%= activity.message.content.truncate(100) %></p>
+
+            <% if activity.message.file.attached? %>
+              <div class="attached-file">
+                <% if activity.message.file.content_type.start_with?('image/') %>
+                  <%= image_tag activity.message.file, alt: 'Attached image', class: 'attached-image' %>
+                <% elsif activity.message.file.content_type.start_with?('video/') %>
+                  <video class="attached-video" controls>
+                    <source src="<%= url_for(activity.message.file) %>" type="<%= activity.message.file.content_type %>">
+                    Jūsu pārlūkprogramma neatbalsta video tagu
+                  </video>
+                <% else %>
+                  <%= link_to 'Download File', rails_blob_path(activity.message.file, disposition: 'attachment') %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="activity-header">
+          <%= link_to profile_path(activity.user) do %>
+            <%= image_tag activity.user.profile_picture.attached? ? activity.user.profile_picture : 'default_profile.png', alt: activity.user.username, class: 'profile-pic-activity' %>
+          <% end %>
+          <span class="activity-username"><%= activity.user.username %></span>
+          <small class="activity-time"><%= time_ago_in_words(activity.created_at) %> ago</small>
+        </div>
+
+        <p><%= activity.content %></p>
+
+        <% if activity.file.attached? %>
+          <div class="attached-file">
+            <% if activity.file.content_type.start_with?('image/') %>
+              <%= image_tag activity.file, alt: 'Attached image', class: 'attached-image' %>
+            <% elsif activity.file.content_type.start_with?('video/') %>
+              <video class="attached-video" controls>
+                <source src="<%= url_for(activity.file) %>" type="<%= activity.file.content_type %>">
+                Jūsu pārlūkprogramma neatbalsta video tagu
+              </video>
+            <% else %>
+              <%= link_to 'Download File', rails_blob_path(activity.file, disposition: 'attachment') %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <p><small class="activity-date"><%= activity.created_at.strftime("%B %d, %Y") %></small></p>
+
+        <!-- Display nested replies (children) if present -->
+        <% if activity.is_a?(Reply) && activity.children.any? %>
+          <div class="nested-replies" style="margin-left: 20px; border-left: 1px solid #ddd; padding-left: 10px;">
+            <% activity.children.each do |nested_reply| %>
+              <div class="activity-item nested-reply">
+                <div class="activity-header">
+                  <%= link_to profile_path(nested_reply.user) do %>
+                    <%= image_tag nested_reply.user.profile_picture.attached? ? nested_reply.user.profile_picture : 'default_profile.png', alt: nested_reply.user.username, class: 'profile-pic-activity' %>
+                  <% end %>
+                  <span class="activity-username"><%= nested_reply.user.username %></span>
+                  <small class="activity-time"><%= time_ago_in_words(nested_reply.created_at) %> ago</small>
+                </div>
+                <p><%= nested_reply.content %></p>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+      </div>
+    <% end %>
+  <% else %>
+    <p>Lietotājs nav publicējis ziņas</p>
+  <% end %>
 </div>

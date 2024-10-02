@@ -315,3 +315,107 @@ hr {
   margin-right: 10px;
 }
 
+/*Profilā */
+.profile-info {
+  margin-bottom: 20px;
+}
+
+.profile-picture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%; 
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0; 
+}
+
+.profile-picture img {
+  width: 100px; 
+  height: 100px;
+  object-fit: cover; 
+  border-radius: 50%;
+}
+
+.profile-username {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.user-details p {
+  font-size: 16px;
+}
+
+.user-activity {
+  margin-top: 20px;
+}
+
+.activity-item {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.activity-item:hover {
+  background-color: #f9f9f9;
+}
+
+.activity-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+
+.profile-pic-activity {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; 
+  margin-right: 10px;
+  object-fit: cover; 
+  background-color: #f0f0f0; 
+}
+
+.activity-username {
+  font-weight: bold;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: #888;
+  margin-left: 10px;
+}
+
+.activity-content {
+  margin-top: 10px;
+}
+
+.activity-date {
+  font-size: 12px;
+  color: #888;
+}
+
+.original-message {
+  border-left: 2px solid #ccc;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+.attached-file {
+  margin-top: 10px;
+}
+
+.attached-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.attached-video {
+  width: 100%;
+  height: auto;
+}
