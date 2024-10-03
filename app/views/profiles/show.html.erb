@@ -16,9 +16,41 @@
 <div class="user-activity">
   <% if (@posts + @replies).any? %>
     <% (@posts + @replies).sort_by(&:created_at).reverse.each do |activity| %>
-      <div class="activity-item" onclick="window.location='<%= message_path(activity.is_a?(Message) ? activity : activity.message) %>';">
-        
-        <% if activity.is_a?(Reply) && activity.parent_id.nil? %>
+
+      <!-- Show original post if it has no replies or parent reply -->
+      <% if activity.is_a?(Message) && activity.replies.empty? %>
+        <div class="activity-item" onclick="window.location='<%= message_path(activity) %>';">
+          <div class="activity-header">
+            <%= link_to profile_path(activity.user) do %>
+              <%= image_tag activity.user.profile_picture.attached? ? activity.user.profile_picture : 'default_profile.png', alt: activity.user.username, class: 'profile-pic-activity' %>
+            <% end %>
+            <span class="activity-username"><%= activity.user.username %></span>
+            <small class="activity-time"><%= time_ago_in_words(activity.created_at) %> ago</small>
+          </div>
+          <p><%= activity.content %></p>
+
+          <% if activity.file.attached? %>
+            <div class="attached-file">
+              <% if activity.file.content_type.start_with?('image/') %>
+                <%= image_tag activity.file, alt: 'Attached image', class: 'attached-image' %>
+              <% elsif activity.file.content_type.start_with?('video/') %>
+                <video class="attached-video" controls>
+                  <source src="<%= url_for(activity.file) %>" type="<%= activity.file.content_type %>">
+                  Your browser does not support the video tag.
+                </video>
+              <% else %>
+                <%= link_to 'Download File', rails_blob_path(activity.file, disposition: 'attachment') %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <p><small class="activity-date"><%= activity.created_at.strftime("%B %d, %Y") %></small></p>
+        </div>
+
+      <!-- Show parent reply with original post if the parent has no parent -->
+      <% elsif activity.is_a?(Reply) && activity.parent_id.nil? %>
+        <div class="activity-item" onclick="window.location='<%= message_path(activity.message) %>';">
+          <!-- Display original message -->
           <div class="original-message">
             <div class="activity-header">
               <%= link_to profile_path(activity.message.user) do %>
@@ -28,72 +60,97 @@
               <small class="activity-time"><%= time_ago_in_words(activity.message.created_at) %> ago</small>
             </div>
             <p><%= activity.message.content.truncate(100) %></p>
+          </div>
 
-            <% if activity.message.file.attached? %>
+          <!-- Display parent reply -->
+          <div class="parent-reply">
+            <div class="activity-header">
+              <%= link_to profile_path(activity.user) do %>
+                <%= image_tag activity.user.profile_picture.attached? ? activity.user.profile_picture : 'default_profile.png', alt: activity.user.username, class: 'profile-pic-activity' %>
+              <% end %>
+              <span class="activity-username"><%= activity.user.username %></span>
+              <small class="activity-time"><%= time_ago_in_words(activity.created_at) %> ago</small>
+            </div>
+            <p><%= activity.content %></p>
+
+            <% if activity.file.attached? %>
               <div class="attached-file">
-                <% if activity.message.file.content_type.start_with?('image/') %>
-                  <%= image_tag activity.message.file, alt: 'Attached image', class: 'attached-image' %>
-                <% elsif activity.message.file.content_type.start_with?('video/') %>
+                <% if activity.file.content_type.start_with?('image/') %>
+                  <%= image_tag activity.file, alt: 'Attached image', class: 'attached-image' %>
+                <% elsif activity.file.content_type.start_with?('video/') %>
                   <video class="attached-video" controls>
-                    <source src="<%= url_for(activity.message.file) %>" type="<%= activity.message.file.content_type %>">
-                    Jūsu pārlūkprogramma neatbalsta video tagu
+                    <source src="<%= url_for(activity.file) %>" type="<%= activity.file.content_type %>">
+                    Your browser does not support the video tag.
                   </video>
                 <% else %>
-                  <%= link_to 'Download File', rails_blob_path(activity.message.file, disposition: 'attachment') %>
+                  <%= link_to 'Download File', rails_blob_path(activity.file, disposition: 'attachment') %>
                 <% end %>
               </div>
             <% end %>
           </div>
-        <% end %>
-
-        <div class="activity-header">
-          <%= link_to profile_path(activity.user) do %>
-            <%= image_tag activity.user.profile_picture.attached? ? activity.user.profile_picture : 'default_profile.png', alt: activity.user.username, class: 'profile-pic-activity' %>
-          <% end %>
-          <span class="activity-username"><%= activity.user.username %></span>
-          <small class="activity-time"><%= time_ago_in_words(activity.created_at) %> ago</small>
         </div>
 
-        <p><%= activity.content %></p>
+      <!-- Show child reply with parent reply only -->
+      <% elsif activity.is_a?(Reply) && activity.parent.present? %>
+        <div class="activity-item" onclick="window.location='<%= message_path(activity.message) %>';">
+          <!-- Display parent reply -->
+          <div class="parent-reply">
+            <div class="activity-header">
+              <%= link_to profile_path(activity.parent.user) do %>
+                <%= image_tag activity.parent.user.profile_picture.attached? ? activity.parent.user.profile_picture : 'default_profile.png', alt: activity.parent.user.username, class: 'profile-pic-activity' %>
+              <% end %>
+              <span class="activity-username"><%= activity.parent.user.username %></span>
+              <small class="activity-time"><%= time_ago_in_words(activity.parent.created_at) %> ago</small>
+            </div>
+            <p><%= activity.parent.content.truncate(100) %></p>
 
-        <% if activity.file.attached? %>
-          <div class="attached-file">
-            <% if activity.file.content_type.start_with?('image/') %>
-              <%= image_tag activity.file, alt: 'Attached image', class: 'attached-image' %>
-            <% elsif activity.file.content_type.start_with?('video/') %>
-              <video class="attached-video" controls>
-                <source src="<%= url_for(activity.file) %>" type="<%= activity.file.content_type %>">
-                Jūsu pārlūkprogramma neatbalsta video tagu
-              </video>
-            <% else %>
-              <%= link_to 'Download File', rails_blob_path(activity.file, disposition: 'attachment') %>
-            <% end %>
-          </div>
-        <% end %>
-
-        <p><small class="activity-date"><%= activity.created_at.strftime("%B %d, %Y") %></small></p>
-
-        <!-- Display nested replies (children) if present -->
-        <% if activity.is_a?(Reply) && activity.children.any? %>
-          <div class="nested-replies" style="margin-left: 20px; border-left: 1px solid #ddd; padding-left: 10px;">
-            <% activity.children.each do |nested_reply| %>
-              <div class="activity-item nested-reply">
-                <div class="activity-header">
-                  <%= link_to profile_path(nested_reply.user) do %>
-                    <%= image_tag nested_reply.user.profile_picture.attached? ? nested_reply.user.profile_picture : 'default_profile.png', alt: nested_reply.user.username, class: 'profile-pic-activity' %>
-                  <% end %>
-                  <span class="activity-username"><%= nested_reply.user.username %></span>
-                  <small class="activity-time"><%= time_ago_in_words(nested_reply.created_at) %> ago</small>
-                </div>
-                <p><%= nested_reply.content %></p>
+            <% if activity.parent.file.attached? %>
+              <div class="attached-file">
+                <% if activity.parent.file.content_type.start_with?('image/') %>
+                  <%= image_tag activity.parent.file, alt: 'Attached image', class: 'attached-image' %>
+                <% elsif activity.parent.file.content_type.start_with?('video/') %>
+                  <video class="attached-video" controls>
+                    <source src="<%= url_for(activity.parent.file) %>" type="<%= activity.parent.file.content_type %>">
+                    Your browser does not support the video tag.
+                  </video>
+                <% else %>
+                  <%= link_to 'Download File', rails_blob_path(activity.parent.file, disposition: 'attachment') %>
+                <% end %>
               </div>
             <% end %>
           </div>
-        <% end %>
 
-      </div>
+          <!-- Display child reply -->
+          <div class="child-reply">
+            <div class="activity-header">
+              <%= link_to profile_path(activity.user) do %>
+                <%= image_tag activity.user.profile_picture.attached? ? activity.user.profile_picture : 'default_profile.png', alt: activity.user.username, class: 'profile-pic-activity' %>
+              <% end %>
+              <span class="activity-username"><%= activity.user.username %></span>
+              <small class="activity-time"><%= time_ago_in_words(activity.created_at) %> ago</small>
+            </div>
+            <p><%= activity.content %></p>
+
+            <% if activity.file.attached? %>
+              <div class="attached-file">
+                <% if activity.file.content_type.start_with?('image/') %>
+                  <%= image_tag activity.file, alt: 'Attached image', class: 'attached-image' %>
+                <% elsif activity.file.content_type.start_with?('video/') %>
+                  <video class="attached-video" controls>
+                    <source src="<%= url_for(activity.file) %>" type="<%= activity.file.content_type %>">
+                    Your browser does not support the video tag.
+                  </video>
+                <% else %>
+                  <%= link_to 'Download File', rails_blob_path(activity.file, disposition: 'attachment') %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
     <% end %>
   <% else %>
-    <p>Lietotājs nav publicējis ziņas</p>
+    <p>This user has not posted anything yet.</p>
   <% end %>
 </div>
