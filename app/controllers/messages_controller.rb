@@ -1,6 +1,6 @@
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
-  before_action :authorize_user!, only: [:edit, :update, :destroy]
+  before_action :authenticate_user!, only: [:edit, :update, :destroy]
  
 
   def index
@@ -60,16 +60,18 @@ class MessagesController < ApplicationController
     @message = Message.find(params[:id])
   if @message.user == current_user
     @message.destroy
-    redirect_to messages_path, notice: 'Ziņa veiksmīgi dzēsta.'
+    redirect_to root_path, notice: 'Ziņa veiksmīgi dzēsta.'
   else
-    redirect_to messages_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
+    redirect_to root_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
   end
   end
 
   private
 
   def set_message
+    Rails.logger.debug "Looking for Message with ID: #{params[:id]}"
     @message = Message.find(params[:id])
+    
   end
 
   def message_params
@@ -77,7 +79,10 @@ class MessagesController < ApplicationController
   end
 
   def message_data(message)
-    data = {
+    direct_comments = message.replies.where(parent_id: nil).count
+    all_replies = message.replies.joins(:children).count
+  
+    {
       id: message.id,
       content: message.content,
       user: message.user ? {
@@ -87,13 +92,9 @@ class MessagesController < ApplicationController
       } : {
         username: 'Anonīms',
         profile_picture_url: 'default_profile.png'
-      }
+      },
+      file_url: message.file.attached? ? url_for(message.file) : nil,
+      comment_count: direct_comments + all_replies
     }
-  
-    data[:file_url] = message.file.attached? ? url_for(message.file) : nil
-  
-    data
   end
-  
-  
 end

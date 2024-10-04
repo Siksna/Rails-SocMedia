@@ -85,7 +85,7 @@ function createPostElement(message) {
 
   if (message.user) {
     const profileLink = document.createElement('a');
-    profileLink.href = `/profiles/${message.user.id}`; 
+    profileLink.href = `/profiles/${message.user.id}`;
 
     const profileImage = document.createElement('img');
     profileImage.src = message.user.profile_picture_url || '/assets/default_profile.png';
@@ -96,7 +96,7 @@ function createPostElement(message) {
     userInfoElement.appendChild(profileLink);
 
     const usernameLink = document.createElement('a');
-    usernameLink.href = `/profiles/${message.user.id}`; 
+    usernameLink.href = `/profiles/${message.user.id}`;
     usernameLink.textContent = message.user.username || 'Anonīms';
     usernameLink.className = 'username-link';
 
@@ -139,8 +139,14 @@ function createPostElement(message) {
     }
   }
 
+const commentCountElement = document.createElement('p');
+commentCountElement.innerHTML = `<i class="fa-regular fa-message"></i> ${message.comment_count}`;
+postElement.appendChild(commentCountElement);
+
+
   return postElement;
 }
+
 
 
 

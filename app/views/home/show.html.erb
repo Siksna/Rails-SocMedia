@@ -38,7 +38,7 @@
 <div class="card-container">
   <div class="reply-form">
     <div id="replyFilePreview" class="file-preview"></div>
-    <%= form_with model: [@message, @message.replies.build], local: true do |form| %>
+    <%= form_with model: [@message, @message.replies.build], local: false do |form| %>
       <div class="input-container">
         <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", autocomplete: "off", class: "form-control", id: "replyInputField" %>
         
@@ -49,6 +49,7 @@
         <button><i class="fas fa-paper-plane"></i></button>
       </div>
     <% end %>
+    
   </div>
 
   <hr>
