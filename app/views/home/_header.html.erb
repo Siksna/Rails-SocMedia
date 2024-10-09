@@ -55,16 +55,60 @@
           </ul>
         </li>
         
-
-        
+      
      
 <% end %>
       </ul>
 <div class="d-flex">
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Meklēt" aria-label="Search">
-        <button class="mainbtn btn-outline-success" type="submit ">Meklēt</button>
-      </form>
+<form class="d-flex" action="<%= search_users_path %>" method="get" role="search" id="user-search-form">
+  <input class="form-control me-2" type="search" name="query" placeholder="Meklēt" aria-label="Search" id="user-search-input" autocomplete="off">
+  <button class="mainbtn btn-outline-success" type="submit">Meklēt</button>
+  <ul id="suggestions-dropdown" class="dropdown-menu" style="display: none;"></ul>
+</form>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('user-search-input');
+  const suggestionsDropdown = document.getElementById('suggestions-dropdown');
+
+  searchInput.addEventListener('input', function() {
+    const query = this.value;
+
+    if (query.length > 0) {
+      fetch(`/search_users.json?query=${query}`)  // Note: we're explicitly fetching the JSON format
+        .then(response => response.json())
+        .then(users => {
+          suggestionsDropdown.innerHTML = '';
+          if (users.length > 0) {
+            users.forEach(user => {
+              const listItem = document.createElement('li');
+              listItem.textContent = user;
+              listItem.classList.add('dropdown-item');
+              listItem.onclick = function() {
+                searchInput.value = user;
+                suggestionsDropdown.style.display = 'none';
+              };
+              suggestionsDropdown.appendChild(listItem);
+            });
+            suggestionsDropdown.style.display = 'block';
+          } else {
+            suggestionsDropdown.style.display = 'none';
+          }
+        });
+    } else {
+      suggestionsDropdown.style.display = 'none'; 
+    }
+  });
+
+  document.addEventListener('click', function(event) {
+    if (!searchInput.contains(event.target) && !suggestionsDropdown.contains(event.target)) {
+      suggestionsDropdown.style.display = 'none';
+    }
+  });
+});
+
+</script>
 
 
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -75,11 +119,12 @@
       <% if current_user.profile_picture.attached? %>
         <%= image_tag current_user.profile_picture, alt: "Profile Picture", class: "profile-picture-icon" %>
       <% else %>
-      <div class="default-profile-picture" style="background-color: <%= current_user.profile_color %>;">
+      <div class="default-profile-picture-icon" style="background-color: <%= current_user.profile_color %>; border-radius:50%;">
       <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
     </div>
     
-    
+
+
       <% end %>
     <% else %>
       <i class="fa-sharp fa-solid fa-right-to-bracket"></i>
@@ -90,7 +135,7 @@
 
   <% if user_signed_in? %>
 <li>
-            <%= link_to "Mans profils", profile_path(current_user), class:"dropdown-item" %>
+       <%= link_to "Mans profils", profile_path(current_user), class:"dropdown-item" %>
   </li>
         <li>
        <%= link_to "Rediģēt profilu", edit_user_registration_path, class:"dropdown-item" %>
@@ -99,11 +144,9 @@
         <li>
           <%= button_to "Iziet", destroy_user_session_path, method: :delete, class:"dropdown-item" %>
   </li>
-  
-        
+
       <% else %>
 
-     
       <li>
       <%= link_to "Reģistrēties", new_user_registration_path, class:"dropdown-item" %>
       </li>

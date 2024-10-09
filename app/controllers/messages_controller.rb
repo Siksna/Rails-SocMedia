@@ -1,6 +1,7 @@
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
   before_action :authenticate_user!, only: [:edit, :update, :destroy]
+  
  
 
   def index
@@ -69,7 +70,6 @@ class MessagesController < ApplicationController
   private
 
   def set_message
-    Rails.logger.debug "Looking for Message with ID: #{params[:id]}"
     @message = Message.find(params[:id])
     
   end

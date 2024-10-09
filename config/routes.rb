@@ -16,8 +16,11 @@ Rails.application.routes.draw do
   resources :messages, only: [:index, :show, :create, :delete]
 
 
+
+
   devise_for :users
   resources :friends
+  get 'search_users', to: 'home#search_users' 
   get "friends/index"
   get "friends/new"
   get "friends/create"

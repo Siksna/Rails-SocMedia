@@ -1,3 +1,4 @@
+/* failu pirmskats */
 function displayFileName() {
   const fileInput = document.getElementById('fileInput');
   const previewContainer = document.getElementById('filePreview');
@@ -88,7 +89,7 @@ function createPostElement(message) {
     profileLink.href = `/profiles/${message.user.id}`;
 
     const profileImage = document.createElement('img');
-    profileImage.src = message.user.profile_picture_url || '/assets/default_profile.png';
+    profileImage.src = message.user.profile_picture_url || 'default_profile.png';
     profileImage.alt = `${message.user.username}`;
     profileImage.className = 'profile-pic';
 
@@ -103,7 +104,7 @@ function createPostElement(message) {
     userInfoElement.appendChild(usernameLink);
   } else {
     const placeholderImage = document.createElement('img');
-    placeholderImage.src = '/assets/default_profile.png';
+    placeholderImage.src = 'default_profile.png';
     placeholderImage.className = 'profile-pic';
 
     const defaultUsernameElement = document.createElement('span');
