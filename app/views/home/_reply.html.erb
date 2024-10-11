@@ -10,6 +10,8 @@
     <span class="fw-bold">
       <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user) %>
     </span>
+      <small class="activity-time"><%= time_ago_in_words(reply.created_at) %> ago</small>
+
 
     <% if reply.user == current_user %>
       <div class="nav-item dropdown ms-auto">

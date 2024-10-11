@@ -16,6 +16,9 @@ class User < ApplicationRecord
 
   validates :username, presence: true
 
+
+  
+
   private
 
   def set_profile_color

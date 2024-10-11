@@ -10,6 +10,7 @@
       <% end %>
     <% end %>
     <%= link_to @message.user&.username || 'Anonīms', profile_path(@message.user), class: 'fw-bold' %>
+            <small class="activity-time"><%= time_ago_in_words(@message.created_at) %> ago</small>
 
     <% if @message.user == current_user %>
       <div class="nav-item dropdown ms-auto">
@@ -69,7 +70,7 @@
            <% if reply.user.profile_picture.attached? %>
         <%= image_tag url_for(reply.user.profile_picture), alt: reply.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' %>
       <% else %>
-        <div class="default-profile-picture" style="background-color: <%= @message.user.profile_color %>;">
+        <div class="default-profile-picture" style="background-color: <%= reply.user.profile_color %>;">
           <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
         </div>
       <% end %>
@@ -77,6 +78,9 @@
         
           
           <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user), class: 'fw-bold' %>
+            <small class="activity-time"><%= time_ago_in_words(reply.created_at) %> ago</small>
+
+
 
           <% if reply.user == current_user %>
             <div class="nav-item dropdown ms-auto">

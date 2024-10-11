@@ -493,3 +493,13 @@ hr {
 .username {
   color: #007bff;
 }
+
+.user-info{
+  display:flex;
+  align-items:center;
+}
+
+.user-info p{
+ margin-top:1rem;
+ margin-bottom:1rem;
+}

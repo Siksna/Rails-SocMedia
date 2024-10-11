@@ -73,6 +73,38 @@ function displayReplyFileName() {
 
 /* Ziņu izveide */
 
+function timeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString); 
+  const secondsAgo = Math.floor((now - date) / 1000);
+  
+  const intervals = {
+    year: 365 * 24 * 60 * 60,
+    month: 30 * 24 * 60 * 60,
+    day: 24 * 60 * 60,
+    hour: 60 * 60,
+    minute: 60,
+  };
+
+  let timeStr = '';
+  
+  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+    const elapsed = Math.floor(secondsAgo / secondsInUnit);
+    if (elapsed > 0) {
+      timeStr = `${elapsed} ${unit}${elapsed > 1 ? 's' : ''} ago`;
+      break;
+    }
+  }
+
+  if (!timeStr) {
+    timeStr = 'less than a minute ago';
+  }
+
+  return timeStr;
+}
+
+
+
 function createPostElement(message) {
   const postElement = document.createElement('div');
   postElement.className = 'post';
@@ -89,7 +121,7 @@ function createPostElement(message) {
     profileLink.href = `/profiles/${message.user.id}`;
 
     const profileImage = document.createElement('img');
-    profileImage.src = message.user.profile_picture_url || 'default_profile.png';
+    profileImage.src = message.user.profile_picture_url || 'assets/images/default_profile.png';
     profileImage.alt = `${message.user.username}`;
     profileImage.className = 'profile-pic';
 
@@ -104,7 +136,7 @@ function createPostElement(message) {
     userInfoElement.appendChild(usernameLink);
   } else {
     const placeholderImage = document.createElement('img');
-    placeholderImage.src = 'default_profile.png';
+    placeholderImage.src = 'assets/images/default_profile.png';
     placeholderImage.className = 'profile-pic';
 
     const defaultUsernameElement = document.createElement('span');
@@ -113,8 +145,11 @@ function createPostElement(message) {
     userInfoElement.appendChild(placeholderImage);
     userInfoElement.appendChild(defaultUsernameElement);
   }
-
   postElement.appendChild(userInfoElement);
+
+  const ActivityTime = document.createElement('p');
+  ActivityTime.innerHTML = `<small class="activity-time">${timeAgo(message.created_at)}</small>`;
+  userInfoElement.appendChild(ActivityTime);
 
   const textElement = document.createElement('p');
   textElement.textContent = message.content || 'Nav datu';
@@ -140,13 +175,13 @@ function createPostElement(message) {
     }
   }
 
-const commentCountElement = document.createElement('p');
-commentCountElement.innerHTML = `<i class="fa-regular fa-message"></i> ${message.comment_count}`;
-postElement.appendChild(commentCountElement);
-
+  const commentCountElement = document.createElement('p');
+  commentCountElement.innerHTML = `<i class="fa-regular fa-message"></i> ${message.comment_count}`;
+  postElement.appendChild(commentCountElement);
 
   return postElement;
 }
+
 
 
 

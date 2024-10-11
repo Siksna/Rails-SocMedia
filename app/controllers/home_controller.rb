@@ -7,15 +7,21 @@ class HomeController < ApplicationController
 
   def search_users
     if params[:query].present?
-      @users = User.where("username LIKE ?", "%#{params[:query]}%").limit(10)
+      query = params[:query].downcase
+      @users_start_with = User.where("LOWER(username) LIKE ?", "#{query}%").limit(10)
+      @users_rest = User.where("LOWER(username) LIKE ?", "%#{query}%")
+                         .where.not("LOWER(username) LIKE ?", "#{query}%")
+                         .limit(10)
+      
+      @users = @users_start_with + @users_rest
     else
       @users = []
     end
-  
+    
     respond_to do |format|
       format.html 
       format.json { render json: @users.pluck(:username) } 
     end
   end
-  
 end
+

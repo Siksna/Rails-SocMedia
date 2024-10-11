@@ -28,7 +28,9 @@
   <% if (@posts + @replies).any? %>
     <% (@posts + @replies).sort_by(&:created_at).reverse.each do |activity| %>
 
-      <% if activity.is_a?(Message) %> <!-- Original post -->
+
+      <!-- Originala ziņa -->
+      <% if activity.is_a?(Message) %>
         <div class="activity-item" onclick="window.location='<%= message_path(activity) %>';">
           <div class="activity-header d-flex align-items-center">
             <%= link_to do %>
@@ -77,7 +79,9 @@
           </div>
         </div>
 
-      <% elsif activity.is_a?(Reply) && activity.parent_id.nil? %> <!-- Reply to an original post -->
+
+        <!-- Reply uz oriģinala posta -->
+      <% elsif activity.is_a?(Reply) && activity.parent_id.nil? %>
         <div class="activity-item" onclick="window.location='<%= message_path(activity.message) %>';">
           <div class="activity-header d-flex align-items-center">
             <%= link_to do %>
@@ -123,6 +127,7 @@
             <%= activity.children.count %>
           </div>
 
+
           <div class="original-message">
             <div class="activity-header">
               <%= link_to do %>
@@ -161,12 +166,16 @@
           </div>
         </div>
 
-      <% elsif activity.is_a?(Reply) && activity.parent.present? %> <!-- Reply to a reply -->
+
+        <!-- Reply uz reply -->
+
+        <!-- Child replijs uz reply-->
+      <% elsif activity.is_a?(Reply) && activity.parent.present? %> 
         <div class="activity-item" onclick="window.location='<%= message_path(activity.message) %>';">
           <div class="child-reply">
             <div class="activity-header d-flex align-items-center">
               <%= link_to do %>
-<% if activity.user.profile_picture.attached? %>
+                <% if activity.user.profile_picture.attached? %>
                 <%= image_tag activity.user.profile_picture, alt: activity.user.username, class: 'profile-pic-activity' %>
               <% else %>
                 <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
@@ -209,17 +218,20 @@
             <%= activity.children.count %>
           </div>
 
+
+              <!-- Parents reply to reply zinai -->
           <div class="parent-reply">
-            <div class="activity-header">
-              <%= link_to do %>
-                <% if activity.user.profile_picture.attached? %>
-                <%= image_tag activity.user.profile_picture, alt: activity.user.username, class: 'profile-pic-activity' %>
+          <div class="activity-header">
+            <%= link_to do %>
+              <% if activity.parent.user.profile_picture.attached? %>
+                <%= image_tag activity.parent.user.profile_picture, alt: activity.parent.user.username, class: 'profile-pic-activity' %>
               <% else %>
-                <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
+                <div class="default-profile-picture" style="background-color: <%= activity.parent.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
                   <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
                 </div>
               <% end %>
-              <% end %>
+            <% end %>
+        
               <%= link_to activity.parent.user.username, profile_path(activity.parent.user), class: 'activity-username' %>
               <small class="activity-time"><%= time_ago_in_words(activity.parent.created_at) %> ago</small>
             </div>

@@ -83,18 +83,20 @@ class MessagesController < ApplicationController
     all_replies = message.replies.joins(:children).count
   
     {
-      id: message.id,
-      content: message.content,
-      user: message.user ? {
-        id: message.user.id, 
-        username: message.user.username,
-        profile_picture_url: message.user.profile_picture.attached? ? url_for(message.user.profile_picture) : 'default_profile.png'
-      } : {
-        username: 'Anonīms',
-        profile_picture_url: 'default_profile.png'
-      },
-      file_url: message.file.attached? ? url_for(message.file) : nil,
-      comment_count: direct_comments + all_replies
-    }
+  id: message.id,
+  content: message.content,
+  user: message.user ? {
+    id: message.user.id, 
+    username: message.user.username,
+    profile_picture_url: message.user.profile_picture.attached? ? url_for(message.user.profile_picture) : 'assets/images/default_profile.png'
+  } : {
+    username: 'Anonīms',
+    profile_picture_url: 'assets/images/default_profile.png'
+  },
+  file_url: message.file.attached? ? url_for(message.file) : nil,
+  comment_count: direct_comments + all_replies,
+  created_at: message.created_at.iso8601
+}
+
   end
 end

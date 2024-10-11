@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const query = this.value;
 
     if (query.length > 0) {
-      fetch(`/search_users.json?query=${query}`)  // Note: we're explicitly fetching the JSON format
+      fetch(`/search_users.json?query=${query}`)
         .then(response => response.json())
         .then(users => {
           suggestionsDropdown.innerHTML = '';
