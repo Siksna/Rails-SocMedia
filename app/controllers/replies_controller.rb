@@ -1,6 +1,6 @@
 class RepliesController < ApplicationController
-  before_action :set_message, only: [:create, :edit, :update, :destroy]
-  before_action :set_reply, only: [:edit, :update, :destroy]
+  before_action :set_message, only: [:create, :edit, :update, :destroy, :toggle_like]
+  before_action :set_reply, only: [:edit, :update, :destroy, :toggle_like]
   before_action :authorize_user!, only: [:edit, :update, :destroy]
 
   def create
@@ -35,6 +35,17 @@ end
   def destroy
     @reply.destroy
     redirect_to message_path(@message), notice: 'Atbilde dzēsta.'
+  end
+
+
+  def toggle_like
+    @reply = Reply.find(params[:id])
+    if current_user.liked?(@reply)
+      current_user.unlike(@reply)
+    else
+      current_user.like(@reply)
+    end
+    redirect_to request.referer
   end
 
   private

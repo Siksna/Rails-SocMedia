@@ -26,6 +26,17 @@
 
   <p><%= reply.content %></p>
 
+        <div class="like-section d-flex align-items-center">
+          <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'me-2' do %>
+            <% if current_user.liked?(reply) %>
+            <i class="fa-solid fa-heart"></i>
+            <% else %>
+              <i class="fa-regular fa-heart"></i>
+            <% end %>
+          <% end %>
+            <span><%= reply.likes.count %></span>
+          </div>
+
   <% if reply.file.attached? %>
     <div class="reply-file">
       <% if reply.file.content_type.start_with?('image/') %>

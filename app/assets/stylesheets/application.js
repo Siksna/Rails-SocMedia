@@ -179,8 +179,52 @@ function createPostElement(message) {
   commentCountElement.innerHTML = `<i class="fa-regular fa-message"></i> ${message.comment_count}`;
   postElement.appendChild(commentCountElement);
 
+
+  const likeSection = document.createElement('div');
+  likeSection.className = 'like-section d-flex align-items-center';
+
+  const likeButton = document.createElement('button');
+  likeButton.className = 'me-2'; 
+  likeButton.innerHTML = `
+    <i class="fa${message.liked_by_user ? 's' : '-regular'} fa-heart"></i>
+    <span>${message.like_count}</span>
+  `;
+
+  likeButton.onclick = function(event) {
+    event.stopPropagation(); 
+  
+    const method = message.liked_by_user ? 'DELETE' : 'POST'; 
+    const likeUrl = `/messages/${message.id}/toggle_like`;
+  
+    fetch(likeUrl, {
+      method: method,
+      headers: {
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      message.liked_by_user = data.liked_by_user; 
+      message.like_count = data.like_count; 
+      updateLikeButton();
+    })
+    .catch(error => console.error('Error:', error));
+  };
+  
+  function updateLikeButton() {
+    likeButton.innerHTML = `
+      <i class="fa${message.liked_by_user ? 's' : '-regular'} fa-heart"></i>
+      <span>${message.like_count}</span>
+    `;
+  }
+  
+
+  likeSection.appendChild(likeButton);
+  postElement.appendChild(likeSection);
+
   return postElement;
 }
+
 
 
 

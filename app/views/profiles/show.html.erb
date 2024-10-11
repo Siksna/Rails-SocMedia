@@ -77,8 +77,25 @@
             <i class="fa-regular fa-message"></i>
             <%= activity.replies.count %>
           </div>
+
+          <!-- Like originala ziņa STRADA-->
+          <% if activity.is_a?(Message) %>
+            <div class="like-section d-flex align-items-center">
+              <%= button_to toggle_like_message_path(activity), method: :post, remote: true, class: 'me-2' do %>
+                <% if current_user.liked?(activity) %>
+                  <i class="fa-solid fa-heart"></i>
+                <% else %>
+                  <i class="fa-regular fa-heart"></i>
+                <% end %>
+              <% end %>
+              <span><%= activity.likes.count %></span>
+            </div>
+          <% end %>
+          
+          
         </div>
 
+       
 
         <!-- Reply uz oriģinala posta -->
       <% elsif activity.is_a?(Reply) && activity.parent_id.nil? %>
@@ -91,7 +108,8 @@
                 <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
                   <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
                 </div>
-              <% end %>            <% end %>
+              <% end %>          
+                <% end %>
             <%= link_to activity.user.username, profile_path(activity.user), class: 'activity-username' %>
             <small class="activity-time"><%= time_ago_in_words(activity.created_at) %> ago</small>
 
@@ -127,6 +145,17 @@
             <%= activity.children.count %>
           </div>
 
+          <!-- Like originalajiem replijiem STRADA -->
+          <div class="like-section d-flex align-items-center">
+            <%= button_to toggle_like_message_reply_path(activity.message, activity), method: :post, remote: true, class: 'me-2' do %>
+            <% if current_user.liked?(activity) %>
+              <i class="fa-solid fa-heart"></i>
+            <% else %>
+              <i class="fa-regular fa-heart"></i>
+            <% end %>
+          <% end %>
+          <span><%= activity.likes.count %></span>
+        </div>
 
           <div class="original-message">
             <div class="activity-header">
@@ -219,6 +248,21 @@
           </div>
 
 
+          <!-- Like reply replijiem NESTRADA -->
+       <% if activity.is_a?(Reply) %>         
+          <div class="like-section d-flex align-items-center">
+            <%= button_to toggle_like_message_reply_path(activity), method: :post, remote: true, class: 'me-2' do %>
+            <% if current_user.liked?(activity) %>
+              <i class="fa-solid fa-heart"></i>
+            <% else %>
+              <i class="fa-regular fa-heart"></i>
+            <% end %>
+          <% end %>
+          <span><%= activity.likes.count %></span>
+        </div>
+        <% end %>
+
+
               <!-- Parents reply to reply zinai -->
           <div class="parent-reply">
           <div class="activity-header">
@@ -241,6 +285,8 @@
               <i class="fa-regular fa-message"></i>
               <%= activity.parent.children.count %>
             </div>
+
+            
 
             <% if activity.parent.file.attached? %>
               <div class="attached-file">

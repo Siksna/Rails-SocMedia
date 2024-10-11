@@ -1,7 +1,7 @@
 class Message < ApplicationRecord
     has_many :replies, dependent: :destroy
     has_one_attached :file
-    has_many :likes, dependent: :destroy
+    has_many :likes, as: :likeable
     validates :content, presence: true
   
     belongs_to :user

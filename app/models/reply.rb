@@ -1,7 +1,7 @@
 class Reply < ApplicationRecord
   belongs_to :message
   has_one_attached :file
-  has_many :likes, dependent: :destroy
+  has_many :likes, as: :likeable
 
 
   belongs_to :user

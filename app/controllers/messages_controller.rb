@@ -1,5 +1,5 @@
 class MessagesController < ApplicationController
-  before_action :set_message, only: [:show, :edit, :update, :destroy]
+  before_action :set_message, only: [:show, :edit, :update, :destroy, :toggle_like]
   before_action :authenticate_user!, only: [:edit, :update, :destroy]
   
  
@@ -65,6 +65,18 @@ class MessagesController < ApplicationController
   else
     redirect_to root_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
   end
+  end
+
+
+
+  def toggle_like
+    @message = Message.find(params[:id])
+    if current_user.liked?(@message)
+      current_user.unlike(@message)
+    else
+      current_user.like(@message)
+    end
+    redirect_to request.referer
   end
 
   private

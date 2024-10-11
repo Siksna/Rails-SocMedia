@@ -5,17 +5,26 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_many :friends
-
   has_many :messages, dependent: :destroy
-
   has_many :replies, dependent: :destroy
 
   before_create :set_profile_color
 
-  
+  has_many :likes
 
   validates :username, presence: true
 
+  def like(likeable)
+    likes.create(likeable: likeable)
+  end
+
+  def unlike(likeable)
+    likes.find_by(likeable: likeable).destroy
+  end
+
+  def liked?(likeable)
+    likes.exists?(likeable: likeable)
+  end
 
   
 
@@ -28,5 +37,4 @@ class User < ApplicationRecord
   def generate_random_color
     "#" + "%06x" % (rand * 0xffffff)
   end
-
 end

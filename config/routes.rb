@@ -7,13 +7,12 @@ Rails.application.routes.draw do
   end
 
   resources :messages do
-    resources :replies, only: [:create, :edit, :update, :destroy]
-    post 'toggle_like', to: 'likes#toggle', as: 'toggle_like'
-  end
+    resources :replies, only: [:create, :edit, :update, :destroy] do
+      post 'toggle_like', on: :member
+    end
+        post 'toggle_like', on: :member
+      end
 
-  resources :replies do
-    post 'toggle_like', to: 'likes#toggle', as: 'toggle_like'
-  end
 
   
   resources :profiles, only: [:show]
