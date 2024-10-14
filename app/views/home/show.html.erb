@@ -41,20 +41,31 @@
     </div>
   <% end %>
 
-<!-- Like funkcija -->
-  <div class="like-section d-flex align-items-center">
-  <%= button_to toggle_like_message_path(@message), method: :post, remote: true, class: 'me-2' do %>
-    <% if current_user.liked?(@message) %>
-    <i class="fa-solid fa-heart"></i>
-    <% else %>
-      <i class="fa-regular fa-heart"></i>
-    <% end %>
-  <% end %>
-    <span><%= @message.likes.count %></span>
-  </div>
+
+  <div class="comment-section d-flex align-items-center">
+  <i class="fa-regular fa-message me-2"></i>
+  <span><%= @comment_count %></span>
 </div>
 
 
+
+  <!-- Like funkcija -->
+  <div class="like-section d-flex align-items-center">
+  <% if current_user %>
+    <%= button_to toggle_like_message_path(@message), method: :post, remote: true, class: 'me-2', id: "like-button-#{@message.id}" do %>
+      <% if current_user.liked?(@message) %>
+        <i class="fa-solid fa-heart"></i>
+      <% else %>
+        <i class="fa-regular fa-heart"></i>
+      <% end %>
+    <% end %>
+  <% else %>
+    <i class="fa-regular fa-heart me-2"></i>
+  <% end %>
+  <span><%= @message.likes.count %></span>
+</div>
+
+</div>
 
 <div class="card-container">
   <div class="reply-form">
@@ -120,23 +131,28 @@
             </div>
           <% end %>
 
-          <!-- Like funkcija prieks replijiem -->
-          <div class="like-section d-flex align-items-center">
-          <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'me-2' do %>
-            <% if current_user.liked?(reply) %>
-            <i class="fa-solid fa-heart"></i>
-            <% else %>
-              <i class="fa-regular fa-heart"></i>
-            <% end %>
-          <% end %>
-            <span><%= reply.likes.count %></span>
-          </div>
-          
+         
 
           <button class="btn btn-sm btn-link" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
             <i class="fa-regular fa-message"></i>
             <%= pluralize(reply.children.count, 'koments', 'komenti') %>
           </button>
+
+            <!-- Like funkcija prieks replijiem -->
+          <div class="like-section d-flex align-items-center">
+            <% if current_user %>
+              <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'me-2' do %>
+                <% if current_user.liked?(reply) %>
+                  <i class="fa-solid fa-heart"></i>
+                <% else %>
+                  <i class="fa-regular fa-heart"></i>
+                <% end %>
+              <% end %>
+            <% else %>
+              <i class="fa-regular fa-heart me-2"></i>
+            <% end %>
+            <span><%= reply.likes.count %></span>
+          </div>
 
           <div id="replyToReply<%= reply.id %>" class="collapse">
             <%= form_with model: [@message, @message.replies.build], local: true do |form| %>

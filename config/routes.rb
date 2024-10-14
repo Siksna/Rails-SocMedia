@@ -8,20 +8,13 @@ Rails.application.routes.draw do
 
   resources :messages do
     resources :replies, only: [:create, :edit, :update, :destroy] do
-      post 'toggle_like', on: :member
+      post 'toggle_like', on: :member, controller: 'replies'
     end
-        post 'toggle_like', on: :member
-      end
-
-
+    post 'toggle_like', on: :member
+  end
   
+
   resources :profiles, only: [:show]
-
-  
-  resources :messages, only: [:index, :show, :create, :delete]
-
-
-
 
   devise_for :users
   resources :friends

@@ -18,8 +18,10 @@ class MessagesController < ApplicationController
     @message = Message.find(params[:id])
     @reply = Reply.new
     @replies = @message.replies.includes(:user, :children).where(parent_id: nil).order(created_at: :desc)
+    @comment_count = message_data(@message)[:comment_count]
     render 'home/show'
   end
+  
   
 
   def new
@@ -76,7 +78,9 @@ class MessagesController < ApplicationController
     else
       current_user.like(@message)
     end
-    redirect_to request.referer
+   # redirect_to request.referer
+    
+   render json: { liked_by_user: current_user.liked?(@message), like_count: @message.likes.count }
   end
 
   private
