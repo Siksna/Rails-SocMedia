@@ -1,0 +1,4 @@
+<h2>Seko</h2>
+<% @user.following.each do |followed| %>
+  <%= link_to followed.username, profile_path(followed) %><br>
+<% end %>

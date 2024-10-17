@@ -11,7 +11,15 @@ class Message < ApplicationRecord
     end
 
     def file_url
-      Rails.application.routes.url_helpers.url_for(file) if file.attached?
+      if file.attached?
+        Rails.application.routes.url_helpers.rails_blob_path(file, only_path: true)
+      end
     end
+    
+
+
+  def comment_count
+    replies.where(parent_id: nil).count + replies.joins(:children).count
+  end
   end
   

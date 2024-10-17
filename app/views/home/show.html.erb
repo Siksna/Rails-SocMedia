@@ -42,6 +42,7 @@
   <% end %>
 
 
+  <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
   <div class="comment-section d-flex align-items-center">
   <i class="fa-regular fa-message me-2"></i>
   <span><%= @comment_count %></span>
@@ -52,7 +53,8 @@
   <!-- Like funkcija -->
   <div class="like-section d-flex align-items-center">
   <% if current_user %>
-    <%= button_to toggle_like_message_path(@message), method: :post, remote: true, class: 'me-2', id: "like-button-#{@message.id}" do %>
+  <!--   onclick: "toggleLike(#{@message.id}, this); event.stopPropagation();"  -->
+    <%= button_to toggle_like_message_path(@message), method: :post, remote: true, class: 'heart me-2', id: "like-button-#{@message.id}" do %>
       <% if current_user.liked?(@message) %>
         <i class="fa-solid fa-heart"></i>
       <% else %>
@@ -66,7 +68,7 @@
 </div>
 
 </div>
-
+</div>
 <div class="card-container">
   <div class="reply-form">
     <div id="replyFilePreview" class="file-preview"></div>
@@ -132,26 +134,27 @@
           <% end %>
 
          
-
+          <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
           <button class="btn btn-sm btn-link" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
             <i class="fa-regular fa-message"></i>
             <%= pluralize(reply.children.count, 'koments', 'komenti') %>
           </button>
 
             <!-- Like funkcija prieks replijiem -->
-          <div class="like-section d-flex align-items-center">
+         <div class="like-section d-flex align-items-center">
             <% if current_user %>
-              <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'me-2' do %>
-                <% if current_user.liked?(reply) %>
-                  <i class="fa-solid fa-heart"></i>
-                <% else %>
-                  <i class="fa-regular fa-heart"></i>
-                <% end %>
+              <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'heart me-2', onclick: "toggleReplyLike(#{reply.id}, this); event.stopPropagation();" do %>
+             <% if current_user.liked?(reply) %>
+               <i class="fa-solid fa-heart"></i>
+               <% else %>
+                <i class="fa-regular fa-heart"></i>
               <% end %>
-            <% else %>
-              <i class="fa-regular fa-heart me-2"></i>
+             <% end %>
+           <% else %>
+               <i class="fa-regular fa-heart me-2"></i>
             <% end %>
-            <span><%= reply.likes.count %></span>
+           <span id="like-reply-count-<%= reply.id %>"><%= reply.likes.count %></span>
+          </div>
           </div>
 
           <div id="replyToReply<%= reply.id %>" class="collapse">
@@ -160,7 +163,7 @@
               <div class="input-container">
                 <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", class: "form-control" %>
                 <label class="file-upload">
-                  <i class="fas fa-paperclip"></i>
+                 <i class="fas fa-paperclip"></i>
                   <%= form.file_field :file %>
                 </label>
                 <button><i class="fas fa-paper-plane"></i></button>
@@ -168,7 +171,7 @@
             <% end %>
 
             <% if reply.children.any? %>
-              <ul class="reply-list" style="padding-left: 3rem;"> 
+             <ul class="reply-list" style="padding-left: 3rem;"> 
                 <%= render partial: 'home/reply', collection: reply.children, as: :reply %>
               </ul>
             <% end %>

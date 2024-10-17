@@ -13,8 +13,17 @@ Rails.application.routes.draw do
     post 'toggle_like', on: :member
   end
   
+  resources :profiles, only: [:show] do
+    member do
+      post 'follow', to: 'relationships#create', as: 'follow'
+      delete 'unfollow', to: 'relationships#destroy', as: 'unfollow'
+    end
+  
+    get 'followers', on: :member
+    get 'following', on: :member
+  end
+  
 
-  resources :profiles, only: [:show]
 
   devise_for :users
   resources :friends

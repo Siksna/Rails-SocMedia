@@ -2,7 +2,7 @@
   <div class="profile-picture">
     <%= link_to profile_path(@user) do %>
       <% if @user.profile_picture.attached? %>
-        <%= image_tag @user.profile_picture, alt: "#{@user.username}", class: "profile-picture", style: "height:100px; width:100px;" %>
+        <%= image_tag @user.profile_picture, alt: "#{@user.username}", class: "profile-picture", style: "height:100px; width:100px; object-fit:cover;" %>
       <% else %>
       <div class="default-profile-picture" style="background-color: <%= @user.profile_color %>; width:100px; height:auto;">
       <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
@@ -18,15 +18,44 @@
 
   <div class="user-details">
     <p><%= @user.email %></p>
+
+    <!-- Sekosanas pogas -->
+    <% if current_user != @user %>
+    <% if current_user.following?(@user) %>
+      <%= button_to 'Unfollow', profile_unfollow_path(@user), method: :delete, class: "btn btn-danger" %>
+    <% else %>
+      <%= button_to 'Follow', profile_follow_path(@user), method: :post, class: "btn btn-primary" %>
+    <% end %>
+  <% end %>
+  
+    <p>
+      <%= link_to "#{@user.followers.count} Sekotāji", followers_profile_path(@user) %> |
+      <%= link_to "#{@user.following.count} Seko", following_profile_path(@user) %>
+    </p>
   </div>
 </div>
 
 
 <hr>
 
+
+<div class="profile-buttons">
+  <%= link_to profile_path(@user), class: "btn #{params[:liked].nil? ? 'active' : ''}" do %>
+    <i class="<%= params[:liked].nil? ? 'fa-solid fa-message' : 'fa-regular fa-message'%>"></i>
+  <% end %>
+
+  <%= link_to profile_path(@user, liked: true), class: "btn #{params[:liked] == 'true' ? 'active' : ''}" do %>
+    <i class="<%= params[:liked] == 'true' ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i>
+  <% end %>
+</div>
+
+
+
+<hr>
+
 <div class="user-activity">
-  <% if (@posts + @replies).any? %>
-    <% (@posts + @replies).sort_by(&:created_at).reverse.each do |activity| %>
+  <% if @activities.any? %>
+    <% @activities.each do |activity| %>
 
 
       <!-- Originala ziņa -->
@@ -37,7 +66,7 @@
               <% if activity.user.profile_picture.attached? %>
                 <%= image_tag activity.user.profile_picture, alt: activity.user.username, class: 'profile-pic-activity' %>
               <% else %>
-                <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
+                <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
                   <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
                 </div>
               <% end %>
@@ -73,6 +102,9 @@
             </div>
           <% end %>
 
+
+            <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
+          
           <div class="reply-counts">
             <i class="fa-regular fa-message"></i>
             <%= activity.replies.count %>
@@ -82,7 +114,7 @@
           <% if activity.is_a?(Message) %>
             <div class="like-section d-flex align-items-center">
               <% if current_user %>
-              <%= button_to toggle_like_message_path(activity), method: :post, remote: true, class: 'me-2' do %>
+              <%= button_to toggle_like_message_path(activity), method: :post, remote: true, class: 'heart me-2' do %>
                 <% if current_user.liked?(activity) %>
                   <i class="fa-solid fa-heart"></i>
                 <% else %>
@@ -96,8 +128,7 @@
             </div>
             <% end %>
         </div>
-
-
+    </div>
          
        
 
@@ -109,7 +140,7 @@
               <% if activity.user.profile_picture.attached? %>
                 <%= image_tag activity.user.profile_picture, alt: activity.user.username, class: 'profile-pic-activity' %>
               <% else %>
-                <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
+                <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
                   <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
                 </div>
               <% end %>          
@@ -144,6 +175,7 @@
             </div>
           <% end %>
 
+           <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
           <div class="reply-counts">
             <i class="fa-regular fa-message"></i>
             <%= activity.children.count %>
@@ -152,7 +184,7 @@
           <!-- Like originalajiem replijiem STRADA -->
           <div class="like-section d-flex align-items-center">
           <% if current_user %>
-            <%= button_to toggle_like_message_reply_path(activity.message, activity), method: :post, remote: true, class: 'me-2' do %>
+            <%= button_to toggle_like_message_reply_path(activity.message, activity), method: :post, remote: true, class: 'heart me-2' do %>
               <% if current_user.liked?(activity) %>
                 <i class="fa-solid fa-heart"></i>
               <% else %>
@@ -164,6 +196,8 @@
           <% end %>
           <span><%= activity.likes.count %></span>
         </div>
+        </div>
+
 
           <div class="original-message">
             <div class="activity-header">
@@ -171,7 +205,7 @@
                 <% if activity.message.user.profile_picture.attached? %>
                   <%= image_tag activity.message.user.profile_picture, alt: activity.message.user.username, class: 'profile-pic-activity' %>
                 <% else %>
-                  <div class="default-profile-picture" style="background-color: <%= activity.message.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
+                  <div class="default-profile-picture" style="background-color: <%= activity.message.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
                     <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
                   </div>
                 <% end %>
@@ -181,10 +215,7 @@
             </div>
             <p><%= activity.message.content.truncate(100) %></p>
 
-            <div class="reply-counts">
-              <i class="fa-regular fa-message"></i>
-              <%= activity.message.replies.count %>
-            </div>
+           
 
             <% if activity.message.file.attached? %>
               <div class="attached-file">
@@ -215,7 +246,7 @@
                 <% if activity.user.profile_picture.attached? %>
                 <%= image_tag activity.user.profile_picture, alt: activity.user.username, class: 'profile-pic-activity' %>
               <% else %>
-                <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
+                <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
                   <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
                 </div>
               <% end %>      
@@ -251,7 +282,10 @@
             <% end %>
           </div>
 
-          <div class="reply-counts">
+
+          
+          <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
+            <div class="reply-counts">
             <i class="fa-regular fa-message"></i>
             <%= activity.children.count %>
           </div>
@@ -261,7 +295,7 @@
           <% if activity.is_a?(Reply) %>         
             <div class="like-section d-flex align-items-center">
               <% if current_user %>
-                <%= button_to toggle_like_message_reply_path(activity.message, activity), method: :post, remote: true, class: 'me-2' do %>
+                <%= button_to toggle_like_message_reply_path(activity.message, activity), method: :post, remote: true, class: 'heart me-2' do %>
                   <% if current_user.liked?(activity) %>
                     <i class="fa-solid fa-heart"></i>
                   <% else %>
@@ -274,7 +308,7 @@
               <span><%= activity.likes.count %></span>
             </div>
           <% end %>
-          
+          </div>
 
 
               <!-- Parents reply to reply zinai -->
@@ -284,7 +318,7 @@
               <% if activity.parent.user.profile_picture.attached? %>
                 <%= image_tag activity.parent.user.profile_picture, alt: activity.parent.user.username, class: 'profile-pic-activity' %>
               <% else %>
-                <div class="default-profile-picture" style="background-color: <%= activity.parent.user.profile_color || '#ccc' %>; width:40px; height:40px; border-radius:50%;">
+                <div class="default-profile-picture" style="background-color: <%= activity.parent.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
                   <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
                 </div>
               <% end %>
@@ -295,12 +329,8 @@
             </div>
             <p><%= activity.parent.content.truncate(100) %></p>
 
-            <div class="reply-counts">
-              <i class="fa-regular fa-message"></i>
-              <%= activity.parent.children.count %>
-            </div>
-
             
+         
 
             <% if activity.parent.file.attached? %>
               <div class="attached-file">
@@ -326,3 +356,14 @@
     <p>Lietotājs nav neko vēl publicējis</p>
   <% end %>
 </div>
+
+
+
+
+
+
+
+
+
+
+

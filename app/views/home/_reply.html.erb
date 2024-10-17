@@ -26,20 +26,23 @@
 
   <p><%= reply.content %></p>
 
-              <div class="like-section d-flex align-items-center">
-                <% if current_user %>
-                    <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'me-2' do %>
-                       <% if current_user.liked?(reply) %>
-                          <i class="fa-solid fa-heart"></i>
-                        <% else %>
-                           <i class="fa-regular fa-heart"></i>
-                        <% end %>
-                      <% end %>
-                  <% else %>
-                      <i class="fa-regular fa-heart me-2"></i>
-                  <% end %>
-               <span><%= reply.likes.count %></span>
-              </div>
+
+  <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
+            <div class="like-section d-flex align-items-center">
+  <% if current_user %>
+    <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'heart me-2', onclick: "toggleReplyLike(#{reply.id}, this); event.stopPropagation();" do %>
+      <% if current_user.liked?(reply) %>
+        <i class="fa-solid fa-heart"></i>
+      <% else %>
+        <i class="fa-regular fa-heart"></i>
+      <% end %>
+    <% end %>
+  <% else %>
+    <i class="fa-regular fa-heart me-2"></i>
+  <% end %>
+  <span id="like-reply-count-<%= reply.id %>"><%= reply.likes.count %></span>
+</div>
+</div>
 
   <% if reply.file.attached? %>
     <div class="reply-file">

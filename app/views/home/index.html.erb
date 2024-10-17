@@ -2,15 +2,72 @@
 <html lang="en">
 <head>
 
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-  
 </head>
 <body>
 
-<div id="post-container"></div>
+<div id="post-container">
+<% if @messages.present? %>
+  <% @messages.each do |message| %>
+    <div class="post" id="post-<%= message.id %>" onclick="window.location.href='/messages/<%= message.id %>';">
+      <div class="user-info d-flex align-items-center">
+        <% if message.user %>
+          <a href="<%= profile_path(message.user) %>" class="d-flex align-items-center">
+            <% if message.user.profile_picture.attached? %>
+              <%= image_tag url_for(message.user.profile_picture), alt: message.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit: cover;' %>
+            <% else %>
+              <div class="default-profile-picture me-2" style="background-color: <%= message.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block; object-fit: cover;">
+                <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
+              </div>
+            <% end %>
+            <span class="fw-bold"><%= message.user.username %></span>
+          </a>
+          <p><small class="activity-time"><%= time_ago_in_words(message.created_at)  %> ago</small></p>
+        <% else %>
+          <img src="assets/images/default_profile.png" class="profile-pic me-2" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+          <span>Anonīms</span>
+        <% end %>
+      </div>
+
+      <p><%= message.content || 'Nav datu' %></p>
+
+      <% if message.file_url %>
+        <% if message.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) %>
+          <img src="<%= message.file_url %>" alt="Pievienota bilde">
+        <% elsif message.file_url.match(/\.(mp4|webm|ogg)$/i) %>
+          <video src="<%= message.file_url %>" controls style="width: 100%;"></video>
+        <% else %>
+          <a href="<%= message.file_url %>">Nolādēt failu</a>
+        <% end %>
+      <% end %>
+
+       <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
+      <p style="margin:auto 0;"><i class="fa-regular fa-message"></i> <%= message.comment_count %></p>
+
+      <div class="like-section d-flex align-items-center">
+        <% if current_user %>
+          <button class="heart me-2" method: :post, remote: true, onclick="toggleLike('<%= message.id %>', this); event.stopPropagation(); event.preventDefault();">
+            <% if current_user.liked?(message) %>
+              <i class="fa-solid fa-heart"></i>
+            <% else %>
+              <i class="fa-regular fa-heart"></i>
+            <% end %>
+          </button>
+        <% else %>
+          <i class="fa-regular fa-heart me-2"></i>
+        <% end %>
+        <span><%= message.likes.count %></span>
+      </div>
+    </div>
+    </div>
+  <% end %>
+<% else %>
+  <p>Nav ziņas.</p>
+<% end %>
+</div>
+
 
 
 <div class="bg-dark text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
@@ -31,7 +88,6 @@
     <button id="postButton" onclick="postComment()" class="mainbtn"><i class="fas fa-paper-plane"></i></button>
   </div>
 </div>
-
 
 
 

@@ -8,7 +8,7 @@ class MessagesController < ApplicationController
     @messages = Message.includes(:user).all.order(created_at: :desc)
     messages_data = @messages.map { |message| message_data(message) }
     Rails.logger.debug(messages_data.inspect)
-    render json: messages_data
+    render 'home/index'
   end
   
 
@@ -75,12 +75,15 @@ class MessagesController < ApplicationController
     @message = Message.find(params[:id])
     if current_user.liked?(@message)
       current_user.unlike(@message)
+      liked = false
     else
       current_user.like(@message)
+      liked = true
     end
-   # redirect_to request.referer
-    
-   render json: { liked_by_user: current_user.liked?(@message), like_count: @message.likes.count }
+    respond_to do |format|
+      format.json { render json: { likes_count: @message.likes.count, liked: liked } }
+      format.html { redirect_to request.referer } 
+    end
   end
 
   private

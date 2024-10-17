@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     <% if user_signed_in? %>
       <% if current_user.profile_picture.attached? %>
-        <%= image_tag current_user.profile_picture, alt: "Profile Picture", class: "profile-picture-icon" %>
+        <%= image_tag current_user.profile_picture, alt: "Profile Picture", class: "profile-picture-icon", style: "object-fit:cover;" %>
       <% else %>
       <div class="default-profile-picture-icon" style="background-color: <%= current_user.profile_color %>; border-radius:50%;">
       <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>

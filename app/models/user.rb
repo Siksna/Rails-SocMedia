@@ -12,7 +12,13 @@ class User < ApplicationRecord
 
   has_many :likes
 
+  has_many :liked_messages, -> { order('likes.created_at DESC') }, through: :likes, source: :likeable, source_type: 'Message'
+
+  has_many :liked_replies, -> { order('likes.created_at DESC') }, through: :likes, source: :likeable, source_type: 'Reply'
+
   validates :username, presence: true
+
+ 
 
   def like(likeable)
     likes.create(likeable: likeable)
@@ -27,6 +33,17 @@ class User < ApplicationRecord
   end
 
   
+  has_many :active_relationships, class_name: 'Follow', foreign_key: 'follower_id', dependent: :destroy
+  has_many :following, through: :active_relationships, source: :followed
+
+  has_many :passive_relationships, class_name: 'Follow', foreign_key: 'followed_id', dependent: :destroy
+  has_many :followers, through: :passive_relationships, source: :follower
+
+  
+  def following?(other_user)
+    following.include?(other_user)
+  end
+
 
   private
 

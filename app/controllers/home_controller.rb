@@ -1,6 +1,9 @@
 class HomeController < ApplicationController
   def index
-    
+   
+      @messages = Message.all.includes(:user).all.order(created_at: :desc)
+      logger.debug "Ziņas: #{@messages.inspect}"  
+   
   end
 
   def about

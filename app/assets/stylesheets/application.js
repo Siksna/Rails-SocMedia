@@ -71,201 +71,63 @@ function displayReplyFileName() {
 
 
 
-/* Ziņu izveide */
 
-function timeAgo(dateString) {
-  const now = new Date();
-  const date = new Date(dateString); 
-  const secondsAgo = Math.floor((now - date) / 1000);
-  
-  const intervals = {
-    year: 365 * 24 * 60 * 60,
-    month: 30 * 24 * 60 * 60,
-    day: 24 * 60 * 60,
-    hour: 60 * 60,
-    minute: 60,
-  };
 
-  let timeStr = '';
-  
-  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-    const elapsed = Math.floor(secondsAgo / secondsInUnit);
-    if (elapsed > 0) {
-      timeStr = `${elapsed} ${unit}${elapsed > 1 ? 's' : ''} ago`;
-      break;
+
+/* Like pogas */
+function toggleLike(messageId, button) {
+  fetch(`/messages/${messageId}/toggle_like`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Accept': 'application/json',
     }
-  }
-
-  if (!timeStr) {
-    timeStr = 'less than a minute ago';
-  }
-
-  return timeStr;
-}
-
-
-
-function createPostElement(message) {
-  const postElement = document.createElement('div');
-  postElement.className = 'post';
-  postElement.id = `post-${message.id}`;
-  postElement.onclick = function() {
-    window.location.href = `/messages/${message.id}`;
-  };
-
-  const userInfoElement = document.createElement('div');
-  userInfoElement.className = 'user-info';
-
-  if (message.user) {
-    const profileLink = document.createElement('a');
-    profileLink.href = `/profiles/${message.user.id}`;
-
-    const profileImage = document.createElement('img');
-    profileImage.src = message.user.profile_picture_url || 'assets/images/default_profile.png';
-    profileImage.alt = `${message.user.username}`;
-    profileImage.className = 'profile-pic';
-
-    profileLink.appendChild(profileImage);
-    userInfoElement.appendChild(profileLink);
-
-    const usernameLink = document.createElement('a');
-    usernameLink.href = `/profiles/${message.user.id}`;
-    usernameLink.textContent = message.user.username || 'Anonīms';
-    usernameLink.className = 'username-link';
-
-    userInfoElement.appendChild(usernameLink);
-  } else {
-    const placeholderImage = document.createElement('img');
-    placeholderImage.src = 'assets/images/default_profile.png';
-    placeholderImage.className = 'profile-pic';
-
-    const defaultUsernameElement = document.createElement('span');
-    defaultUsernameElement.textContent = 'Anonīms';
-
-    userInfoElement.appendChild(placeholderImage);
-    userInfoElement.appendChild(defaultUsernameElement);
-  }
-  postElement.appendChild(userInfoElement);
-
-  const ActivityTime = document.createElement('p');
-  ActivityTime.innerHTML = `<small class="activity-time">${timeAgo(message.created_at)}</small>`;
-  userInfoElement.appendChild(ActivityTime);
-
-  const textElement = document.createElement('p');
-  textElement.textContent = message.content || 'Nav datu';
-  postElement.appendChild(textElement);
-
-  if (message.file_url) {
-    if (message.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      const img = document.createElement('img');
-      img.src = message.file_url;
-      img.alt = 'Pievienota bilde';
-      postElement.appendChild(img);
-    } else if (message.file_url.match(/\.(mp4|webm|ogg)$/i)) {
-      const video = document.createElement('video');
-      video.src = message.file_url;
-      video.controls = true;
-      video.style.width = '100%';
-      postElement.appendChild(video);
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    const likeCountSpan = button.nextElementSibling; 
+    if (data.liked) {
+      button.innerHTML = '<i class="fa-solid fa-heart"></i>'; 
     } else {
-      const fileLink = document.createElement('a');
-      fileLink.href = message.file_url;
-      fileLink.textContent = 'Nolādēt failu';
-      postElement.appendChild(fileLink);
+      button.innerHTML = '<i class="fa-regular fa-heart"></i>'; 
     }
-  }
-
-  const commentCountElement = document.createElement('p');
-  commentCountElement.innerHTML = `<i class="fa-regular fa-message"></i> ${message.comment_count}`;
-  postElement.appendChild(commentCountElement);
-
-
-  const likeSection = document.createElement('div');
-  likeSection.className = 'like-section d-flex align-items-center';
-
-  const likeButton = document.createElement('button');
-  likeButton.className = 'me-2'; 
-  likeButton.innerHTML = `
-    <i class="fa${message.liked_by_user ? 's' : '-regular'} fa-heart"></i>
-    <span>${message.like_count}</span>`;
-
-    likeButton.onclick = function(event) {
-      event.stopPropagation();
-    
-      const method = message.liked_by_user ? 'DELETE' : 'POST';
-      const likeUrl = `/messages/${message.id}/toggle_like`;
-    
-      fetch(likeUrl, {
-        method: method,
-        headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        message.liked_by_user = data.liked_by_user;
-        message.like_count = data.like_count;
-        updateLikeButton();
-      })
-      .catch(error => console.error('Error:', error));
-    };
-    
-    function updateLikeButton() {
-      likeButton.innerHTML = `
-        <i class="fa${message.liked_by_user ? 's' : '-regular'} fa-heart"></i>
-        <span>${message.like_count}</span>
-      `;
-    }
-    
-  
-
-  likeSection.appendChild(likeButton);
-  postElement.appendChild(likeSection);
-
-  return postElement;
+    likeCountSpan.innerText = data.likes_count;
+  })
+  .catch(error => console.error('Error:', error));
 }
 
 
 
 
-
-
-
-
-
-
-
-/* komentu izveide */
-function createReplyElement(reply) {
-  const replyElement = document.createElement('li');
-
-  const textElement = document.createElement('p');
-  textElement.textContent = reply.content;
-  replyElement.appendChild(textElement);
-
-  if (reply.file_url) {
-    if (reply.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      const img = document.createElement('img');
-      img.src = reply.file_url;
-      img.alt = 'Attached image';
-      replyElement.appendChild(img);
-
-    } else if (reply.file_url.match(/\.(mp4|webm|ogg)$/i)) {
-      const video = document.createElement('video');
-      video.src = reply.file_url;
-      video.controls = true;
-      video.style.width = '100%';
-      replyElement.appendChild(video);
-
-    } else {
-      const fileLink = document.createElement('a');
-      fileLink.href = reply.file_url;
-      fileLink.textContent = 'Nolādēt failu';
-      replyElement.appendChild(fileLink);
+function toggleReplyLike(replyId, button) {
+  fetch(`/messages/${replyId}/toggle_like`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Accept': 'application/json',
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
-  }
-
-  return replyElement;
+    return response.json();
+  })
+  .then(data => {
+    const likeCountSpan = document.getElementById(`like-reply-count-${replyId}`);
+    if (data.liked) {
+      button.innerHTML = '<i class="fa-solid fa-heart"></i>'; 
+    } else {
+      button.innerHTML = '<i class="fa-regular fa-heart"></i>'; 
+    }
+    likeCountSpan.innerText = data.likes_count;
+  })
+  .catch(error => console.error('Error:', error));
 }
 
 
@@ -273,30 +135,7 @@ function createReplyElement(reply) {
 
 
 /*Error meklēšana */
-function fetchMessages() {
-  fetch('/messages', {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json', 
-    }
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Interneta responsivitāte nav laba');
-      }
-      return response.json();
-    })
-    .then(data => {
-      const postContainer = document.getElementById('post-container');
-      postContainer.innerHTML = '';
 
-      data.forEach(message => {
-        const postElement = createPostElement(message);
-        postContainer.appendChild(postElement);
-      });
-    })
-    .catch(error => console.log('Kļūda iegūstot ziņas:', error));
-}
 
 
 
