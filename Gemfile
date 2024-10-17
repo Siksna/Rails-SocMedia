@@ -14,7 +14,7 @@ gem "bootsnap", require: false
 
 gem 'devise', '~> 4.9', '>= 4.9.4'
 
-gem 'will_paginate', '~> 3.1'
+gem 'will_paginate', '~> 4.0'
 
 
 group :development, :test do
