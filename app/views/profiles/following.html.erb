@@ -1,4 +1,20 @@
 <h2>Seko</h2>
-<% @user.following.each do |followed| %>
-  <%= link_to followed.username, profile_path(followed) %><br>
-<% end %>
+<div class="follow-list">
+  <% @user.following.each do |followed| %>
+    
+      <%= link_to profile_path(followed) do %>
+        <div class="follow-item">
+        <div class="follow-item-content">
+          <% if followed.profile_picture.attached? %>
+            <%= image_tag followed.profile_picture, class: "profile-picture", style: " width: 50px;height: 50px;border-radius: 50%;margin-right: 10px;object-fit: cover;"%>
+          <% else %>
+            <div class="default-profile-picture" style="background-color: <%= followed.profile_color %>; margin-right: 10px;">
+            <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture", style: " width: 50px;height: 50px;border-radius: 50%;object-fit: cover;" %>
+          </div>
+          <% end %>
+          <span class="follow-username"><%= followed.username %></span>
+        </div>
+        </div>
+      <% end %>
+  <% end %>
+  </div>

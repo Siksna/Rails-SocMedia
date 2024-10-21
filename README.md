@@ -5,12 +5,7 @@
 
 Izdzest visas ziņas: rake messages:clear
 
-git add .
-
-git commit -am '...'
-
-git push
-
+cursor paged pagination
 
 
 
@@ -41,3 +36,7 @@ Komentaru komentos var atbildet uz citu komentaru komentiem
 
 
  Kad updato vscode kodu tad nezinu kapec main lapa pirmo reizi ladejot neieladejas zinas
+
+ 
+
+ 

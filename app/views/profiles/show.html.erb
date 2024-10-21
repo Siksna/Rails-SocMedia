@@ -19,19 +19,27 @@
   <div class="user-details">
     <p><%= @user.email %></p>
 
+    
     <!-- Sekosanas pogas -->
-    <% if current_user != @user %>
-    <% if current_user.following?(@user) %>
-      <%= button_to 'Unfollow', profile_unfollow_path(@user), method: :delete, class: "btn btn-danger" %>
-    <% else %>
-      <%= button_to 'Follow', profile_follow_path(@user), method: :post, class: "btn btn-primary" %>
-    <% end %>
-  <% end %>
   
-    <p>
-      <%= link_to "#{@user.followers.count} Sekotāji", followers_profile_path(@user) %> |
-      <%= link_to "#{@user.following.count} Seko", following_profile_path(@user) %>
-    </p>
+    <% if current_user %> 
+    <% if current_user != @user %>
+      <% if current_user.following?(@user) %>
+        
+<%= button_to 'Atsekot', unfollow_profile_path(@user), method: :delete, class: "unfollow" %>
+<% else %>
+  <%= button_to 'Sekot', follow_profile_path(@user), method: :post, class: "follow" %>
+<% end %>
+ <% end %>
+  <% else %>
+      <p><%= link_to 'Sekot', new_user_registration_path %></p>
+    <% end %>
+
+<p>
+  <%= link_to "#{@user.followers.count} Sekotāji", followers_profile_path(@user), class: "follower" %> |
+  <%= link_to "#{@user.following.count} Seko", following_profile_path(@user), class: "following" %>
+</p>
+
   </div>
 </div>
 

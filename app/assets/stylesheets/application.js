@@ -154,9 +154,7 @@ function fetchReplies() {
     .catch(error => console.error('Error fetching replies:', error));
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  fetchMessages();
-});
+
 
 
 

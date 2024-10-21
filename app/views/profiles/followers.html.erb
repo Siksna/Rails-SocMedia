@@ -1,4 +1,20 @@
 <h2>Sekotāji</h2>
-<% @user.followers.each do |follower| %>
-  <%= link_to follower.username, profile_path(follower) %><br>
-<% end %>
+<div class="follow-list">
+  <% @user.followers.each do |follower| %>
+   
+      <%= link_to profile_path(follower) do %>
+        <div class="follow-item">
+        <div class="follow-item-content">
+          <% if follower.profile_picture.attached? %>
+            <%= image_tag follower.profile_picture, class: "profile-picture", style: " width: 50px;height: 50px;border-radius: 50%;margin-right: 10px;object-fit: cover;" %>
+          <% else %>
+            <div class="default-profile-picture" style="background-color: <%= follower.profile_color %>; margin-right: 10px;">
+            <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture", style: " width: 50px;height: 50px;border-radius: 50%;object-fit: cover;" %>
+          </div>
+          <% end %>
+          <span class="follow-username"><%= follower.username %></span>
+        </div>
+        </div>
+      <% end %>
+  <% end %>
+</div>

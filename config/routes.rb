@@ -22,7 +22,6 @@ Rails.application.routes.draw do
     get 'followers', on: :member
     get 'following', on: :member
   end
-  
 
 
   devise_for :users

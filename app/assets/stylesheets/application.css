@@ -553,3 +553,86 @@ hr {
 .heart i.fa-solid.fa-heart {
   color: red;
 }
+
+
+.follow {
+  background-color: #444444;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.follow:hover {
+  background-color: #888888; 
+}
+
+.unfollow {
+  background-color: #444444; 
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.unfollow:hover {
+  background-color: #c82333;
+}
+
+.follower, .following {
+  color: #000000;
+  text-decoration: none;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.follower:hover, .following:hover {
+  text-decoration: underline;
+  color: #000000;
+}
+
+
+/* follow listi */
+
+.follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.follow-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.follow-item:hover {
+  background-color: #e2e6ea;
+}
+
+.follow-item-content {
+  display: flex;
+  align-items: center;
+}
+
+.follow-username {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+
+.follow-username:hover {
+  color: #007bff;
+  text-decoration: underline;
+}

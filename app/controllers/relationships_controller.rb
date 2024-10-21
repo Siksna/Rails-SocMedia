@@ -1,8 +1,8 @@
 class RelationshipsController < ApplicationController
-  before_action :set_user
+  before_action :find_user
 
   def create
-    current_user.following << @user unless current_user.following.include?(@user)
+    current_user.following << @user unless current_user.following?(@user)
     respond_to do |format|
       format.html { redirect_to profile_path(@user) }
       format.js
@@ -19,7 +19,7 @@ class RelationshipsController < ApplicationController
 
   private
 
-  def set_user
+  def find_user
     @user = User.find(params[:id])
   end
 end
