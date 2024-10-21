@@ -20,6 +20,20 @@ class User < ApplicationRecord
 
  
 
+  enum admin_type: { user: 0, admin: 1, head_admin: 2 }
+
+  def admin?
+    admin_type == "admin" || head_admin?
+  end
+
+  def head_admin?
+    admin_type == "head_admin"
+
+    self.id == 6
+  end
+
+
+
   def like(likeable)
     likes.create(likeable: likeable)
   end

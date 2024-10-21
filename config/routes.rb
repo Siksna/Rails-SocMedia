@@ -1,11 +1,15 @@
 Rails.application.routes.draw do
 
-  resources :friends do
+  resources :admin do
+    resources :users
     collection do
       get :personas
     end
+    member do
+      patch :promote_to_admin
+      patch :demote_admin
+    end
   end
-
   resources :messages do
     resources :replies, only: [:create, :edit, :update, :destroy] do
       post 'toggle_like', on: :member, controller: 'replies'
@@ -25,18 +29,17 @@ Rails.application.routes.draw do
 
 
   devise_for :users
-  resources :friends
+  resources :admins
   get 'search_users', to: 'home#search_users' 
-  get "friends/index"
-  get "friends/new"
-  get "friends/create"
-  get "friends/show"
-  get "friends/edit"
-  get "friends/update"
-  get "friends/destroy"
+  get "admin/index"
+  
+  get "admin/show"
+  get "admin/edit"
+  get "admin/update"
+  get "admin/destroy"
   root "home#index"
   get 'home/about'
-  get 'friends/personas'
+  get 'admin/personas'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
