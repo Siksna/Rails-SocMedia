@@ -1,0 +1,22 @@
+<h1>Admin Activity History</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Admins</th>
+      <th>Izmaiņa</th>
+      <th>Kam</th>
+      <th>Laiks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @admin_activities.each do |activity| %>
+      <tr>
+        <td><%= activity.admin.username %></td>
+        <td><%= activity.action %></td>
+        <td><%= activity.target %></td>
+        <td><%= time_ago_in_words(activity.created_at) %> ago</td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

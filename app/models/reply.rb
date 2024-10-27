@@ -3,7 +3,7 @@ class Reply < ApplicationRecord
   has_one_attached :file
   has_many :likes, as: :likeable
 
-
+  scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
   belongs_to :user
 
   belongs_to :parent, class_name: 'Reply', optional: true

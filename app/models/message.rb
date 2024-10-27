@@ -3,7 +3,7 @@ class Message < ApplicationRecord
     has_one_attached :file
     has_many :likes, as: :likeable
     validates :content, presence: true
-  
+    scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
     belongs_to :user
 
     def liked_by?(user)

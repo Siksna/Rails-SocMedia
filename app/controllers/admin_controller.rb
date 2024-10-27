@@ -24,24 +24,29 @@ class AdminController < ApplicationController
   end
 
   def update
+    @user = User.find(params[:id])
     if @user.update(user_params)
-      flash[:notice] = 'Lietotājs veiksmīgi atjaunināts'
-      redirect_to admin_index_path
+      redirect_to admin_personas_path, notice: 'Lietotājs veiksmīgi atjaunināts.'
     else
       flash[:errors] = @user.errors.full_messages
-      redirect_to edit_admin_path(@user)
+      render :edit
     end
   end
 
   def destroy
-    if @user.destroy
-      flash[:notice] = 'Lietotājs veiksmīgi dzēsts'
-      redirect_to admin_index_path
-    else
-      flash[:errors] = @user.errors.full_messages
-      redirect_to admin_path(@user)
-    end
+    @user = User.find(params[:id])
+    @user.soft_delete          
+    @user.randomize_attributes  
+    redirect_to admin_personas_path, notice: 'Lietotājs veiksmīgi izslēgts.'
   end
+  
+
+  def restore
+    @user = User.find(params[:id])
+    @user.restore
+    redirect_to admin_personas_path, notice: 'Lietotājs veiksmīgi atlsēgts.'
+  end
+  
 
 
   def promote_to_admin
@@ -65,16 +70,24 @@ class AdminController < ApplicationController
     end
     redirect_to admin_personas_path
   end
+
+
+  def history
+    @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc)
+    render 'admin/history'
+  end
   
+
 
   private
 
   def set_user
+     return if action_name == 'history'
     @user = User.find(params[:id])
   end
 
   def user_params
-    params.require(:user).permit(:vards, :uzvards, :epasts, :talrunis, :twitters)
+    params.require(:user).permit(:username, :email)
   end
 
   def correct_user
@@ -84,7 +97,7 @@ class AdminController < ApplicationController
       
       if @user.admin? || @user.head_admin?
         flash[:errors] = 'Nēsat autorizēts rediģēt citus administratorus'
-        redirect_to admin_index_path
+        redirect_to admin_personas_path
       end
     else
       

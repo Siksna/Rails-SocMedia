@@ -55,7 +55,7 @@ end
   end
 
   def set_reply
-    @reply = @message.replies.find(params[:id])
+    @reply = @message.replies.visible.find(params[:id])
   end
 
   def reply_params

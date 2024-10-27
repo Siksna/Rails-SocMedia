@@ -19,25 +19,40 @@
         </tr>
       </thead>
       <tbody>
-        <% @users.each do |user| %>
-          <tr style="cursor: pointer;" onclick="window.location='<%= admin_path(user) %>'">
-            <td class="text-center"><%= user.id %></td>
-            <td class="text-center"><%= user.username %></td>
-            <td class="text-center"><%= user.email %></td>
-            <td class="justify-content-center d-flex">
-              <% if current_user.head_admin? %>
-                <% if user.admin? && user.id != current_user.id %> 
-                  <%= button_to "Parveidot par lietotāju", demote_admin_admin_path(user), method: :patch, class: "btn btn-danger" %>
-                <% elsif !user.admin? %>
-                  <%= button_to "Parveidot par adminu", promote_to_admin_admin_path(user), method: :patch, class: "btn btn-success" %>
-                <% end %>
-              <% end %>
-              <%= button_to raw("<i class='fa-sharp fa-solid fa-gear'></i>"), edit_admin_path(user), method: :get, class: "btn btn-primary border-0 rounded-pill shadow px-2 py-1", style: "width: 40px; height: 40px;" %>
-              <%= button_to raw("<i class='fa-solid fa-trash'></i>"), admin_path(user), method: :delete, data: { confirm: 'Parliecināts?' }, class: "btn btn-danger border-0 rounded-pill shadow px-2 py-1", style: "width: 40px; height: 40px;" %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
+  <% @users.each do |user| %>
+    <tr style="cursor: pointer;" onclick="window.location='<%= admin_path(user) %>'">
+      <td class="text-center" style="<%= 'background-color: #515151;' if user == current_user %>"><%= user.id %></td>
+      <td class="text-center" style="<%= 'background-color: #515151;' if user == current_user %>"><%= user.username %></td>
+      <td class="text-center" style="<%= 'background-color: #515151;' if user == current_user %>"><%= user.email %></td>
+      <td class="justify-content-center d-flex" style="<%= 'background-color: #515151;' if user == current_user %>">
+      <% if current_user.head_admin? %>
+      <% if user.admin? && user.id != current_user.id %> 
+        <%= button_to "Parveidot par lietotāju", demote_admin_admin_path(user), method: :patch, class: "btn btn-danger" %>
+      <% elsif !user.admin? %>
+        <%= button_to "Parveidot par adminu", promote_to_admin_admin_path(user), method: :patch, class: "btn btn-success" %>
+      <% end %>
+    <% end %>
+    
+    <% if user.head_admin? %>
+  <p>Galvenais administrātors</p>
+<% elsif user.admin? && !current_user.head_admin? %>
+  <p>Administrēta persona</p>
+<% else %>
+  <% unless user.head_admin? %>
+    <%= button_to raw("<i class='fa-sharp fa-solid fa-gear'></i>"), edit_admin_path(user), method: :get, class: "btn btn-primary border-0 rounded-pill shadow px-2 py-1", style: "width: 40px; height: 40px;" %>
+    <% if user.deleted? %>
+      <%= button_to raw("<i class='fa-solid fa-rotate-right'></i>"), restore_admin_path(user), method: :patch, class: "btn btn-warning border-0 rounded-pill shadow px-2 py-1", style: "width: 40px; height: 40px;" %>
+    <% else %>
+      <%= button_to raw("<i class='fa-solid fa-trash'></i>"), admin_path(user), method: :delete, data: { confirm: 'Parliecināts?' }, class: "btn btn-danger border-0 rounded-pill shadow px-2 py-1", style: "width: 40px; height: 40px;" %>
+    <% end %>
+  <% end %>
+<% end %>
+
+      </td>
+    </tr>
+  <% end %>
+</tbody>
+
     </table>
   </div>
 <% end %>

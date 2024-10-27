@@ -8,9 +8,16 @@
 </head>
 <body>
 
+<% if user_signed_in? && current_user.deleted? %>
+  <div class="alert alert-warning">
+   Jūsu konts tika bloķēts kopš <%= current_user.deleted_at.strftime("%Y-%m-%d %H:%M:%S") %>.
+  </div>
+<% else %>
+
+
 <div id="post-container">
-<% if @messages.present? %>
-  <% @messages.each do |message| %>
+<% if @messages.visible.present? %>
+  <% @messages.visible.each do |message| %>
     <div class="post" id="post-<%= message.id %>" onclick="window.location.href='/messages/<%= message.id %>';">
       <div class="user-info d-flex align-items-center">
         <% if message.user %>
@@ -89,7 +96,7 @@
   </div>
 </div>
 
-
+<% end %>
 
 </body>
 </html>

@@ -1,3 +1,4 @@
+<div style="display:flex;flex-direction: column-reverse;">
 <div class="profile-info">
   <div class="profile-picture">
     <%= link_to profile_path(@user) do %>
@@ -20,30 +21,38 @@
     <p><%= @user.email %></p>
 
     
-    <!-- Sekosanas pogas -->
-  
-    <% if current_user %> 
-    <% if current_user != @user %>
-      <% if current_user.following?(@user) %>
-        
-<%= button_to 'Atsekot', unfollow_profile_path(@user), method: :delete, class: "unfollow" %>
-<% else %>
-  <%= button_to 'Sekot', follow_profile_path(@user), method: :post, class: "follow" %>
-<% end %>
- <% end %>
-  <% else %>
-      <p><%= link_to 'Sekot', new_user_registration_path %></p>
-    <% end %>
-
+   
 <p>
   <%= link_to "#{@user.followers.count} Sekotāji", followers_profile_path(@user), class: "follower" %> |
   <%= link_to "#{@user.following.count} Seko", following_profile_path(@user), class: "following" %>
 </p>
 
+
+<!-- Sekosanas pogas -->
+  
+<% if current_user %> 
+<% if current_user != @user %>
+<% if !@user.deleted? %>
+  <% if current_user.following?(@user) %>
+    
+<%= button_to 'Atsekot', unfollow_profile_path(@user), method: :delete, class: "unfollow"%>
+<% else %>
+<%= button_to 'Sekot', follow_profile_path(@user), method: :post, class: "follow" %>
+<% end %>
+<% end %>
+<% end %>
+<% else %>
+  <p><%= link_to 'Sekot', new_user_registration_path, class:"follow" %></p>
+<% end %>
+
+
   </div>
 </div>
 
-
+<% if current_user == @user %> 
+<%= link_to raw("<i class='fa-solid fa-gear'></i>"), edit_user_registration_path, class: "dropdown-item", style: "display: flex; justify-content: flex-end; padding-top:1rem;" %>
+<% end %>
+</div>
 <hr>
 
 
@@ -62,6 +71,9 @@
 <hr>
 
 <div class="user-activity">
+<% if @user.deleted? %>
+<p>Lietotāja profils ir bloķēts</p>
+<% else %>
   <% if @activities.any? %>
     <% @activities.each do |activity| %>
 
@@ -362,6 +374,7 @@
     <% end %>
   <% else %>
     <p>Šeit nav aktivitātes</p>
+  <% end %>
   <% end %>
 </div>
 

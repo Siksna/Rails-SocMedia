@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  admin_id: 1
+  action: MyString
+  target: MyString
+  created_at: 2024-10-24 15:02:43
+
+two:
+  admin_id: 1
+  action: MyString
+  target: MyString
+  created_at: 2024-10-24 15:02:43

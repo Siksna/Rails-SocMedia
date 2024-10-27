@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_21_121754) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_24_120243) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,14 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_21_121754) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admin_activities", force: :cascade do |t|
+    t.integer "admin_id"
+    t.string "action"
+    t.string "target"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "follows", force: :cascade do |t|
@@ -108,6 +116,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_21_121754) do
     t.string "username", null: false
     t.string "profile_color"
     t.integer "admin_type", default: 0
+    t.datetime "deleted_at"
+    t.string "original_username"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true

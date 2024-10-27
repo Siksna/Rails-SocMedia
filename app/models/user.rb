@@ -66,6 +66,32 @@ class User < ApplicationRecord
   end
 
 
+
+
+  scope :active, -> { where(deleted_at: nil) }
+
+  def deleted?
+    deleted_at.present?
+  end
+
+  def soft_delete
+    self.original_username = username
+    update(deleted_at: Time.current)
+  end
+  
+  def restore
+    update(deleted_at: nil, username: original_username)
+  end
+  
+
+  def randomize_attributes
+    self.username = "Lietotājs #{SecureRandom.hex(4)}"
+    save
+  end
+
+
+
+
   private
 
   def set_profile_color

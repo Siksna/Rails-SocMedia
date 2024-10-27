@@ -1,15 +1,23 @@
 Rails.application.routes.draw do
 
   resources :admin do
-    resources :users
-    collection do
-      get :personas
-    end
-    member do
-      patch :promote_to_admin
-      patch :demote_admin
-    end
+    resources :users, only: [:edit, :update, :show, :destroy]
+      collection do
+        get :personas
+      end
+      member do
+        patch :promote_to_admin
+        patch :demote_admin
+          patch :restore
+      end
   end
+
+
+  get 'admin/history', to: 'admin#history', as: 'admin_history'
+
+  
+  
+
   resources :messages do
     resources :replies, only: [:create, :edit, :update, :destroy] do
       post 'toggle_like', on: :member, controller: 'replies'
@@ -27,31 +35,22 @@ Rails.application.routes.draw do
     get 'following', on: :member
   end
 
-
   devise_for :users
   resources :admins
-  get 'search_users', to: 'home#search_users' 
-  get "admin/index"
+  
+  get 'search_users', to: 'home#search_users'
   
   get "admin/show"
   get "admin/edit"
   get "admin/update"
   get "admin/destroy"
+  
   root "home#index"
   get 'home/about'
   get 'admin/personas'
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Render dynamic PWA files from app/views/pwa/*
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
-  # Defines the root path route ("/")
-  # root "posts#index"
-
- 
 end

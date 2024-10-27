@@ -11,7 +11,7 @@
         <% end %>
       <% end %>
    
-      <%= form_with model: @user, url: admin_user_path(@user), local: true do |f| %>
+        <%= form_with model: @user, url: admin_user_path(@user), local: true do |f| %>
         <%= f.label :username, "Personas vārds :", class: "mt-3" %>
         <%= f.text_field :username, placeholder: "Ievadi personas vārdu", value: @user.username, class: "mb-2 form-control" %>
         <br>

@@ -28,7 +28,7 @@ class ProfilesController < ApplicationController
     end
 
 
-    #sie
+    
     def follow
       current_user.following << @user unless current_user.following.include?(@user)
       respond_to do |format|

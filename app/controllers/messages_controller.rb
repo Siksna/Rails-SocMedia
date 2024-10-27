@@ -5,7 +5,7 @@ class MessagesController < ApplicationController
  
 
   def index
-    @messages = Message.includes(:user).all.order(created_at: :desc)
+    @messages = Message.includes(:user).all.order(created_at: :desc).visible
     messages_data = @messages.map { |message| message_data(message) }
     Rails.logger.debug(messages_data.inspect)
     render 'home/index'

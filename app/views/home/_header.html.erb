@@ -19,7 +19,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <div class="container-fluid" >
 
-  <%= link_to 'Twitters', root_path, class: "navbar-brand", data: { turbo: 'false' } %>
+  <%= link_to 'Galvena', root_path, class: "navbar-brand", data: { turbo: 'false' } %>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,14 +37,13 @@
            <% if user_signed_in? && (current_user.admin? || current_user.head_admin?) %>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Adminiem
+            Admin panelis
           </a>
           <ul class="dropdown-menu">
             <li><%= link_to "Personu dati", admin_personas_path, class: "dropdown-item" %></li>
-            <li><a class="dropdown-item" href="#">2</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">3</a></li>
-          </ul>
+            <li><%= link_to "Vēsture", admin_history_path, class: "dropdown-item" %></li>
+            </ul>
         </li>
         <% end %>
         
