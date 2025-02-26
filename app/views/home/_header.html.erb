@@ -103,56 +103,54 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-      <li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    <% if user_signed_in? %>
-      <% if current_user.profile_picture.attached? %>
-        <%= image_tag current_user.profile_picture, alt: "Profile Picture", class: "profile-picture-icon", style: "object-fit:cover;" %>
-      <% else %>
-      <div class="default-profile-picture-icon" style="background-color: <%= current_user.profile_color %>; border-radius:50%;">
-      <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
-    </div>
-    
-
-
-      <% end %>
-    <% else %>
-      <i class="fa-sharp fa-solid fa-right-to-bracket"></i>
-    <% end %>
-  </a>
-  <ul class="dropdown-menu dropdown-menu-end">
-   
-
-  <% if user_signed_in? %>
-<li>
-       <%= link_to "Mans profils", profile_path(current_user), class:"dropdown-item" %>
-  </li>
-        <li>
-       <%= link_to "Rediģēt profilu", edit_user_registration_path, class:"dropdown-item" %>
-
-        </li>
-        <li>
-          <%= button_to "Iziet", destroy_user_session_path, method: :delete, class:"dropdown-item" %>
-  </li>
-
-      <% else %>
-
-      <li>
-      <%= link_to "Reģistrēties", new_user_registration_path, class:"dropdown-item" %>
-      </li>
-      <li>
-         <%= link_to "Pieslēgties", new_user_session_path, class:"dropdown-item" %>
-        </li>
-        
-        <% end %>
-
-        </ul>
-        </ul>
+      
         </div>
 
     </div>
   </div>
 </nav> 
+
+<div class="sidebar">
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <% if user_signed_in? %>
+          <span class="fw-bold"><%= current_user.username %></span>
+          <% if current_user.profile_picture.attached? %>
+            <%= image_tag current_user.profile_picture, alt: "#{current_user.username}", class: "profile-picture-icon me-2", style: "width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" %>
+          <% else %>
+            <div class="default-profile-picture-icon me-2" style="background-color: <%= current_user.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block;">
+              <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
+            </div>
+          <% end %>
+        
+        <% else %>
+          <i class="fa-sharp fa-solid fa-right-to-bracket me-2"></i>
+          <span>Pieslēgties</span>
+        <% end %>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <% if user_signed_in? %>
+          <li>
+            <%= link_to "Mans profils", profile_path(current_user), class: "dropdown-item" %>
+          </li>
+          <li>
+            <%= link_to "Rediģēt profilu", edit_user_registration_path, class: "dropdown-item" %>
+          </li>
+          <li>
+            <%= button_to "Iziet", destroy_user_session_path, method: :delete, class: "dropdown-item" %>
+          </li>
+        <% else %>
+          <li>
+            <%= link_to "Reģistrēties", new_user_registration_path, class: "dropdown-item" %>
+          </li>
+          <li>
+            <%= link_to "Pieslēgties", new_user_session_path, class: "dropdown-item" %>
+          </li>
+        <% end %>
+      </ul>
+    </li>
+  </ul>
+</div>
+
 </html>
