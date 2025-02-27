@@ -4,19 +4,16 @@ Rails.application.routes.draw do
     resources :users, only: [:edit, :update, :show, :destroy]
       collection do
         get :personas
+        get :history
       end
       member do
         patch :promote_to_admin
         patch :demote_admin
           patch :restore
+          patch :update
       end
   end
 
-
-  get 'admin/history', to: 'admin#history', as: 'admin_history'
-
-  
-  
 
   resources :messages do
     resources :replies, only: [:create, :edit, :update, :destroy] do
@@ -40,11 +37,13 @@ Rails.application.routes.draw do
   
   get 'search_users', to: 'home#search_users'
   
-  get "admin/show"
   get "admin/edit"
   get "admin/update"
   get "admin/destroy"
-  
+  get 'admin/history'
+
+
+
   root "home#index"
   get 'home/about'
   get 'admin/personas'

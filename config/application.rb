@@ -8,6 +8,10 @@ Bundler.require(*Rails.groups)
 
 module Friends
   class Application < Rails::Application
+    config.time_zone = "Europe/Riga"
+    config.active_record.default_timezone = :local
+    
+
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.2
 

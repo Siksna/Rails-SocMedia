@@ -1,2 +1,4 @@
 class AdminActivity < ApplicationRecord
-end
+    belongs_to :admin, class_name: 'User'
+  end
+  
