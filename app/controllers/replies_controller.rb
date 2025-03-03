@@ -63,8 +63,8 @@ end
   end
 
   def authorize_user!
-    unless @reply.user == current_user
+    unless @reply.user == current_user || (current_user&.admin? || current_user&.moderator?)
       redirect_to message_path(@message), alert: 'Jūs nēsat autorizēts rediģēt vai dzēst šo atbildi.'
     end
-  end
+  end  
 end

@@ -12,7 +12,7 @@
     <%= link_to @message.user&.username || 'Anonīms', profile_path(@message.user), class: 'fw-bold' %>
     <small class="activity-time"><%= time_ago_in_words(@message.created_at) %> ago</small>
 
-    <% if @message.user == current_user %>
+<% if current_user && (@message.user == current_user || current_user.admin?) %>
       <div class="nav-item dropdown ms-auto">
         <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
         <ul class="dropdown-menu">
@@ -105,7 +105,7 @@
             <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user), class: 'fw-bold' %>
             <small class="activity-time"><%= time_ago_in_words(reply.created_at) %> ago</small>
 
-            <% if reply.user == current_user %>
+            <% if current_user && (reply.user == current_user || current_user.admin?) %>
               <div class="nav-item dropdown ms-auto">
                 <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
                 <ul class="dropdown-menu">

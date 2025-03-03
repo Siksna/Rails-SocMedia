@@ -13,7 +13,8 @@
       <small class="activity-time"><%= time_ago_in_words(reply.created_at) %> ago</small>
 
 
-    <% if reply.user == current_user %>
+<% if current_user && (reply.user == current_user || current_user.admin?) %>
+
       <div class="nav-item dropdown ms-auto">
         <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
         <ul class="dropdown-menu">

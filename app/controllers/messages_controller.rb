@@ -41,12 +41,12 @@ class MessagesController < ApplicationController
 
   def edit
     @message = Message.find(params[:id])
-    if @message.user != current_user
-      redirect_to messages_path, alert: 'Jūs nēsat autorizēts rediģēt šo ziņu.'
+    if @message.user != current_user && !(current_user&.admin? || current_user&.moderator?)
+      redirect_to messages_path, alert: 'Jūs nēsat autorizēts rediģēt šo ziņu.' and return
     end
     render 'home/edit'
   end
-
+  
   def update
     if @message.update(message_params)
       if params[:message][:remove_file] == '1'
@@ -58,16 +58,16 @@ class MessagesController < ApplicationController
     end
   end
 
-
   def destroy
     @message = Message.find(params[:id])
-  if @message.user == current_user
-    @message.destroy
-    redirect_to root_path, notice: 'Ziņa veiksmīgi dzēsta.'
-  else
-    redirect_to root_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
+    if @message.user == current_user || (current_user&.admin? || current_user&.moderator?)
+      @message.destroy
+      redirect_to root_path, notice: 'Ziņa veiksmīgi dzēsta.'
+    else
+      redirect_to root_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
+    end
   end
-  end
+  
 
 
 
