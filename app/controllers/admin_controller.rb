@@ -18,55 +18,81 @@ class AdminController < ApplicationController
   end
 
   def show
+    @user = User.find(params[:id]) 
   end
 
-  #PROBLEMA STARP EDIT UN UPDATE PRIEKS VESTURES
   def edit
     @user = User.find(params[:id])
   end
-
-  def update
   
-    if @user.update(user_params)
-      AdminActivity.create(
-        admin: current_user,
-        action: "Updated user",
-        target: @user.username
-      )
-      redirect_to admin_personas_path, notice: 'Lietotāja konts veiksmīgi atjaunots.'
+  
+  def update
+    @user = User.find(params[:id])
+    previous_username = @user.username 
+    previous_email = @user.email  
+  
+    if request.patch?
+      if @user.update(user_params)
+        if @user.saved_changes.any?
+          changes = @user.saved_changes.except("updated_at").map do |attribute, values|
+            " #{attribute} from #{values[0]} to #{values[1]}"
+          end.join(", ")
+  
+          unless changes.empty?
+            AdminActivity.create(
+              admin: current_user,
+              action: "Updated user's #{changes}",
+              target: @user.username
+            )
+          end
+        end
+        redirect_to admin_personas_path, notice: 'Lietotāja konts veiksmīgi atjaunots.'
+      else
+        flash[:errors] = @user.errors.full_messages
+        render :edit
+      end
     else
-      flash[:errors] = @user.errors.full_messages
-      render :edit
+      redirect_to edit_admin_path(@user)
     end
   end
+  
+  
+  
   
   
 
   def destroy
     user = User.find(params[:id])
+    previous_username = user.username
+  
     user.soft_delete
     user.randomize_attributes
   
     AdminActivity.create(
       admin: current_user,
-      action: "Deleted user account",
-      target: user.username
+      action: "Deleted user account (previous username: #{previous_username})",
+      target: previous_username
     )
+  
     redirect_to admin_personas_path, notice: 'Lietotajs veiksmīgi dzēsts.'
   end
   
+  
   def restore
     user = User.find(params[:id])
+    previous_username = user.username
+  
     user.restore
   
     AdminActivity.create(
       admin: current_user,
-      action: "Restored user account",
+      action: "Restored user account (restored username: #{user.username}, previous randomized username: #{previous_username})",
       target: user.username
     )
   
     redirect_to admin_personas_path, notice: 'Lietotajs veiksmīgi atjaunināts.'
   end
+  
   
 
   def promote_to_admin

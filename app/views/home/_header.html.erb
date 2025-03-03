@@ -114,7 +114,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="sidebar">
   <ul class="navbar-nav me-auto mb-2 mb-lg-0">
     <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <!-- Added the dropdown-toggle class and data-bs-toggle attribute -->
+      <a class="nav-link d-flex align-items-center dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <% if user_signed_in? %>
           <span class="fw-bold"><%= current_user.username %></span>
           <% if current_user.profile_picture.attached? %>
@@ -124,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
               <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
             </div>
           <% end %>
-        
         <% else %>
           <i class="fa-sharp fa-solid fa-right-to-bracket me-2"></i>
           <span>Pieslēgties</span>
@@ -152,6 +152,32 @@ document.addEventListener('DOMContentLoaded', function() {
       </ul>
     </li>
   </ul>
+
+
+ <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item">
+      <button class="nav-link d-flex align-items-center" disabled>
+        <i class="fa-solid fa-comments me-2"></i> Sarakstes
+      </button>
+    </li>
+   
+  </ul>
+
+   <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<li class="nav-item">
+      <button class="nav-link d-flex align-items-center" disabled>
+        <i class="fa-solid fa-bell me-2"></i> Notifikācijas
+      </button>
+    </li>
+   </ul>
+
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item">
+      <button class="nav-link d-flex align-items-center" disabled>
+        <i class="fa-solid fa-bookmark me-2"></i> Saglabātās ziņas
+      </button>
+    </li>
+    </ul>
 </div>
 
 </html>
