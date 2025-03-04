@@ -1,21 +1,71 @@
 <h1 class="text-center">Admin History</h1>
 
+<div class="card card-body bg-dark text-white border-secondary mb-4">
+  <form id="filterForm" method="get" action="<%= admin_history_path %>">
+    <div class="row mb-3">
+
+      <div class="col-md-4">
+        <label for="adminFilter" class="form-label">Izvēlies Adminu:</label>
+        <select id="adminFilter" name="admin" class="form-select">
+          <option value="">Visi</option>
+          <% @admins.each do |admin| %>
+            <option value="<%= admin.id %>" <%= params[:admin].to_s == admin.id.to_s ? 'selected' : '' %>><%= admin.username %></option>
+          <% end %>
+        </select>
+      </div>
+
+      <!-- Action Filter -->
+      <div class="col-md-4">
+        <label for="actionFilter" class="form-label">Darbība:</label>
+        <select id="actionFilter" name="action" class="form-select">
+          <option value="">Visas</option>
+          <% @unique_actions.each do |action| %>
+            <option value="<%= action %>" <%= params[:action] == action ? 'selected' : '' %>><%= action %></option>
+          <% end %>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Datumu Diapazons:</label>
+        <div class="input-group">
+          <input type="date" class="form-control" name="start_date" value="<%= params[:start_date] %>">
+          <span class="input-group-text">līdz</span>
+          <input type="date" class="form-control" name="end_date" value="<%= params[:end_date] %>">
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary me-2">Filtrēt</button>
+      <a href="<%= admin_history_path %>" class="btn btn-outline-light">Notīrīt</a>
+    </div>
+  </form>
+</div>
+
 <table class="table table-dark table-hover table-bordered border-secondary">
   <thead class="table-light">
     <tr>
       <th class="text-center fw-bold">Admin</th>
       <th class="text-center fw-bold">Action</th>
+      <th class="text-center fw-bold">Description</th>
       <th class="text-center fw-bold">Target</th>
       <th class="text-center fw-bold">Time</th>
     </tr>
   </thead>
   <tbody>
-    <% @admin_activities.each do |activity| %>
+    <% if @admin_activities.any? %>
+      <% @admin_activities.each do |activity| %>
+        <tr>
+          <td class="text-center"><%= activity.admin&.username %></td>
+          <td class="text-center"><%= activity.action %></td>
+          <td class="text-center"><%= activity.description %></td>
+          <td class="text-center"><%= activity.target %></td>
+          <td class="text-center"><%= activity.created_at.strftime("%d-%m-%Y %H:%M:%S") %></td>
+        </tr>
+      <% end %>
+    <% else %>
       <tr>
-        <td class="text-center"><%= activity.admin.username %></td>
-        <td class="text-center"><%= activity.action %></td>
-        <td class="text-center"><%= activity.target %></td>
-        <td class="text-center"><%= activity.created_at.strftime("%d-%m-%Y %H:%M:%S") %></td>
+        <td colspan="5" class="text-center text-warning">Nav atrasts neviens ieraksts</td>
       </tr>
     <% end %>
   </tbody>

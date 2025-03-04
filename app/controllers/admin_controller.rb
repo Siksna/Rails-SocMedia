@@ -35,13 +35,14 @@ class AdminController < ApplicationController
       if @user.update(user_params)
         if @user.saved_changes.any?
           changes = @user.saved_changes.except("updated_at").map do |attribute, values|
-            " #{attribute} from #{values[0]} to #{values[1]}"
+            "#{attribute}: from #{values[0]} to #{values[1]}"
           end.join(", ")
   
           unless changes.empty?
             AdminActivity.create(
               admin: current_user,
-              action: "Updated user's #{changes}",
+              action: "Updated user",
+              description: "#{changes}:",
               target: @user.username
             )
           end
@@ -70,8 +71,9 @@ class AdminController < ApplicationController
   
     AdminActivity.create(
       admin: current_user,
-      action: "Deleted user account (previous username: #{previous_username})",
-      target: previous_username
+      action: "Deleted user account",
+      description: "Current username: #{user.username}, previous username: #{previous_username}",
+      target: user.username
     )
   
     redirect_to admin_personas_path, notice: 'Lietotajs veiksmīgi dzēsts.'
@@ -86,7 +88,8 @@ class AdminController < ApplicationController
   
     AdminActivity.create(
       admin: current_user,
-      action: "Restored user account (restored username: #{user.username}, previous randomized username: #{previous_username})",
+      action: "Restored user account",
+      description: "Restored username: #{user.username}, previous randomized username: #{previous_username}",
       target: user.username
     )
   
@@ -102,7 +105,8 @@ class AdminController < ApplicationController
       
       AdminActivity.create(
         admin: current_user,
-        action: "Promoted user to admin",
+        action: "Promoted",
+        description: "user to admin",
         target: user.username
       )
   
@@ -121,7 +125,8 @@ class AdminController < ApplicationController
   
       AdminActivity.create(
         admin: current_user,
-        action: "Demoted admin to user",
+        action: "Demoted",
+        description: "admin to user",
         target: user.username
       )
   
@@ -132,11 +137,32 @@ class AdminController < ApplicationController
     redirect_to admin_personas_path
   end
   
-
+# Jasalabo lai var izveleties head admin, un lai darbibas rādītu
   def history
-    @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc)
-    render 'admin/history'
+  @admins = User.where(admin_type: ['admin', 'head_admin'])
+
+  @unique_actions = AdminActivity.distinct.pluck(:action)
+
+  @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc)
+
+  @admin_activities = @admin_activities.where(admin_id: params[:admin]) if params[:admin].present?
+  if params[:start_date].present? && params[:end_date].present?
+    start_date = Date.parse(params[:start_date]).beginning_of_day
+    end_date = Date.parse(params[:end_date]).end_of_day
+    @admin_activities = @admin_activities.where(created_at: start_date..end_date)
+  elsif params[:start_date].present?
+    start_date = Date.parse(params[:start_date]).beginning_of_day
+    @admin_activities = @admin_activities.where("created_at >= ?", start_date)
+  elsif params[:end_date].present?
+    end_date = Date.parse(params[:end_date]).end_of_day
+    @admin_activities = @admin_activities.where("created_at <= ?", end_date)
   end
+
+  
+
+  render 'admin/history'
+end
+
 
   private
 

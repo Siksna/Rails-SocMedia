@@ -21,21 +21,47 @@ class RepliesController < ApplicationController
   end
 
   def update
-  if params[:reply][:remove_file] == '1'
-    @reply.file.purge
+    old_content = @reply.content  
+  
+    if params[:reply][:remove_file] == '1'
+      @reply.file.purge
+    end
+  
+    if @reply.update(reply_params)
+      if current_user&.admin? && old_content != @reply.content
+        AdminActivity.create(
+          admin: current_user,
+          action: "Edited reply",
+          description: "from #{old_content.truncate(100)}, to #{@reply.content.truncate(100)})",
+          target: @reply.user.username
+        )
+      end
+  
+      redirect_to message_path(@message), notice: 'Atbilde atjaunināta.'
+    else
+      render :edit
+    end
   end
+  
 
-  if @reply.update(reply_params)
-    redirect_to message_path(@message), notice: 'Atbilde atjaunināta.'
+def destroy
+  if @reply.user == current_user || current_user&.admin?
+    if current_user&.admin?
+      AdminActivity.create(
+        admin: current_user,
+        action: "Deleted reply",
+        description: "Content: #{@reply.content.truncate(100)}",
+        target: @reply.user.username
+      )
+    end
+
+    @reply.destroy
+    redirect_to message_path(@message), notice: 'Atbilde dzēsta.'
   else
-    render :edit
+    redirect_to message_path(@message), alert: 'Jūs nēsat autorizēts dzēst šo atbildi.'
   end
 end
 
-  def destroy
-    @reply.destroy
-    redirect_to message_path(@message), notice: 'Atbilde dzēsta.'
-  end
 
 
   def toggle_like

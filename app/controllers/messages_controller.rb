@@ -48,7 +48,18 @@ class MessagesController < ApplicationController
   end
   
   def update
+    old_content = @message.content 
+  
     if @message.update(message_params)
+      if current_user&.admin? && old_content != @message.content
+        AdminActivity.create(
+          admin: current_user,
+          action: "Edited message",
+          description: "from #{old_content.truncate(100)} to #{@message.content.truncate(100)}",
+          target: @message.user.username
+        )
+      end
+  
       if params[:message][:remove_file] == '1'
         @message.file.purge
       end
@@ -57,16 +68,30 @@ class MessagesController < ApplicationController
       render :edit
     end
   end
+  
+  
 
   def destroy
     @message = Message.find(params[:id])
-    if @message.user == current_user || (current_user&.admin? || current_user&.moderator?)
+  
+    if @message.user == current_user || current_user&.admin?
+      if current_user&.admin?
+        AdminActivity.create(
+          admin: current_user,
+          action: "Deleted message",
+          description: "Content: #{@message.content.truncate(100)}",
+          target: @message.user.username
+        )
+      end
+  
       @message.destroy
       redirect_to root_path, notice: 'Ziņa veiksmīgi dzēsta.'
     else
       redirect_to root_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
     end
   end
+  
+  
   
 
 
