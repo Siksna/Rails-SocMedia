@@ -1,46 +1,53 @@
 <h1 class="text-center">Admin History</h1>
 
-<div class="card card-body bg-dark text-white border-secondary mb-4">
-  <form id="filterForm" method="get" action="<%= admin_history_path %>">
-    <div class="row mb-3">
+<div class="mb-4">
+    <button class="btn btn-outline-dark mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">Filtrs</button>
 
-      <div class="col-md-4">
-        <label for="adminFilter" class="form-label">Izvēlies Adminu:</label>
-        <select id="adminFilter" name="admin" class="form-select">
-          <option value="">Visi</option>
-          <% @admins.each do |admin| %>
-            <option value="<%= admin.id %>" <%= params[:admin].to_s == admin.id.to_s ? 'selected' : '' %>><%= admin.username %></option>
-          <% end %>
-        </select>
-      </div>
 
-      <!-- Action Filter -->
-      <div class="col-md-4">
-        <label for="actionFilter" class="form-label">Darbība:</label>
-        <select id="actionFilter" name="action" class="form-select">
-          <option value="">Visas</option>
-          <% @unique_actions.each do |action| %>
-            <option value="<%= action %>" <%= params[:action] == action ? 'selected' : '' %>><%= action %></option>
-          <% end %>
-        </select>
-      </div>
+  <div class="collapse" id="filterCollapse">
+    <div class="card card-body bg-dark border-secondary mb-4">
+      <form id="filterForm" method="get" action="<%= admin_history_path %>">
+        <div class="row mb-3">
 
-      <div class="col-md-4">
-        <label class="form-label">Datumu Diapazons:</label>
-        <div class="input-group">
-          <input type="date" class="form-control" name="start_date" value="<%= params[:start_date] %>">
-          <span class="input-group-text">līdz</span>
-          <input type="date" class="form-control" name="end_date" value="<%= params[:end_date] %>">
+          <div class="col-md-4">
+            <label for="adminFilter" class="form-label">Izvēlies Adminu:</label>
+            <select id="adminFilter" name="admin" class="form-select">
+              <option value="">Visi</option>
+              <% @admins.each do |admin| %>
+                <option value="<%= admin.id %>" <%= params[:admin].to_s == admin.id.to_s ? 'selected' : '' %>><%= admin.username %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label for="actionFilter" class="form-label">Darbība:</label>
+            <select id="actionFilter" name="activity_action" class="form-select">
+              <option value="">Visas</option>
+              <% @unique_actions.each do |action| %>
+                <option value="<%= action %>" <%= params[:activity_action] == action ? 'selected' : '' %>><%= action %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Datumu Diapazons:</label>
+            <div class="input-group">
+              <input type="date" class="form-control" name="start_date" value="<%= params[:start_date] %>">
+              <span class="input-group-text">līdz</span>
+              <input type="date" class="form-control" name="end_date" value="<%= params[:end_date] %>">
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="text-center">
-      <button type="submit" class="btn btn-primary me-2">Filtrēt</button>
-      <a href="<%= admin_history_path %>" class="btn btn-outline-light">Notīrīt</a>
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary me-2">Filtrēt</button>
+          <a href="<%= admin_history_path %>" class="btn btn-outline-light">Notīrīt</a>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 </div>
+
 
 <table class="table table-dark table-hover table-bordered border-secondary">
   <thead class="table-light">

@@ -154,19 +154,19 @@ document.addEventListener('DOMContentLoaded', function() {
   </ul>
 
 
- <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-    <li class="nav-item">
-      <button class="nav-link d-flex align-items-center" disabled>
-        <i class="fa-solid fa-comments me-2"></i> Sarakstes
-      </button>
-    </li>
-   
-  </ul>
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+  <li class="nav-item">
+    <%= link_to chats_path, class: "nav-link d-flex align-items-center" do %>
+      <i class="fa-solid fa-comments me-2"></i> Chat
+    <% end %>
+  </li>
+</ul>
+
 
    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 <li class="nav-item">
       <button class="nav-link d-flex align-items-center" disabled>
-        <i class="fa-solid fa-bell me-2"></i> Notifikācijas
+        <i class="fa-solid fa-bell me-2"></i> Notifications
       </button>
     </li>
    </ul>
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
     <li class="nav-item">
       <button class="nav-link d-flex align-items-center" disabled>
-        <i class="fa-solid fa-bookmark me-2"></i> Saglabātās ziņas
+        <i class="fa-solid fa-bookmark me-2"></i> Saved posts
       </button>
     </li>
     </ul>

@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
 
   resources :admin do
-    resources :users, only: [:edit, :update, :show, :destroy]
+    resources :users, only: [ :edit, :update, :show, :destroy]
       collection do
         get :personas
         get :history
@@ -14,6 +14,8 @@ Rails.application.routes.draw do
       end
   end
 
+
+  resources :chats
 
   resources :messages do
     resources :replies, only: [:create, :edit, :update, :destroy] do
@@ -33,7 +35,6 @@ Rails.application.routes.draw do
   end
 
   devise_for :users
-  resources :admins
   
   get 'search_users', to: 'home#search_users'
   

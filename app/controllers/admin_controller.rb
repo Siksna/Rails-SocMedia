@@ -5,6 +5,28 @@ class AdminController < ApplicationController
 
   def personas
     @users = User.all
+
+    # Filter by username
+    if params[:username_search].present?
+      @users = @users.where("username LIKE ?", "%#{params[:username_search]}%")
+    end
+
+    # Filter by email
+    if params[:email_search].present?
+      @users = @users.where("email LIKE ?", "%#{params[:email_search]}%")
+    end
+
+    # Filter by role
+    case params[:role_filter]
+    when 'admin'
+      @users = @users.where(admin_type: ['admin', 'head_admin'])   # Replace with the correct column name
+    when 'user'
+      @users = @users.where(admin_type: 'user')   # Replace with the correct column name
+    when 'default', nil
+      # No filter for default, so we just return all users
+    end
+    
+
     render 'admin/personas'
   end
 
@@ -137,15 +159,14 @@ class AdminController < ApplicationController
     redirect_to admin_personas_path
   end
   
-# Jasalabo lai var izveleties head admin, un lai darbibas rādītu
-  def history
+ def history
   @admins = User.where(admin_type: ['admin', 'head_admin'])
-
   @unique_actions = AdminActivity.distinct.pluck(:action)
-
   @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc)
 
   @admin_activities = @admin_activities.where(admin_id: params[:admin]) if params[:admin].present?
+  @admin_activities = @admin_activities.where(action: params[:activity_action]) if params[:activity_action].present?
+
   if params[:start_date].present? && params[:end_date].present?
     start_date = Date.parse(params[:start_date]).beginning_of_day
     end_date = Date.parse(params[:end_date]).end_of_day
@@ -157,8 +178,6 @@ class AdminController < ApplicationController
     end_date = Date.parse(params[:end_date]).end_of_day
     @admin_activities = @admin_activities.where("created_at <= ?", end_date)
   end
-
-  
 
   render 'admin/history'
 end
