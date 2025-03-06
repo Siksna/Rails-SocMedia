@@ -1,0 +1,17 @@
+<h2 class="text-xl font-bold mb-4">Friends</h2>
+<div class="grid grid-cols-3 gap-4">
+  <% @friends.each do |friend| %>
+    <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
+      <%= link_to profile_path(friend) do %>
+        <% if friend.profile_picture.attached? %>
+        <%= image_tag friend.profile_picture, class: 'w-20 h-20 rounded-full object-cover mb-2' %>
+        <% else %>
+        <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>; width:100px; height:auto;">
+        <%= image_tag 'default_profile.png', class: 'w-20 h-20 rounded-full object-cover mb-2' %>
+        </div>
+        <% end %>
+        <p class="text-center text-sm font-semibold"><%= friend.username %></p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

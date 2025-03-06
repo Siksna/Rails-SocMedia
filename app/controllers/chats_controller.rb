@@ -1,5 +1,7 @@
 class ChatsController < ApplicationController
-    def index
+  before_action :authenticate_user!
 
-    end
+  def index
+    @friends = current_user.friends
   end
+end

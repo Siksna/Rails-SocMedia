@@ -6,24 +6,20 @@ class AdminController < ApplicationController
   def personas
     @users = User.all
 
-    # Filter by username
     if params[:username_search].present?
       @users = @users.where("username LIKE ?", "%#{params[:username_search]}%")
     end
 
-    # Filter by email
     if params[:email_search].present?
       @users = @users.where("email LIKE ?", "%#{params[:email_search]}%")
     end
 
-    # Filter by role
     case params[:role_filter]
     when 'admin'
-      @users = @users.where(admin_type: ['admin', 'head_admin'])   # Replace with the correct column name
+      @users = @users.where(admin_type: ['admin', 'head_admin'])   
     when 'user'
-      @users = @users.where(admin_type: 'user')   # Replace with the correct column name
+      @users = @users.where(admin_type: 'user')   
     when 'default', nil
-      # No filter for default, so we just return all users
     end
     
 

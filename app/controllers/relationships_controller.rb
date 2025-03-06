@@ -2,7 +2,13 @@ class RelationshipsController < ApplicationController
   before_action :find_user
 
   def create
-    current_user.following << @user unless current_user.following?(@user)
+    current_user.follow(@user) unless current_user.following?(@user)
+
+    if @user.following?(current_user)
+      Friendship.create(user: current_user, friend: @user)
+      Friendship.create(user: @user, friend: current_user)
+    end
+
     respond_to do |format|
       format.html { redirect_to profile_path(@user) }
       format.js
@@ -10,7 +16,11 @@ class RelationshipsController < ApplicationController
   end
 
   def destroy
-    current_user.following.delete(@user)
+    current_user.unfollow(@user)
+
+    Friendship.where(user: current_user, friend: @user).destroy_all
+    Friendship.where(user: @user, friend: current_user).destroy_all
+
     respond_to do |format|
       format.html { redirect_to profile_path(@user) }
       format.js
