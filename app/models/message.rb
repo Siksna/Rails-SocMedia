@@ -5,6 +5,9 @@ class Message < ApplicationRecord
     validates :content, presence: true
     scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
     belongs_to :user
+    belongs_to :chat
+
+    
 
     def liked_by?(user)
       likes.exists?(user: user)

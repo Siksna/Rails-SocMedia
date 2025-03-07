@@ -20,7 +20,9 @@ class User < ApplicationRecord
   end
 
   def head_admin?
-    admin_type == "head_admin" && self.id == 6
+    admin_type == "head_admin"
+    
+    self.id == 6
   end
 
   def like(likeable)
@@ -46,6 +48,11 @@ class User < ApplicationRecord
 
   has_many :inverse_friendships, class_name: 'Friendship', foreign_key: 'friend_id'
   has_many :inverse_friends, through: :inverse_friendships, source: :user
+
+
+  has_many :chat_users, dependent: :destroy
+has_many :chats, through: :chat_users
+
   
   def follow(other_user)
     following << other_user unless following?(other_user)

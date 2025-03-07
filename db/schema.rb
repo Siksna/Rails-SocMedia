@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_06_103705) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_07_154723) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -46,6 +46,23 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_06_103705) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "description"
+  end
+
+  create_table "chat_messages", force: :cascade do |t|
+    t.integer "chat_id", null: false
+    t.integer "user_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_id"], name: "index_chat_messages_on_chat_id"
+    t.index ["user_id"], name: "index_chat_messages_on_user_id"
+  end
+
+  create_table "chats", force: :cascade do |t|
+    t.bigint "user1_id", null: false
+    t.bigint "user2_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "follows", force: :cascade do |t|
@@ -136,6 +153,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_06_103705) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "chat_messages", "chats"
+  add_foreign_key "chat_messages", "users"
+  add_foreign_key "chats", "users", column: "user1_id"
+  add_foreign_key "chats", "users", column: "user2_id"
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
   add_foreign_key "likes", "messages"

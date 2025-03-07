@@ -1,17 +1,17 @@
-<h2 class="text-xl font-bold mb-4">Friends</h2>
-<div class="grid grid-cols-3 gap-4">
+<div class="space-y-4">
   <% @friends.each do |friend| %>
-    <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-      <%= link_to profile_path(friend) do %>
-        <% if friend.profile_picture.attached? %>
-        <%= image_tag friend.profile_picture, class: 'w-20 h-20 rounded-full object-cover mb-2' %>
-        <% else %>
-        <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>; width:100px; height:auto;">
-        <%= image_tag 'default_profile.png', class: 'w-20 h-20 rounded-full object-cover mb-2' %>
-        </div>
-        <% end %>
-        <p class="text-center text-sm font-semibold"><%= friend.username %></p>
-      <% end %>
+    <%= link_to chat_path(friend) do %>
+      <div class="bg-white shadow rounded-lg p-4 flex items-center hover:bg-gray-50 transition">
+      <% if friend.profile_picture.attached? %>
+        <%= image_tag friend.profile_picture, class: 'w-16 h-16 rounded-full object-cover mr-4' %>
+      <% else %>
+      <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>; width:100px; height:auto;">
+      <%= image_tag 'default_profile.png', class: 'w-20 h-20 rounded-full object-cover mb-2' %>
     </div>
+      <% end %>
+      <p class="text-sm font-semibold"><%= friend.username %></p>
+    </div>
+    <% end %>
+    
   <% end %>
 </div>

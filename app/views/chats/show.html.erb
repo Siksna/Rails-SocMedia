@@ -1,0 +1,29 @@
+<h2><%= @friend.username %></h2>
+
+<div id="messages">
+  <% @chat_messages.each do |chat_message| %>
+    <div class="message">
+      <strong><%= chat_message.user.username %>:</strong> <%= chat_message.content %>
+    </div>
+  <% end %>
+</div>
+
+<div class="bg-dark text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
+  <div id="fileInfo" class="file-info"></div>
+
+  <div id="filePreview" class="file-preview"></div>
+
+  <div class="input-container d-flex">
+<%= form_with(model: [@chat, @chat_message], local: true, html: { multipart: true }) do |form| %>
+      <%= form.text_area :content, placeholder: "Ievadiet savu ziņu šeit...", class: "form form-control", rows: 1, autocomplete: "off" %>
+      <%= form.hidden_field :user_id, value: current_user.id %>
+
+      <label class="file-upload">
+        <i class="fas fa-paperclip"></i>
+        <%= form.file_field :file, id: "fileInput", onchange: "displayFileName()" %>
+      </label>
+
+      <%= form.submit "<i class='fas fa-paper-plane'></i>", class: "mainbtn fas fa-paper-plane" %>
+    <% end %>
+  </div>
+</div>
