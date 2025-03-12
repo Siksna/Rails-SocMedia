@@ -1,24 +1,30 @@
 <h2><%= @conversation.sender == current_user ? @conversation.receiver.username : @conversation.sender.username %></h2>
 
 <div class="chat-box">
+  <% @chat_conversations.each do |chat_conversation| %>
+    <div class="<%= chat_conversation.sender == current_user ? 'sent' : 'received' %>">
+      <p><strong><%= chat_conversation.sender.username %>:</strong> <%= chat_conversation.content %></p>
+    </div>
+  <% end %>
 </div>
 
-<div class="bg-dark text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
-  <div id="fileInfo" class="file-info"></div>
+<%= form_with(model: [@conversation, @conversation.chat_conversations.build], url: chat_chat_conversations_path(@conversation), local: true) do |form| %>
+  <div class="bg-dark text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
+    <div id="fileInfo" class="file-info"></div>
+    <div id="filePreview" class="file-preview"></div>
 
-  <div id="filePreview" class="file-preview"></div>
+    <div class="input-container d-flex">
+      <input id="inputField" type="text" class="form-control" name="chat_conversation[content]" placeholder="Enter your message..." autocomplete="off"> <!-- Changed name here -->
+      <label class="file-upload">
+        <i class="fas fa-paperclip"></i>
+        <input type="file" id="fileInput" onchange="displayFileName()">
+      </label>
 
-  <div class="input-container d-flex">
-    <input id="inputField" type="text" class="form-control" placeholder="Ievadiet savu ziņu šeit..." autocomplete="off">
-
-    <label class="file-upload">
-      <i class="fas fa-paperclip"></i>
-      <input type="file" id="fileInput" onchange="displayFileName()">
-    </label>
-
-    <button id="postButton" onclick="postComment()" class="mainbtn">
-      <i class="fas fa-paper-plane"></i>
-    </button>
+      <button id="postButton" onclick="postMessage()" class="mainbtn">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
   </div>
-</div>
+<% end %>
+
 
