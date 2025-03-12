@@ -46,6 +46,13 @@ class User < ApplicationRecord
 
   has_many :inverse_friendships, class_name: 'Friendship', foreign_key: 'friend_id'
   has_many :inverse_friends, through: :inverse_friendships, source: :user
+
+  has_many :sent_conversations, class_name: 'Conversation', foreign_key: 'sender_id'
+  has_many :received_conversations, class_name: 'Conversation', foreign_key: 'receiver_id'
+
+  def find_or_create_conversation(other_user)
+    Conversation.between(self, other_user).first_or_create(sender: self, receiver: other_user)
+  end
   
   def follow(other_user)
     following << other_user unless following?(other_user)
@@ -67,6 +74,22 @@ class User < ApplicationRecord
  def deleted?
     deleted_at.present?
   end
+  
+  def restore
+    update(deleted_at: nil, username: original_username)
+  end
+
+  def soft_delete
+    self.original_username = username
+    update(deleted_at: Time.current)
+  end
+  
+  
+
+  def randomize_attributes
+    self.username = "Lietotājs #{SecureRandom.hex(4)}"
+    save
+  end
   private
 
   def create_friendship_if_mutual(other_user)
@@ -83,21 +106,6 @@ class User < ApplicationRecord
   scope :active, -> { where(deleted_at: nil) }
 
  
-
-  def soft_delete
-    self.original_username = username
-    update(deleted_at: Time.current)
-  end
-  
-  def restore
-    update(deleted_at: nil, username: original_username)
-  end
-
-  def randomize_attributes
-    self.username = "Lietotājs #{SecureRandom.hex(4)}"
-    save
-  end
-
 
   before_create :set_profile_color
 

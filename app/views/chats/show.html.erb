@@ -1,0 +1,24 @@
+<h2><%= @conversation.sender == current_user ? @conversation.receiver.username : @conversation.sender.username %></h2>
+
+<div class="chat-box">
+</div>
+
+<div class="bg-dark text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
+  <div id="fileInfo" class="file-info"></div>
+
+  <div id="filePreview" class="file-preview"></div>
+
+  <div class="input-container d-flex">
+    <input id="inputField" type="text" class="form-control" placeholder="Ievadiet savu ziņu šeit..." autocomplete="off">
+
+    <label class="file-upload">
+      <i class="fas fa-paperclip"></i>
+      <input type="file" id="fileInput" onchange="displayFileName()">
+    </label>
+
+    <button id="postButton" onclick="postComment()" class="mainbtn">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </div>
+</div>
+
