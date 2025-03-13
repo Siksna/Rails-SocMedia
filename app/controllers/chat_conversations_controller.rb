@@ -3,16 +3,22 @@ class ChatConversationsController < ApplicationController
 
   def create
     @conversation = Conversation.find(params[:chat_id])
-
     @chat_conversation = @conversation.chat_conversations.build(chat_message_params)
     @chat_conversation.sender = current_user
-    
     @chat_conversation.receiver = @conversation.sender == current_user ? @conversation.receiver : @conversation.sender
 
     if @chat_conversation.save
+      ChatChannel.broadcast_to(
+        @conversation,
+        sender: @chat_conversation.sender.username,
+        content: @chat_conversation.content,
+        current_user: current_user.username
+      )
+
       respond_to do |format|
-        format.html { redirect_to request.referer } 
-        format.json { render json: @chat_conversation }
+        format.js
+        format.json { render json: @chat_conversation, status: :created }
+        # format.html { redirect_to request.referer }
       end
     else
       render 'chats/show'

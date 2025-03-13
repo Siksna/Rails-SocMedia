@@ -1,0 +1,5 @@
+<% chat_conversations.each do |chat_conversation| %>
+  <div class="<%= chat_conversation.sender == current_user ? 'sent' : 'received' %>">
+    <p><strong><%= chat_conversation.sender.username %>:</strong> <%= chat_conversation.content %></p>
+  </div>
+<% end %>

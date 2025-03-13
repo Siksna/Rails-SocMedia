@@ -257,6 +257,7 @@ document.getElementById('inputField').addEventListener('keydown', function(event
 
 
 
+
 /* profila bildes pirmskats */
 document.addEventListener('DOMContentLoaded', function () {
   let cropper;
@@ -329,5 +330,49 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+/* chats */
+function postChat() {
 
+  const inputField = document.getElementById('inputField_chat');
+  const fileInput = document.getElementById('fileInput_chat');
+  const messageContent = inputField.value;
+  const file = fileInput.files[0];
 
+  if (messageContent.trim() === "") {
+    alert("Lūdzu ievadiet ziņu.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('chat_conversation[content]', messageContent);
+  
+  if (file) {
+    formData.append('chat_conversation[file]', file);
+  }
+
+  fetch(`/chats/${chatId}/chat_conversations`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+       'Accept': 'application/javascript'
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      
+    } else {
+      alert("Neizdevās ievietot ziņu.");
+    }
+  })
+  .catch(error => {
+    console.error('Kļūda:', error);
+  });
+}
+
+document.querySelector('form').addEventListener('submit', postChat);
+document.getElementById('inputField_chat').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    postChat(); 
+  }
+});
