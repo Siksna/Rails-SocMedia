@@ -1,7 +1,9 @@
 <h2><%= @conversation.sender == current_user ? @conversation.receiver.username : @conversation.sender.username %></h2>
 
-<div class="chat-box" data-controller="chat" data-chat-conversation-id="<%= @conversation.id %>">
+<div class="chat-box" data-controller="chat" data-chat-conversation-id="<%= @conversation.id %>" data-current-user="<%= current_user.username %>">
+<div id="chat_messages" data-chat-target="messages">
 <%= render 'chats/chat_conversation', chat_conversations: @chat_conversations %>
+</div>
 </div>
 
 <%= form_with(model: [@conversation, @conversation.chat_conversations.build], url: chat_chat_conversations_path(@conversation), remote: true) do |form| %>

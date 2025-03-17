@@ -18,14 +18,20 @@ export default class extends Controller {
   }
 
   handleReceivedMessage(data) {
+    console.log("Received message via ActionCable:", data); 
+  
+    const currentUser = this.element.dataset.currentUser;
+    
     const messageHtml = `
-      <div class="${data.sender === this.data.get("currentUser") ? 'sent' : 'received'}">
-        <p><strong>${data.sender}:</strong> ${data.content}</p>
+      <div class="${data.sender_username === currentUser ? 'sent' : 'received'}">
+        <p><strong>${data.sender_username}:</strong> ${data.content}</p>
       </div>
     `;
+  
     this.messagesTarget.innerHTML += messageHtml;  
     this.scrollToBottom();
   }
+  
 
   scrollToBottom() {
     this.messagesTarget.scrollTop = this.messagesTarget.scrollHeight;

@@ -331,10 +331,12 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* chats */
-function postChat() {
+function postChat(event) {
+  if (event) event.preventDefault();
 
-  const inputField = document.getElementById('inputField_chat');
-  const fileInput = document.getElementById('fileInput_chat');
+  const chatId = document.querySelector(".chat-box").dataset.chatConversationId;
+  const inputField = document.getElementById("inputField_chat");
+  const fileInput = document.getElementById("fileInput_chat");
   const messageContent = inputField.value;
   const file = fileInput.files[0];
 
@@ -344,31 +346,46 @@ function postChat() {
   }
 
   const formData = new FormData();
-  formData.append('chat_conversation[content]', messageContent);
-  
+  formData.append("chat_conversation[content]", messageContent);
+
   if (file) {
-    formData.append('chat_conversation[file]', file);
+    formData.append("chat_conversation[file]", file);
   }
 
   fetch(`/chats/${chatId}/chat_conversations`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
     headers: {
-      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-       'Accept': 'application/javascript'
-    }
+      "X-CSRF-Token": document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content"),
+      Accept: "application/json",
+    },
   })
-  .then(response => {
-    if (response.ok) {
-      
-    } else {
-      alert("Neizdevās ievietot ziņu.");
-    }
-  })
-  .catch(error => {
-    console.error('Kļūda:', error);
-  });
+    .then((response) => response.text())
+    .then((data) => {
+      console.log("Response from server:", data); 
+      try {
+        const jsonData = JSON.parse(data);
+        if (jsonData.error) {
+          alert("Message could not be sent.");
+        } else {
+          const messageHtml =
+            `<div class="${jsonData.sender === document.querySelector('.chat-box').dataset.currentUser ? 'sent' : 'received'}">
+              <p><strong>${jsonData.sender_username}:</strong> ${jsonData.content}</p>
+            </div>`;
+          document.getElementById("chat_messages").innerHTML += messageHtml;
+          const chatBox = document.querySelector(".chat-box");
+          chatBox.scrollTop = chatBox.scrollHeight;
+          inputField.value = ""; 
+        }
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    })
+    .catch((error) => console.error("Error:", error));
 }
+
 
 document.querySelector('form').addEventListener('submit', postChat);
 document.getElementById('inputField_chat').addEventListener('keydown', function(event) {
