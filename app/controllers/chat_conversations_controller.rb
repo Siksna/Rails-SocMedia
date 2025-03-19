@@ -1,8 +1,8 @@
 class ChatConversationsController < ApplicationController
   before_action :authenticate_user!
-  
   def create
-    logger.debug "Request format: #{request.format}"  # Log the format for debugging
+    logger.debug "Request format: #{request.format}"  
+
     @conversation = Conversation.find(params[:chat_id])
     @chat_conversation = @conversation.chat_conversations.build(chat_message_params)
     @chat_conversation.sender = current_user
@@ -21,14 +21,14 @@ class ChatConversationsController < ApplicationController
         message: "New message from #{@chat_conversation.sender.username}: #{@chat_conversation.content}",
         conversation_id: @conversation.id
       )
-
-      respond_to do |format|
-        format.json { render json: { id: @chat_conversation.id, sender_username: @chat_conversation.sender.username, content: @chat_conversation.content, sender: @chat_conversation.sender.username }, status: :created }
-      end
+  
+      render json: { id: @chat_conversation.id, sender_username: @chat_conversation.sender.username, content: @chat_conversation.content, receiver: @chat_conversation.receiver.username }, status: :created
     else
       render json: { error: "Message could not be sent" }, status: :unprocessable_entity
     end
   end
+  
+  
   
   
 
@@ -37,4 +37,5 @@ class ChatConversationsController < ApplicationController
   def chat_message_params
     params.require(:chat_conversation).permit(:content)
   end
+
 end

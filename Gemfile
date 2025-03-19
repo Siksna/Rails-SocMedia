@@ -3,6 +3,7 @@ source "https://rubygems.org"
 gem "rails", "~> 7.2.1"
 gem "sprockets-rails"
 gem 'webpacker'
+gem 'redis'
 gem "sqlite3", ">= 1.4"
 gem "puma", ">= 5.0"
 gem "importmap-rails"

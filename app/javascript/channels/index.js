@@ -1,6 +1,3 @@
-import { createConsumer } from "@rails/actioncable";
+import "channels";
+import "./chat_channel";
 
-const consumer = createConsumer();
-
-export { consumer };
-import "./notification_channel"

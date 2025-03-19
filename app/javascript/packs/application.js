@@ -1,11 +1,5 @@
-import { start } from "@rails/ujs";
-import { Turbo } from "@hotwired/turbo-rails";
-import "channels";
+import "../channels/consumer";
 
-window.App = {};
-App.cable = ActionCable.createConsumer();
-
-start();
 
 /* failu pirmskats */
 function displayFileName() {
@@ -340,17 +334,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* chats */
-function postChat(event) {
-  if (event) event.preventDefault();
 
+
+function postChat() {
   const chatId = document.querySelector(".chat-box").dataset.chatConversationId;
   const inputField = document.getElementById("inputField_chat");
+  const messageContent = inputField.value.trim();
   const fileInput = document.getElementById("fileInput_chat");
-  const messageContent = inputField.value;
   const file = fileInput.files[0];
 
-  if (messageContent.trim() === "") {
-    alert("Lūdzu ievadiet ziņu.");
+  if (!messageContent) {
+    alert("Please enter a message.");
     return;
   }
 
@@ -365,41 +359,62 @@ function postChat(event) {
     method: "POST",
     body: formData,
     headers: {
-      "X-CSRF-Token": document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content"),
-      Accept: "application/json",
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+      "Accept": "application/json"
     },
   })
-    .then((response) => response.text())
-    .then((data) => {
-      console.log("Response from server:", data); 
-      try {
-        const jsonData = JSON.parse(data);
-        if (jsonData.error) {
-          alert("Message could not be sent.");
-        } else {
-          this.channel.send({ message: jsonData.content });
-          const messageHtml =
-            `<div class="${jsonData.sender === document.querySelector('.chat-box').dataset.currentUser ? 'sent' : 'received'}">
-              <p><strong>${jsonData.sender_username}:</strong> ${jsonData.content}</p>
-            </div>`;
-          document.getElementById("chat_messages").innerHTML += messageHtml;
-          const chatBox = document.querySelector(".chat-box");
-          chatBox.scrollTop = chatBox.scrollHeight;
-          inputField.value = ""; 
-        }
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
+    .then(response => response.json())
+    .then(data => {
+      console.log("Response from server:", data);
+
+      if (data.error) {
+        alert("Message could not be sent.");
+      } else {
+        const messageHtml = `
+          <div class="${data.sender === document.querySelector('.chat-box').dataset.currentUser ? 'sent' : 'received'}">
+            <p><strong>${data.sender_username}:</strong> ${data.content}</p>
+          </div>`;
+          
+        document.getElementById("chat_messages").innerHTML += messageHtml;
+
+        const chatBox = document.querySelector(".chat-box");
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        inputField.value = "";
       }
     })
-    .catch((error) => console.error("Error:", error));
+    .catch(error => console.error("Error:", error));
 }
 
-
-document.querySelector('form').addEventListener('submit', postChat);
-document.getElementById('inputField_chat').addEventListener('keydown', function(event) {
-  if (event.key === 'Enter') {
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector("form");
+  
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
     postChat(); 
-  }
+  });
+
+  document.getElementById("inputField_chat").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      postChat();
+    }
+  });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector("form");
+  
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    postChat(); 
+  });
+
+  document.getElementById("inputField_chat").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault(); 
+      postChat();
+    }
+  });
 });
