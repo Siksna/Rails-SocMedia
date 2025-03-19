@@ -16,6 +16,12 @@ class ChatConversationsController < ApplicationController
         chat_id: @conversation.id
       )
   
+      NotificationChannel.broadcast_to(
+        @chat_conversation.receiver,
+        message: "New message from #{@chat_conversation.sender.username}: #{@chat_conversation.content}",
+        conversation_id: @conversation.id
+      )
+
       respond_to do |format|
         format.json { render json: { id: @chat_conversation.id, sender_username: @chat_conversation.sender.username, content: @chat_conversation.content, sender: @chat_conversation.sender.username }, status: :created }
       end

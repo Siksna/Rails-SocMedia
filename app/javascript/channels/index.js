@@ -1,3 +1,6 @@
 import { createConsumer } from "@rails/actioncable";
+
 const consumer = createConsumer();
-export default consumer;
+
+export { consumer };
+import "./notification_channel"

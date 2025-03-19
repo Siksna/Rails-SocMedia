@@ -6,3 +6,5 @@ newMessage.innerHTML = `
   <p><%= @chat_conversation.content %></p>
 `;
 messageContainer.appendChild(newMessage);
+
+messageContainer.scrollTop = messageContainer.scrollHeight;

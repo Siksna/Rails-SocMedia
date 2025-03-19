@@ -11,6 +11,7 @@ module Friends
     config.time_zone = "Europe/Riga"
     config.active_record.default_timezone = :local
     
+    config.assets.enabled = true
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.2

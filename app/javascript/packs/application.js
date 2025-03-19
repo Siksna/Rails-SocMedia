@@ -1,3 +1,12 @@
+import { start } from "@rails/ujs";
+import { Turbo } from "@hotwired/turbo-rails";
+import "channels";
+
+window.App = {};
+App.cable = ActionCable.createConsumer();
+
+start();
+
 /* failu pirmskats */
 function displayFileName() {
   const fileInput = document.getElementById('fileInput');
@@ -370,6 +379,7 @@ function postChat(event) {
         if (jsonData.error) {
           alert("Message could not be sent.");
         } else {
+          this.channel.send({ message: jsonData.content });
           const messageHtml =
             `<div class="${jsonData.sender === document.querySelector('.chat-box').dataset.currentUser ? 'sent' : 'received'}">
               <p><strong>${jsonData.sender_username}:</strong> ${jsonData.content}</p>
