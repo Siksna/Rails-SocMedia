@@ -1,5 +1,4 @@
 import { createConsumer } from "@rails/actioncable";
 
-window.App = {
-  cable: createConsumer()
-};
+window.App ||= {};
+window.App.cable = createConsumer();
