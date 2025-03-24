@@ -6,7 +6,7 @@
 </div>
 </div>
 
-<%= form_with(model: [@conversation, @conversation.chat_conversations.build], url: chat_chat_conversations_path(@conversation), remote: true) do |form| %>
+<%= form_with(model: [@conversation, @conversation.chat_conversations.build], url: chat_chat_conversations_path(@conversation), remote: true, html: { id: "chat_form", data: { turbo: false } }) do |form| %>
   <div class="bg-dark text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
     <div id="fileInfo" class="file-info"></div>
     <div id="filePreview" class="file-preview"></div>
@@ -24,3 +24,26 @@
     </div>
   </div>
 <% end %>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const conversationId = "<%= @conversation.id %>";
+  
+  fetch(`/notifications/${conversationId}/mark_as_read`, {
+    method: "POST",
+    headers: { "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
+  })
+  .then(() => {
+    const messageNotificationCount = document.getElementById("message-notification-count");
+    let count = parseInt(messageNotificationCount.textContent, 10) || 0;
+    count = Math.max(count - 1, 0);
+    
+    messageNotificationCount.textContent = count;
+    messageNotificationCount.style.display = count > 0 ? "inline-block" : "none";
+
+    localStorage.setItem("messageNotificationCount", count);
+  })
+  .catch(error => console.error("Error marking chat as read:", error));
+});
+</script>

@@ -1,5 +1,6 @@
 import "../channels/consumer";
 import "../channels/chat_channel";
+import "../channels/notification_channel";
 import "../channels";
 
 
@@ -336,8 +337,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* chats */
-
-
 function postChat() {
   const chatId = document.querySelector(".chat-box").dataset.chatConversationId;
   const inputField = document.getElementById("inputField_chat");
@@ -349,6 +348,8 @@ function postChat() {
     alert("Please enter a message.");
     return;
   }
+
+  chatChannel.sendMessage(messageContent);
 
   const formData = new FormData();
   formData.append("chat_conversation[content]", messageContent);
@@ -362,61 +363,69 @@ function postChat() {
     body: formData,
     headers: {
       "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-      "Accept": "application/json"
+      "Accept": "text/javascript"
     },
   })
     .then(response => response.json())
     .then(data => {
       console.log("Response from server:", data);
-
-      if (data.error) {
-        alert("Message could not be sent.");
-      } else {
-        const messageHtml = `
-          <div class="${data.sender === document.querySelector('.chat-box').dataset.currentUser ? 'sent' : 'received'}">
-            <p><strong>${data.sender_username}:</strong> ${data.content}</p>
-          </div>`;
-          
-        document.getElementById("chat_messages").innerHTML += messageHtml;
-
-        const chatBox = document.querySelector(".chat-box");
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        inputField.value = "";
-      }
+      inputField.value = "";
     })
     .catch(error => console.error("Error:", error));
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const form = document.querySelector("form");
-  
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
-    postChat(); 
-  });
+  const form = document.getElementById("chat_form");
+  const inputField = document.getElementById("inputField_chat");
 
-  document.getElementById("inputField_chat").addEventListener("keydown", function (event) {
+  if (form) {
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); 
+      Rails.fire(form, "submit");
+      inputField.value = "";
+    });
+  }
+
+  inputField.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
       event.preventDefault();
-      postChat();
+      Rails.fire(form, "submit");
+      inputField.value = "";
     }
   });
 });
 
 
+/* Notifications */
 document.addEventListener("DOMContentLoaded", function () {
-  const form = document.querySelector("form");
-  
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
-    postChat(); 
-  });
+  const messageNotificationCount = document.getElementById("message-notification-count");
 
-  document.getElementById("inputField_chat").addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-      event.preventDefault(); 
-      postChat();
-    }
-  });
+  fetch("/notifications/unread")
+    .then(response => response.json())
+    .then(data => {
+      const unreadCount = data.unread_count;
+      messageNotificationCount.textContent = unreadCount;
+      messageNotificationCount.style.display = unreadCount > 0 ? "inline-block" : "none";
+
+      localStorage.setItem("unreadChatCount", unreadCount);
+    })
+    .catch(error => console.error("Error fetching notifications:", error));
 });
+
+function markChatAsRead(conversationId) {
+  fetch(`/notifications/${conversationId}/mark_as_read`, {
+    method: "POST",
+    headers: { "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
+  }).then(() => {
+    const messageNotificationCount = document.getElementById("message-notification-count");
+    messageNotificationCount.textContent = "0";
+    messageNotificationCount.style.display = "none";
+
+    localStorage.setItem("unreadChatCount", "0");
+  }).catch(error => console.error("Error marking messages as read:", error));
+}
+
+if (window.location.pathname.includes("/chats/")) {
+  const conversationId = window.location.pathname.split("/").pop();
+  markChatAsRead(conversationId);
+}

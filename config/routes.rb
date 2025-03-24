@@ -41,8 +41,18 @@ Rails.application.routes.draw do
     get 'following', on: :member
   end
 
-  devise_for :users
+  devise_for :users, controllers: { sessions: "sessions" }
+
+  resources :notifications, only: [] do
+    collection do
+      get :unread
+    end
+    member do
+      post :mark_as_read
+    end
+  end
   
+
   get 'search_users', to: 'home#search_users'
   
   get "admin/edit"

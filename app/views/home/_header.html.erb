@@ -114,7 +114,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="sidebar">
   <ul class="navbar-nav me-auto mb-2 mb-lg-0">
     <li class="nav-item dropdown">
-      <!-- Added the dropdown-toggle class and data-bs-toggle attribute -->
       <a class="nav-link d-flex align-items-center dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <% if user_signed_in? %>
           <span class="fw-bold"><%= current_user.username %></span>
@@ -158,20 +157,21 @@ document.addEventListener('DOMContentLoaded', function() {
   <li class="nav-item">
     <%= link_to chats_path, class: "nav-link d-flex align-items-center" do %>
       <i class="fa-solid fa-comments me-2"></i> Chat
+          <span id="message-notification-count" class="badge bg-danger ms-2">0</span>
     <% end %>
   </li>
 </ul>
 
 
 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-  <li class="nav-item">
-    <button class="nav-link d-flex align-items-center" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
-      <i class="fa-solid fa-bell me-2"></i> Notifications
-      <span id="notification-count" class="badge bg-danger ms-2">0</span>
-    </button>
-    <ul id="suggestions-dropdown" class="dropdown-menu" style="display: none;">
-    </ul>
-  </li>
+  <li class="nav-item dropdown">
+  <button class="nav-link d-flex align-items-center dropdown-toggle" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fa-solid fa-bell me-2"></i> Notifications
+    <span id="notification-count" class="badge bg-danger ms-2">0</span>
+  </button>
+<ul id="notifications-dropdown" class="dropdown-menu">
+  </ul>
+</li>
 </ul>
 
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">

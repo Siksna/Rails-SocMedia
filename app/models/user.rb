@@ -11,6 +11,8 @@ class User < ApplicationRecord
   has_many :liked_messages, -> { order('likes.created_at DESC') }, through: :likes, source: :likeable, source_type: 'Message'
   has_many :liked_replies, -> { order('likes.created_at DESC') }, through: :likes, source: :likeable, source_type: 'Reply'
 
+  has_many :notifications, dependent: :destroy
+
   validates :username, presence: true
 
   enum admin_type: { user: 0, admin: 1, head_admin: 2 }

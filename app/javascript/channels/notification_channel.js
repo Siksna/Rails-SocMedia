@@ -1,21 +1,22 @@
-import consumer from "./consumer"
+import consumer from "./consumer";
 
-consumer.subscriptions.create("NotificationChannel", {
+const NotificationChannel = consumer.subscriptions.create("NotificationChannel", {
+  connected() {
+    console.log("Connected to the NotificationChannel");
+  },
+  disconnected() {
+    console.log("Disconnected from the NotificationChannel");
+  },
   received(data) {
-    const notificationsDropdown = document.getElementById('suggestions-dropdown');
-    const notificationItem = document.createElement('li');
-    notificationItem.textContent = data.message;
-    notificationItem.classList.add('dropdown-item');
-    notificationItem.onclick = function() {
-      window.location.href = `/conversations/${data.conversation_id}`;
-    };
-    notificationsDropdown.appendChild(notificationItem);
-    
-    const notificationCount = document.getElementById('notification-count');
-    let count = parseInt(notificationCount.textContent, 10) || 0;
+    console.log("New notification received:", data);
+
+    const messageNotificationCount = document.getElementById("message-notification-count");
+    let count = parseInt(messageNotificationCount.textContent, 10) || 0;
     count += 1;
-    notificationCount.textContent = count;
-    
-    notificationsDropdown.style.display = 'block';
+
+    messageNotificationCount.textContent = count;
+    messageNotificationCount.style.display = count > 0 ? "inline-block" : "none";
   }
 });
+
+export default NotificationChannel;
