@@ -15,14 +15,15 @@ class User < ApplicationRecord
 
   validates :username, presence: true
 
-  enum admin_type: { user: 0, admin: 1, head_admin: 2 }
+  enum :admin_type, [ :user, :admin, :head_admin ]
+
 
   def admin?
     admin_type == "admin" || head_admin?
   end
 
   def head_admin?
-    admin_type == "head_admin" && self.id == 6
+    admin_type == "head_admin"
   end
 
   def like(likeable)

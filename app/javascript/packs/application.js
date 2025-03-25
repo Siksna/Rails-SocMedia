@@ -4,6 +4,7 @@ import "../channels/notification_channel";
 import "../channels";
 
 
+
 /* failu pirmskats */
 function displayFileName() {
   const fileInput = document.getElementById('fileInput');
@@ -398,10 +399,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* Notifications */
 document.addEventListener("DOMContentLoaded", function () {
+
+  console.log("JavaScript!");
   const messageNotificationCount = document.getElementById("message-notification-count");
 
   fetch("/notifications/unread")
-    .then(response => response.json())
+  .then(response => response.json())
+  .then(data => console.log(data))
     .then(data => {
       const unreadCount = data.unread_count;
       messageNotificationCount.textContent = unreadCount;
@@ -413,6 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function markChatAsRead(conversationId) {
+  console.log("JavaScript!");
   fetch(`/notifications/${conversationId}/mark_as_read`, {
     method: "POST",
     headers: { "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
