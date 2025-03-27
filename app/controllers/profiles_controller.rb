@@ -28,14 +28,26 @@ class ProfilesController < ApplicationController
     end
 
 
-    
     def follow
-      current_user.following << @user unless current_user.following.include?(@user)
+      unless current_user.following.include?(@user)
+        current_user.following << @user
+    
+        Notification.create!(
+          user: @user,
+          sender: current_user,
+          message: "New follower: #{current_user.username}",
+          notification_type: "follow",
+          read: false
+        )
+      end
+    
       respond_to do |format|
         format.html { redirect_to profile_path(@user) }
         format.js
       end
     end
+    
+    
   
     def unfollow
       current_user.following.delete(@user)

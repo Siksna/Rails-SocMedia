@@ -3,7 +3,6 @@ class NotificationsController < ApplicationController
   
     def unread
       unread_count = Notification.where(user: current_user, read: false).count
-  
       render json: { unread_count: unread_count }
     end
   

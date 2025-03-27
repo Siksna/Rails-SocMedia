@@ -3,6 +3,7 @@
 
 <%= stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload' %>
 <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+<%= javascript_include_tag "java", "data-turbo-track": "reload", defer: true %>
 
 
 
@@ -98,7 +99,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
-
 </script>
 
 

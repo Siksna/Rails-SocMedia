@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_24_112115) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_27_145053) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -149,7 +149,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_24_112115) do
     t.boolean "read"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "sender_id"
+    t.string "notification_type"
     t.index ["conversation_id"], name: "index_notifications_on_conversation_id"
+    t.index ["sender_id"], name: "index_notifications_on_sender_id"
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
@@ -206,5 +209,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_24_112115) do
   add_foreign_key "likes", "users"
   add_foreign_key "notifications", "conversations"
   add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "sender_id"
   add_foreign_key "replies", "messages"
 end
