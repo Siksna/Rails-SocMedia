@@ -332,6 +332,7 @@ function displayFileName() {
   
   /* chats */
   function postChat() {
+
     const chatId = document.querySelector(".chat-box").dataset.chatConversationId;
     const inputField = document.getElementById("inputField_chat");
     const messageContent = inputField.value.trim();
@@ -341,9 +342,9 @@ function displayFileName() {
     if (!messageContent) {
       alert("Please enter a message.");
       return;
-    }
-  
-  
+      
+    }else{
+
     const formData = new FormData();
     formData.append("chat_conversation[content]", messageContent);
   
@@ -356,15 +357,23 @@ function displayFileName() {
       body: formData,
       headers: {
         "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-        "Accept": "text/javascript"
+        "Accept": "text/plain"
       },
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Response from server:", data);
-        inputField.value = "";
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(text => {
+        if (text) {
+          console.log("Response from server:", text);
+          inputField.value = "";
+        }
       })
       .catch(error => console.error("Error:", error));
+    }
   }
   
   document.addEventListener("DOMContentLoaded", function () {
@@ -374,7 +383,7 @@ function displayFileName() {
     if (form) {
       form.addEventListener("submit", function (event) {
         event.preventDefault(); 
-        Rails.fire(form, "submit");
+        postChat(); 
         inputField.value = "";
       });
     }
@@ -382,11 +391,12 @@ function displayFileName() {
     inputField.addEventListener("keydown", function (event) {
       if (event.key === "Enter") {
         event.preventDefault();
-        Rails.fire(form, "submit");
+        postChat(); 
         inputField.value = "";
       }
     });
   });
+  
   
   
   /* Notifications */

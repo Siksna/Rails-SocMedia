@@ -24,26 +24,3 @@
     </div>
   </div>
 <% end %>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const conversationId = "<%= @conversation.id %>";
-  
-  fetch(`/notifications/${conversationId}/mark_as_read`, {
-    method: "POST",
-    headers: { "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
-  })
-  .then(() => {
-    const messageNotificationCount = document.getElementById("message-notification-count");
-    let count = parseInt(messageNotificationCount.textContent, 10) || 0;
-    count = Math.max(count - 1, 0);
-    
-    messageNotificationCount.textContent = count;
-    messageNotificationCount.style.display = count > 0 ? "inline-block" : "none";
-
-    localStorage.setItem("messageNotificationCount", count);
-  })
-  .catch(error => console.error("Error marking chat as read:", error));
-});
-</script>
