@@ -248,11 +248,20 @@ function displayFileName() {
   
   /* Taustiņu aktivizācija */
   
-  document.getElementById('inputField').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-      postComment();
+  document.addEventListener("DOMContentLoaded", function () {
+    const inputField = document.getElementById("inputField");
+  
+    if (!inputField) {
+      return;
     }
+  
+    inputField.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        postComment();
+      }
+    });
   });
+  
   
   
   
@@ -333,7 +342,7 @@ function displayFileName() {
   /* chats */
   function postChat() {
 
-    const chatId = document.querySelector(".chat-box").dataset.chatConversationId;
+    const chatId = document.querySelector(".chats-box").dataset.chatConversationId;
     const inputField = document.getElementById("inputField_chat");
     const messageContent = inputField.value.trim();
     const fileInput = document.getElementById("fileInput_chat");
@@ -376,32 +385,10 @@ function displayFileName() {
     }
   }
   
-  document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("chat_form");
-    const inputField = document.getElementById("inputField_chat");
-  
-    if (form) {
-      form.addEventListener("submit", function (event) {
-        event.preventDefault(); 
-        postChat(); 
-        inputField.value = "";
-      });
-    }
-  
-    inputField.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        postChat(); 
-        inputField.value = "";
-      }
-    });
-  });
-  
   
   
   /* Notifications */
   document.addEventListener("DOMContentLoaded", function () {
-    console.log("JavaScript loaded!");
   
     const messageNotificationCount = document.getElementById("message-notification-count");
   
@@ -409,7 +396,7 @@ function displayFileName() {
       fetch("/notifications/unread")
         .then(response => response.json())
         .then(data => {
-          console.log("API Response:", data); 
+          console.log("API notis:", data); 
   
           const unreadCount = data.unread_count;
   
@@ -431,24 +418,30 @@ function displayFileName() {
   
   function markChatAsRead(conversationId) {
     console.log("Fetching notification for conversation ID:", conversationId);
-    
+
     fetch(`/notifications/unread`)
       .then(response => response.json())
       .then(data => {
         console.log("Unread notifications data:", data);
-        
+
+        if (!data.unread_notifications || !Array.isArray(data.unread_notifications)) {
+          console.warn("unread_notifications is undefined or not an array.");
+          return;
+        }
+
         if (data.unread_notifications.length === 0) {
           console.log("No unread notifications.");
           return;
         }
-                const notification = data.unread_notifications.find(n => n.conversation_id == conversationId);
+
+        const notification = data.unread_notifications.find(n => n.conversation_id == conversationId);
         if (!notification) {
           console.log("No matching notification found for conversation ID:", conversationId);
           return;
         }
-  
+
         const notificationId = notification.id;
-  
+
         fetch(`/notifications/${notificationId}/mark_as_read`, {
           method: "POST",
           headers: {
@@ -457,19 +450,21 @@ function displayFileName() {
           }
         }).then(() => {
           const messageNotificationCount = document.getElementById("message-notification-count");
-          messageNotificationCount.textContent = "0";
-          messageNotificationCount.style.display = "none";
-  
+          if (messageNotificationCount) {
+            messageNotificationCount.textContent = "0";
+            messageNotificationCount.style.display = "none";
+          }
+
           localStorage.setItem("unreadChatCount", "0");
           console.log("Notification marked as read.");
         }).catch(error => console.error("Error marking messages as read:", error));
       })
       .catch(error => console.error("Error fetching unread notifications:", error));
-  }
-  
-  
-  if (window.location.pathname.includes("/chats/")) {
+}
+
+if (window.location.pathname.includes("/chats/")) {
     const conversationId = window.location.pathname.split("/").pop();
     markChatAsRead(conversationId);
-  }
+}
+
   

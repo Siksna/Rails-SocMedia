@@ -1,5 +1,7 @@
 import consumer from "./consumer";
 
+let canSendMessage = true; // Toggle flag to block every second message
+
 const chatChannel = consumer.subscriptions.create(
   { channel: "ChatChannel", chat_id: 1 }, 
   {
@@ -11,38 +13,37 @@ const chatChannel = consumer.subscriptions.create(
     },
     received(data) {
       console.log("Received data from ChatChannel:", data);
-      
-      const chatBox = document.querySelector(".chat-box");
-      if (!chatBox) {
-        console.warn("Chat message received, but chat box not found on this page.");
-        return; 
+
+      if (!data.content || data.content.trim() === "") {
+        console.warn("Empty message. Ignoring...");
+        return;
       }
 
-      const chatMessages = document.getElementById("chat_messages");
-      if (!chatMessages) {
-        console.warn("Chat messages div not found");
-        return; 
+      if (!canSendMessage) {
+        console.log("Message skipped");
+        canSendMessage = true;
+        return;
       }
+
+      const chatBox = document.querySelector(".chats-box");
+      if (!chatBox) return;
+
+      const chatMessages = document.getElementById("chats_messages");
+      if (!chatMessages) return;
 
       const newMessage = document.createElement("div");
-
-      const currentUser = chatBox.dataset.currentUser || "";
-      newMessage.classList.add(data.sender_username === currentUser ? 'sent' : 'received');
-
+      newMessage.classList.add(data.sender_username === chatBox.dataset.currentUser ? 'sent' : 'received');
       newMessage.innerHTML = `<p><strong>${data.sender_username}:</strong> ${data.content}</p>`;
 
       chatMessages.appendChild(newMessage);
-
       chatBox.scrollTop = chatBox.scrollHeight;
 
       const inputField = document.getElementById("inputField_chat");
       if (inputField) {
         inputField.value = "";
       }
-    },
-    
-    sendMessage(message) {
-      this.perform("send_message", { content: message });
+
+      canSendMessage = false;
     }
   }
 );

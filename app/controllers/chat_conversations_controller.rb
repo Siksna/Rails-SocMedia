@@ -7,22 +7,9 @@ class ChatConversationsController < ApplicationController
     @chat_conversation.sender = current_user
     @chat_conversation.receiver = @conversation.sender == current_user ? @conversation.receiver : @conversation.sender
 
-    last_message = @conversation.chat_conversations.where(sender: current_user).order(created_at: :desc).limit(1).pluck(:content).first
 
-if last_message == @chat_conversation.content
-  Rails.logger.debug("Duplicate message detected: #{@chat_conversation.content}")
-  last_message = ''
-  return head :no_content
-end
   
     if @chat_conversation.save
-      Rails.logger.debug("Saved chat message: #{@chat_conversation.content}")
-      ChatChannel.broadcast_to(
-        @conversation,
-        sender_username: @chat_conversation.sender.username,
-        content: @chat_conversation.content,
-        chat_id: @conversation.id
-      )
 
       Notification.create!(
         user: @chat_conversation.receiver,
