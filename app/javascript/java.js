@@ -340,6 +340,14 @@ function displayFileName() {
   });
   
   /* chats */
+  document.addEventListener('DOMContentLoaded', function() {
+    const postButton = document.getElementById('postChat');
+    
+    if (postButton) {
+      postButton.addEventListener('click', postChat);
+    }
+  });
+
   function postChat() {
 
     const chatId = document.querySelector(".chats-box").dataset.chatConversationId;

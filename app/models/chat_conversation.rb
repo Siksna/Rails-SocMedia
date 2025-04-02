@@ -10,7 +10,9 @@ class ChatConversation < ApplicationRecord
       "chat_#{conversation.id}",
       {
         content: content,
-        sender_username: sender.username
+        sender_username: sender.username,
+        message_id: id,
+        conversation_id: conversation.id
       }
     )
   end

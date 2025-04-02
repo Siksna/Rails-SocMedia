@@ -29,6 +29,22 @@ class ChatConversationsController < ApplicationController
     end
   end
 
+
+  def destroy
+    @chat_conversation = ChatConversation.find_by(id: params[:id], conversation_id: params[:chat_id])
+  
+    if @chat_conversation.nil?
+      Rails.logger.error("Chat not found")
+    end
+  
+    if @chat_conversation.destroy
+      head :no_content
+    else
+      Rails.logger.error("Failed")
+    end
+  end
+  
+
   private
 
   def chat_message_params
