@@ -422,53 +422,34 @@ function displayFileName() {
   
     updateUnreadMessages();
   });
-  
-  
-  function markChatAsRead(conversationId) {
-    console.log("Fetching notification for conversation ID:", conversationId);
 
-    fetch(`/notifications/unread`)
+    function markChatAsRead(conversationId) {
+      console.log("Marking chat as read for conversation ID:", conversationId);
+    
+      fetch(`/notifications/mark_as_read/${conversationId}`, {
+        method: "POST",
+        headers: {
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+          "Content-Type": "application/json"
+        }
+      })
       .then(response => response.json())
       .then(data => {
-        console.log("Unread notifications data:", data);
-
-        if (!data.unread_notifications || !Array.isArray(data.unread_notifications)) {
-          console.warn("unread_notifications is undefined or not an array.");
-          return;
-        }
-
-        if (data.unread_notifications.length === 0) {
-          console.log("No unread notifications.");
-          return;
-        }
-
-        const notification = data.unread_notifications.find(n => n.conversation_id == conversationId);
-        if (!notification) {
-          console.log("No matching notification found for conversation ID:", conversationId);
-          return;
-        }
-
-        const notificationId = notification.id;
-
-        fetch(`/notifications/${notificationId}/mark_as_read`, {
-          method: "POST",
-          headers: {
-            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
-            "Content-Type": "application/json"
-          }
-        }).then(() => {
+        if (data.success) {
+          console.log("All notifications for conversation marked as read.");
           const messageNotificationCount = document.getElementById("message-notification-count");
           if (messageNotificationCount) {
             messageNotificationCount.textContent = "0";
             messageNotificationCount.style.display = "none";
           }
-
           localStorage.setItem("unreadChatCount", "0");
-          console.log("Notification marked as read.");
-        }).catch(error => console.error("Error marking messages as read:", error));
+        } else {
+          console.error("Error marking messages as read:", data.error);
+        }
       })
-      .catch(error => console.error("Error fetching unread notifications:", error));
-}
+      .catch(error => console.error("Error marking messages as read:", error));
+    }    
+
 
 if (window.location.pathname.includes("/chats/")) {
     const conversationId = window.location.pathname.split("/").pop();

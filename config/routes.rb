@@ -47,9 +47,9 @@ Rails.application.routes.draw do
     collection do
       get :unread
     end
-    member do
-      post :mark_as_read
-    end
+    collection do
+      post "mark_as_read/:conversation_id", to: "notifications#mark_as_read", as: :mark_chat_as_read
+    end    
   end
   
 
