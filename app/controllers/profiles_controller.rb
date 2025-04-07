@@ -32,13 +32,23 @@ class ProfilesController < ApplicationController
       unless current_user.following.include?(@user)
         current_user.following << @user
     
-        Notification.create!(
-          user: @user,
-          sender: current_user,
-          message: "New follower: #{current_user.username}",
-          notification_type: "follow",
-          read: false
-        )
+        notification = Notification.create!(
+        user: @user,
+        sender: current_user,
+        message: "New follower: #{current_user.username}",
+        notification_type: "follow",
+        read: false
+)
+
+NotificationChannel.broadcast_to(
+  @user,
+  notification_id: notification.id,
+  message: notification.message,
+  notification_type: notification.notification_type,
+  sender_username: current_user.username,
+  created_at: notification.created_at.strftime("%b %d, %H:%M")
+)
+
       end
     
       respond_to do |format|

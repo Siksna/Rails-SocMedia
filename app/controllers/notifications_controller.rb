@@ -24,6 +24,21 @@ class NotificationsController < ApplicationController
       end
     end
     
+  
+    def destroy
+      @notification = Notification.find_by(id: params[:id], chat_conversation_id: params[:chat_conversation_id])
+    
+      if @notification.nil?
+        render json: { error: "Notification not found" }, status: :not_found
+        return
+      end
+    
+      if @notification.destroy
+        render json: { success: true }, status: :ok
+      else
+        render json: { error: "Failed to delete notification" }, status: :unprocessable_entity
+      end
+    end
     
     
   end

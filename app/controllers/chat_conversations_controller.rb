@@ -11,17 +11,20 @@ class ChatConversationsController < ApplicationController
   
     if @chat_conversation.save
 
-      Notification.create!(
+      @notification = Notification.create!(
         user: @chat_conversation.receiver,
         conversation: @conversation,
+        chat_conversation_id: @chat_conversation.id,
         read: false
       )
 
       NotificationChannel.broadcast_to(
       @chat_conversation.receiver,
+      notification_id: @notification.id,
+      chat_conversation_id: @chat_conversation.id,
       conversation_id: @conversation.id,
       unread_count: Notification.where(user: @chat_conversation.receiver, read: false).count
-)
+      )
 
 
     else

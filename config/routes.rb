@@ -43,7 +43,7 @@ Rails.application.routes.draw do
 
   devise_for :users, controllers: { sessions: "sessions" }
 
-  resources :notifications, only: [] do
+  resources :notifications, only: [:destroy]  do
     collection do
       get :unread
     end

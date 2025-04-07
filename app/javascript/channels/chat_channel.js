@@ -19,10 +19,6 @@ const chatChannel = consumer.subscriptions.create(
         return;
       }
 
-      // if (!data.message_id || !data.conversation_id) {
-      //   console.error("Missing message_id or conversation_id. Cannot delete message.");
-      //   return;
-      // }
 
       if (!canSendMessage) {
         console.log("Message skipped");
