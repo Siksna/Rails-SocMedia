@@ -14,6 +14,7 @@ class ChatConversationsController < ApplicationController
       @notification = Notification.create!(
         user: @chat_conversation.receiver,
         conversation: @conversation,
+        notification_type: "chats",
         chat_conversation_id: @chat_conversation.id,
         read: false
       )
@@ -22,6 +23,7 @@ class ChatConversationsController < ApplicationController
       @chat_conversation.receiver,
       notification_id: @notification.id,
       chat_conversation_id: @chat_conversation.id,
+      notification_type: @notification.notification_type,
       conversation_id: @conversation.id,
       unread_count: Notification.where(user: @chat_conversation.receiver, read: false).count
       )
