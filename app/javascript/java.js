@@ -397,31 +397,84 @@ function displayFileName() {
   
   /* Notifications */
   document.addEventListener("DOMContentLoaded", function () {
-  
-    const messageNotificationCount = document.getElementById("message-notification-count");
-  
+   const messageNotificationCount = document.getElementById("message-notification-count");
+          const generalNotificationCount = document.getElementById("notification-count");
+          const notificationDropdown = document.getElementById("notifications-dropdown");
+    
     function updateUnreadMessages() {
       fetch("/notifications/unread")
         .then(response => response.json())
         .then(data => {
-          console.log("API notis:", data); 
-  
-          const unreadCount = data.unread_count;
-  
-          if (unreadCount > 0) {
-            messageNotificationCount.textContent = unreadCount;
-            messageNotificationCount.style.display = "inline-block";
-          } else {
-            messageNotificationCount.style.display = "none";
+          console.log("Unread notifications:", data);
+    
+         
+          if (messageNotificationCount) {
+            if (data.chat_unread_count > 0) {
+              messageNotificationCount.textContent = data.chat_unread_count;
+              messageNotificationCount.style.display = "inline-block";
+            } else {
+              messageNotificationCount.style.display = "none";
+            }
           }
+    
+          if (generalNotificationCount) {
+            if (data.general_unread_count > 0) {
+              generalNotificationCount.textContent = data.general_unread_count;
+              generalNotificationCount.style.display = "inline-block";
+            } else {
+              generalNotificationCount.style.display = "none";
+            }
+          }
+    
+          if (notificationDropdown) {
+            notificationDropdown.innerHTML = "";
+    
+            if (data.general_notifications && data.general_notifications.length > 0) {
+              data.general_notifications.forEach(notification => {
+                const li = document.createElement("li");
+                li.className = "dropdown-item";
+    
+                const date = new Date(notification.created_at);
+                const formattedDate = date.toLocaleString();
+    
+                li.textContent = `${notification.message} (${formattedDate})`;
+                notificationDropdown.appendChild(li);
+              });
+            } else {
+              const li = document.createElement("li");
+              li.className = "dropdown-item text-muted";
+              li.textContent = "Nav jaunu paziņojumu.";
+              notificationDropdown.appendChild(li);
+            }
+          }
+
+
+
+          const unreadCounts = data.unread_notifications || {};
   
-          localStorage.setItem("unreadChatCount", unreadCount);
+        document.querySelectorAll("[data-convo-id]").forEach(card => {
+          const convoId = card.getAttribute("data-convo-id");
+          const badge = card.querySelector(".chat-unread-count");
+  
+          if (badge && unreadCounts[convoId] > 0) {
+            badge.textContent = unreadCounts[convoId];
+            badge.style.display = "inline-block";
+          } else if (badge) {
+            badge.style.display = "none";
+          }
+        });
+    
+          localStorage.setItem("unreadChatCount", data.chat_unread_count);
+          localStorage.setItem("unreadGeneralCount", data.general_unread_count);
         })
         .catch(error => console.error("Error fetching notifications:", error));
     }
+    
   
     updateUnreadMessages();
   });
+
+  
 
     function markChatAsRead(conversationId) {
       console.log("Marking chat as read for conversation ID:", conversationId);

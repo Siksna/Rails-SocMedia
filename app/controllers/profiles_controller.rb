@@ -29,45 +29,27 @@ class ProfilesController < ApplicationController
 
 
     def follow
-      # unless current_user.following.include?(@user)
-      #   current_user.following << @user
-
-        
-
-      #   @notification = Notification.create!(
-      #     user: @user,
-      #     sender: current_user,
-      #     message: "New follower: #{current_user.username}",
-      #     notification_type: "follow",
-      #     read: false
-      #   )
-
-      #   NotificationChannel.broadcast_to(
-      #   @user,
-      #   notification_id: @notification.id,
-      #   message: @notification.message,
-      #   notification_type: @notification.notification_type,
-      #   sender_username: current_user.username,
-      #   created_at: @notification.created_at.strftime("%b %d, %H:%M")
-      #   )
+      unless current_user.following.include?(@user)
+        current_user.following << @user
 
 
-      # end
+
+      end
     
-      # respond_to do |format|
-      #   format.html { redirect_to profile_path(@user) }
-      #   format.js
-      # end
+      respond_to do |format|
+        format.html { redirect_to profile_path(@user) }
+        format.js
+      end
     end
     
     
   
     def unfollow
-      # current_user.following.delete(@user)
-      # respond_to do |format|
-      #   format.html { redirect_to profile_path(@user) }
-      #   format.js
-      # end
+      current_user.following.delete(@user)
+      respond_to do |format|
+        format.html { redirect_to profile_path(@user) }
+        format.js
+      end
     end
 
   private

@@ -70,6 +70,25 @@ end
       current_user.unlike(@reply)
     else
       current_user.like(@reply)
+
+      if @reply.user != current_user
+        notification = Notification.create!(
+          user: @reply.user,
+          sender_id: current_user.id,
+          message: "#{current_user.username} liked your message",
+          notification_type: "like",
+          read: false
+        )
+  
+        NotificationChannel.broadcast_to(
+          @message.user,
+          notification_id: notification.id,
+          message: notification.message,
+          notification_type: notification.notification_type,
+          sender_username: current_user.username,
+          created_at: notification.created_at.strftime("%b %d, %H:%M")
+        )
+      end
     end
     redirect_to request.referer
   end

@@ -1,14 +1,31 @@
 class NotificationsController < ApplicationController
     before_action :authenticate_user!
-  
+
     def unread
-      unread_notifications = Notification.where(user: current_user, read: false)
-    
-      respond_to do |format|
-        format.json { render json: { unread_count: unread_notifications.count, unread_notifications: unread_notifications.as_json(only: [:id, :conversation_id]) } }
-        format.html { redirect_to root_path } 
+      if request.format.html?
+        redirect_to root_path and return
       end
+    
+      user = current_user
+    
+      chat_notifications = Notification.where(user: user, notification_type: 'chats', read: false)
+      
+      general_notifications = Notification.where(user: user)
+                                           .where.not(notification_type: 'chats')
+                                           .where(read: false)
+    
+      unread_notifications = chat_notifications.group(:conversation_id).count
+    
+      render json: {
+        chat_unread_count: chat_notifications.count,
+        general_unread_count: general_notifications.count,
+        general_notifications: general_notifications.as_json(only: [:id, :message, :created_at]),
+        unread_notifications: unread_notifications
+      }
     end
+    
+
+    
     
     
   

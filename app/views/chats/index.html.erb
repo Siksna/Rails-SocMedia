@@ -1,16 +1,18 @@
 <h2 class="text-xl font-bold mb-4">Friends</h2>
 <div class="grid grid-cols-3 gap-4">
   <% @friends.each do |friend| %>
-    <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-<%= link_to chat_path(current_user.find_or_create_conversation(friend)) do %>
+    <% conversation = current_user.find_or_create_conversation(friend) %>
+    <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center" data-convo-id="<%= conversation.id %>">
+      <%= link_to chat_path(conversation) do %>
         <% if friend.profile_picture.attached? %>
-        <%= image_tag friend.profile_picture, class: 'w-20 h-20 rounded-full object-cover mb-2' %>
+          <%= image_tag friend.profile_picture, class: 'w-20 h-20 rounded-full object-cover mb-2' %>
         <% else %>
-        <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>; width:100px; height:auto;">
-        <%= image_tag 'default_profile.png', class: 'w-20 h-20 rounded-full object-cover mb-2' %>
-        </div>
+          <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>; width:100px; height:auto;">
+            <%= image_tag 'default_profile.png', class: 'w-20 h-20 rounded-full object-cover mb-2' %>
+          </div>
         <% end %>
-        <p class="text-center text-sm font-semibold"><%= friend.username %></p>
+        <p class="text-center text-sm font-semibold mb-1"><%= friend.username %></p>
+        <span class="chat-unread-count badge bg-danger" style="display: none;">0</span>
       <% end %>
     </div>
   <% end %>

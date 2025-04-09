@@ -92,8 +92,6 @@ class MessagesController < ApplicationController
   end
   
   
-  
-
 
 
   def toggle_like
@@ -104,6 +102,25 @@ class MessagesController < ApplicationController
     else
       current_user.like(@message)
       liked = true
+
+      if @message.user != current_user
+        notification = Notification.create!(
+          user: @message.user,
+          sender_id: current_user.id,
+          message: "#{current_user.username} liked your message",
+          notification_type: "like",
+          read: false
+        )
+  
+        NotificationChannel.broadcast_to(
+          @message.user,
+          notification_id: notification.id,
+          message: notification.message,
+          notification_type: notification.notification_type,
+          sender_username: current_user.username,
+          created_at: notification.created_at.strftime("%b %d, %H:%M")
+        )
+      end
     end
     respond_to do |format|
       format.json { render json: { likes_count: @message.likes.count, liked: liked } }

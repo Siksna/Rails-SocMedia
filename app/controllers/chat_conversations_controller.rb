@@ -19,13 +19,16 @@ class ChatConversationsController < ApplicationController
         read: false
       )
 
+      unread_notifications = Notification.where(user: @chat_conversation.receiver, notification_type: "chats", read: false).as_json(only: [:id, :conversation_id])
+
       NotificationChannel.broadcast_to(
       @chat_conversation.receiver,
       notification_id: @notification.id,
       chat_conversation_id: @chat_conversation.id,
       notification_type: @notification.notification_type,
       conversation_id: @conversation.id,
-      unread_count: Notification.where(user: @chat_conversation.receiver, read: false).count
+      unread_count: Notification.where(user: @chat_conversation.receiver, read: false).count,
+      unread_notifications: unread_notifications
       )
 
 
