@@ -681,3 +681,13 @@ hr {
 #message-notification-count, #notification-count {
   display: none;
 }
+
+
+.blue-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #007bff;
+  display: inline-block;
+  margin-right: 8px;
+}

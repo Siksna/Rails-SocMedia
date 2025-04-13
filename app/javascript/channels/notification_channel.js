@@ -15,104 +15,117 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
     console.log("New notification received:", data);
 
     if (data.notification_type === "chats") {
+      if (!canSendNotification) {
+        console.log("Notification skipped");
 
-    if (!canSendNotification) {
-      console.log("Notification skipped");
+        const notificationId = data.notification_id;
+        const chatConversationId = data.chat_conversation_id;
 
-    const notificationId = data.notification_id; 
-    const chatConversationId = data.chat_conversation_id;
-
-    fetch(`/notifications/${notificationId}?chat_conversation_id=${chatConversationId}`, {
-        method: "DELETE",
-        headers: {
-          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-          "Accept": "application/json"
-        }
-      })
-        .then(response => {
-          if (response.ok) {
-            console.log(`Notification with ID ${data.message_id} has been deleted.`);
-          } else {
-            console.error("Failed to delete notification from the database");
+        fetch(`/notifications/${notificationId}?chat_conversation_id=${chatConversationId}`, {
+          method: "DELETE",
+          headers: {
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+            "Accept": "application/json"
           }
         })
-        .catch(error => console.error("Error deleting notification:", error));
+          .then(response => {
+            if (response.ok) {
+              console.log(`Notification with ID ${data.message_id} has been deleted.`);
+            } else {
+              console.error("Failed to delete notification from the database");
+            }
+          })
+          .catch(error => console.error("Error deleting notification:", error));
 
-      canSendNotification = true;
-      return;
+        canSendNotification = true;
+        return;
+      }
+
+      const messageNotificationCount = document.getElementById("message-notification-count");
+      let count = parseInt(messageNotificationCount.textContent, 10) || 0;
+      count += 1;
+
+      messageNotificationCount.textContent = count;
+      messageNotificationCount.style.display = count > 0 ? "inline-block" : "none";
+
+      canSendNotification = false;
+
+    } else if (data.notification_type === "follow" || data.notification_type === "like") {
+      addGeneralNotification(data);
     }
 
-    const messageNotificationCount = document.getElementById("message-notification-count");
-    let count = parseInt(messageNotificationCount.textContent, 10) || 0;
-    count += 1;
+    const convoCounts = {};
 
-    messageNotificationCount.textContent = count;
-    messageNotificationCount.style.display = count > 0 ? "inline-block" : "none";
+    (data.unread_notifications || []).forEach(n => {
+      console.log(`Processing notification for conversation ID: ${n.conversation_id}`);
+      convoCounts[n.conversation_id] = (convoCounts[n.conversation_id] || 0) + 1;
+    });
 
-    canSendNotification = false;
+    document.querySelectorAll("[data-convo-id]").forEach(card => {
+      const convoId = card.getAttribute("data-convo-id");
+      const badge = card.querySelector(".chat-unread-count");
 
-  } else if (data.notification_type === "follow") {
-    
-    const notificationDropdown = document.getElementById("notifications-dropdown");
-    const notificationCount = document.getElementById("notification-count");
-
-    const li = document.createElement("li");
-    li.className = "dropdown-item";
-    li.textContent = `${data.message} (${data.created_at})`;
-
-    notificationDropdown.prepend(li);
-    let count = parseInt(notificationCount.textContent, 10) || 0;
-    count += 1;
-    notificationCount.textContent = count;
-    notificationCount.style.display = "inline-block";
-
-    
-  } else if (data.notification_type === "like") {
-    const notificationDropdown = document.getElementById("notifications-dropdown");
-    const notificationCount = document.getElementById("notification-count");
-  
-    const li = document.createElement("li");
-    li.className = "dropdown-item";
-    li.textContent = `${data.message} (${data.created_at})`;
-  
-    notificationDropdown.prepend(li);
-    let count = parseInt(notificationCount.textContent, 10) || 0;
-    count += 1;
-    notificationCount.textContent = count;
-    notificationCount.style.display = "inline-block";
-  }
-  
-  const convoCounts = {};
-console.log("Unread notifications received:", data.unread_notifications);
-
-(data.unread_notifications || []).forEach(n => {
-  console.log(`Processing notification for conversation ID: ${n.conversation_id}`);
-  convoCounts[n.conversation_id] = (convoCounts[n.conversation_id] || 0) + 1;
-});
-
-console.log("Convo counts map built:", convoCounts);
-
-document.querySelectorAll("[data-convo-id]").forEach(card => {
-  const convoId = card.getAttribute("data-convo-id");
-  const badge = card.querySelector(".chat-unread-count");
-
-  console.log(`Checking card for convo ID: ${convoId}`);
-  console.log(`Unread count for convo ${convoId}:`, convoCounts[convoId]);
-
-  if (badge && convoCounts[convoId] > 0) {
-    badge.textContent = convoCounts[convoId];
-    badge.style.display = "inline-block";
-    console.log(`Displayed badge with count ${convoCounts[convoId]} for convo ID ${convoId}`);
-  } else if (badge) {
-    badge.style.display = "none";
-    console.log(`Hid badge for convo ID ${convoId}`);
-  } else {
-    console.warn(`No badge element found inside card with convo ID ${convoId}`);
+      if (badge && convoCounts[convoId] > 0) {
+        badge.textContent = convoCounts[convoId];
+        badge.style.display = "inline-block";
+      } else if (badge) {
+        badge.style.display = "none";
+      } else {
+        console.warn(`No badge element found inside card with convo ID ${convoId}`);
+      }
+    });
   }
 });
 
+function addGeneralNotification(data) {
+  const notificationDropdown = document.getElementById("notifications-dropdown");
+  const notificationCount = document.getElementById("notification-count");
 
-  }
-});
+  const noNotifMessage = notificationDropdown.querySelector(".text-muted");
+  if (noNotifMessage) noNotifMessage.remove();
+
+  const li = document.createElement("li");
+  li.className = "dropdown-item";
+
+  const dot = document.createElement("span");
+  dot.className = "blue-dot";
+
+  const messageText = document.createElement("span");
+  messageText.textContent = ` ${data.message} (${data.created_at})`;
+
+  li.appendChild(dot);
+  li.appendChild(messageText);
+
+  li.addEventListener("mouseenter", () => {
+    markSingleNotificationAsRead(data.notification_id, dot);
+  });
+
+  notificationDropdown.prepend(li);
+
+  let count = parseInt(notificationCount.textContent, 10) || 0;
+  count += 1;
+  notificationCount.textContent = count;
+  notificationCount.style.display = "inline-block";
+}
+
+
+function markSingleNotificationAsRead(notificationId, dotElement) {
+  fetch(`/notifications/mark_as_read_notification/${notificationId}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+      "Content-Type": "application/json"
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        if (dotElement) dotElement.style.display = "none";
+      } else {
+        console.error("Failed to mark notification as read:", data.error);
+      }
+    })
+    .catch(error => console.error("Error marking notification as read:", error));
+}
 
 export default NotificationChannel;

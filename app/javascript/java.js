@@ -433,17 +433,30 @@ function displayFileName() {
               data.general_notifications.forEach(notification => {
                 const li = document.createElement("li");
                 li.className = "dropdown-item";
-    
+              
                 const date = new Date(notification.created_at);
                 const formattedDate = date.toLocaleString();
-    
-                li.textContent = `${notification.message} (${formattedDate})`;
+              
+                const dot = document.createElement("span");
+                dot.className = "blue-dot";
+
+                const messageText = document.createElement("span");
+                messageText.textContent = `${notification.message} (${formattedDate})`;
+
+                li.appendChild(dot);
+                li.appendChild(messageText);
+
+                li.addEventListener("mouseenter", () => {
+                 markSingleNotificationAsRead(notification.id, dot);
+                  });
+
+              
                 notificationDropdown.appendChild(li);
               });
             } else {
               const li = document.createElement("li");
               li.className = "dropdown-item text-muted";
-              li.textContent = "Nav jaunu paziņojumu.";
+              li.textContent = "No new notifications.";
               notificationDropdown.appendChild(li);
             }
           }
@@ -509,4 +522,27 @@ if (window.location.pathname.includes("/chats/")) {
     markChatAsRead(conversationId);
 }
 
-  
+
+
+
+
+function markSingleNotificationAsRead(notificationId, element) {
+  fetch(`/notifications/mark_as_read_notification/${notificationId}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`Notification ${notificationId} marked as read`);
+      if (element) element.style.display = "none";
+
+    } else {
+      console.error("Failed to mark notification as read:", data.error);
+    }
+  })
+  .catch(error => console.error("Error marking notification as read:", error));
+}

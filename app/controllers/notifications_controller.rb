@@ -40,6 +40,19 @@ class NotificationsController < ApplicationController
         render json: { error: "Conversation not found" }, status: :not_found
       end
     end
+
+
+    def mark_as_read_notification
+      notification = Notification.find_by(id: params[:id], user: current_user)
+    
+      if notification
+        notification.update(read: true)
+        render json: { success: true }
+      else
+        render json: { error: "Notification not found" }, status: :not_found
+      end
+    end
+    
     
   
     def destroy
