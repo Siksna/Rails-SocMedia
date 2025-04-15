@@ -28,7 +28,8 @@ class ChatConversationsController < ApplicationController
       notification_type: @notification.notification_type,
       conversation_id: @conversation.id,
       unread_count: Notification.where(user: @chat_conversation.receiver, read: false).count,
-      unread_notifications: unread_notifications
+      unread_notifications: unread_notifications,
+      content: @chat_conversation.content
       )
 
 

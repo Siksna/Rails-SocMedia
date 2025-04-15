@@ -6,8 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatId = chatBox?.dataset?.chatConversationId;
 
   if (!chatId) {
-    console.error("Chat ID not found. Cannot subscribe to chat.");
-    console.log("ChatBox info:", chatBox?.dataset);
     return;
   }
 

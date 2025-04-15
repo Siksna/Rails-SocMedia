@@ -1,9 +1,14 @@
 <h2 class="text-xl font-bold mb-4">Friends</h2>
-<div class="grid grid-cols-3 gap-4">
-  <% @friends.each do |friend| %>
-    <% conversation = current_user.find_or_create_conversation(friend) %>
-    <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center" data-convo-id="<%= conversation.id %>">
-      <%= link_to chat_path(conversation) do %>
+<div id="friends-grid" class="grid grid-cols-3 gap-4">
+<% @sorted_conversations.each do |conversation| %>
+  <% friend = conversation.sender == current_user ? conversation.receiver : conversation.sender %>
+    <% last_message_time = conversation.chat_conversations.maximum(:created_at)&.to_i || 0 %>
+    <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center"
+         data-convo-id="<%= conversation.id %>"
+         data-last-message-at="<%= last_message_time %>">
+
+         
+          <%= link_to chat_path(conversation) do %>
         <% if friend.profile_picture.attached? %>
           <%= image_tag friend.profile_picture, class: 'w-20 h-20 rounded-full object-cover mb-2' %>
         <% else %>
@@ -12,6 +17,15 @@
           </div>
         <% end %>
         <p class="text-center text-sm font-semibold mb-1"><%= friend.username %></p>
+
+
+        <% last_message = @last_messages[conversation.id] %>
+        <% if last_message.present? %>
+        <p class="text-sm text-gray-500 text-center mt-1 last-message-snippet">
+        <%= truncate(last_message, length: 30) %>
+        </p>
+        <% end %>
+
         <span class="chat-unread-count badge bg-danger" style="display: none;">0</span>
       <% end %>
     </div>

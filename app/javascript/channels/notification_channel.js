@@ -14,6 +14,8 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
   received(data) {
     console.log("New notification received:", data);
 
+    
+    
     if (data.notification_type === "chats") {
       if (!canSendNotification) {
         console.log("Notification skipped");
@@ -74,6 +76,38 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
         console.warn(`No badge element found inside card with convo ID ${convoId}`);
       }
     });
+
+
+/* live sort un messages index.html.erb lapa*/
+const convoCard = document.querySelector(`[data-convo-id="${data.conversation_id}"]`);
+if (convoCard) {
+  convoCard.setAttribute("data-last-message-at", Math.floor(Date.now() / 1000));
+
+  const snippet = convoCard.querySelector(".last-message-snippet"); 
+  function truncate(str, maxLength) {
+      if (typeof str !== "string") return "";
+      return str.length > maxLength ? str.slice(0, maxLength) + "…" : str;
+    }    
+
+    if (snippet) {
+    snippet.textContent = truncate(data.content, 30);
+    console.log("Last message content:", data.content);
+
+  }
+
+  const grid = document.getElementById("friends-grid");
+  const cards = Array.from(grid.children);
+
+  cards.sort((a, b) => {
+    const aTime = parseInt(a.getAttribute("data-last-message-at"), 10);
+    const bTime = parseInt(b.getAttribute("data-last-message-at"), 10);
+    return bTime - aTime;
+  });
+
+  cards.forEach(card => grid.appendChild(card));
+}
+
+    
   }
 });
 

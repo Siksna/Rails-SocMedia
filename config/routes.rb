@@ -18,7 +18,9 @@ Rails.application.routes.draw do
 
 
   resources :chats, only: [:index, :show] do
-    resources :chat_conversations, only: [:create, :destroy]
+    resources :chat_conversations, only: [:create, :destroy] 
+   post '/chats/:id/close', to: 'chats#close', as: 'close_chat'
+
   end
   
   
