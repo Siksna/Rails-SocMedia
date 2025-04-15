@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_15_154254) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_15_160625) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -85,15 +85,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_15_154254) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "closed_chats", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "conversation_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["conversation_id"], name: "index_closed_chats_on_conversation_id"
-    t.index ["user_id"], name: "index_closed_chats_on_user_id"
-  end
-
   create_table "conversations", force: :cascade do |t|
     t.integer "sender_id"
     t.integer "receiver_id"
@@ -128,6 +119,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_15_154254) do
     t.index ["friend_id"], name: "index_friendships_on_friend_id"
     t.index ["user_id", "friend_id"], name: "index_friendships_on_user_id_and_friend_id", unique: true
     t.index ["user_id"], name: "index_friendships_on_user_id"
+  end
+
+  create_table "hidden_chats", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "conversation_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conversation_id"], name: "index_hidden_chats_on_conversation_id"
+    t.index ["user_id"], name: "index_hidden_chats_on_user_id"
   end
 
   create_table "likes", force: :cascade do |t|
@@ -212,10 +212,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_15_154254) do
   add_foreign_key "chat_users", "users"
   add_foreign_key "chats", "users", column: "user1_id"
   add_foreign_key "chats", "users", column: "user2_id"
-  add_foreign_key "closed_chats", "conversations"
-  add_foreign_key "closed_chats", "users"
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
+  add_foreign_key "hidden_chats", "conversations"
+  add_foreign_key "hidden_chats", "users"
   add_foreign_key "likes", "messages"
   add_foreign_key "likes", "replies"
   add_foreign_key "likes", "users"
