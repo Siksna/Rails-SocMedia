@@ -1,5 +1,3 @@
-<h2><%= @conversation.sender == current_user ? @conversation.receiver.username : @conversation.sender.username %></h2>
-
 <div class="chats-box" data-controller="chat" data-chat-conversation-id="<%= @conversation.id %>" data-current-user="<%= current_user.username %>">
 <div id="chats_messages" data-chat-target="messages">
 <%= render 'chats/chat_conversation', chat_conversations: @chat_conversations %>

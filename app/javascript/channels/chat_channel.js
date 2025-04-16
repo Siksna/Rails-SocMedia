@@ -1,7 +1,6 @@
 import consumer from "./consumer";
 
 document.addEventListener("DOMContentLoaded", () => {
-  let canSendMessage = true;
   const chatBox = document.querySelector(".chats-box");
   const chatId = chatBox?.dataset?.chatConversationId;
 
@@ -26,29 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        if (!canSendMessage) {
-          console.log("Message skipped");
-
-          fetch(`/chats/${data.conversation_id}/chat_conversations/${data.message_id}`, {
-            method: "DELETE",
-            headers: {
-              "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-              "Accept": "application/json"
-            }
-          })
-            .then(response => {
-              if (response.ok) {
-                console.log(`Message with ID ${data.message_id} has been deleted.`);
-              } else {
-                console.error("Failed to delete message from database");
-              }
-            })
-            .catch(error => console.error("Error deleting message:", error));
-
-          canSendMessage = true;
-          return;
-        }
-
         const chatMessages = document.getElementById("chats_messages");
         if (!chatMessages) return;
 
@@ -64,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
           inputField.value = "";
         }
 
-        canSendMessage = false;
       }
     }
   );

@@ -691,3 +691,10 @@ hr {
   display: inline-block;
   margin-right: 8px;
 }
+
+
+/* CHAT */
+.chats-box {
+  max-height: calc(95vh - 200px);
+  overflow-y: auto;
+}

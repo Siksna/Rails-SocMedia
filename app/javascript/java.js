@@ -348,7 +348,8 @@ function displayFileName() {
     }
   });
 
-  function postChat() {
+  function postChat(event) {
+    event.preventDefault();
 
     const chatId = document.querySelector(".chats-box").dataset.chatConversationId;
     const inputField = document.getElementById("inputField_chat");
@@ -390,6 +391,24 @@ function displayFileName() {
         }
       })
       .catch(error => console.error("Error:", error));
+    }
+  }
+  
+
+  window.addEventListener("load", function () {
+    const postButton = document.getElementById("postChat");
+  
+    if (postButton) {
+      postButton.addEventListener("click", postChat);
+    }
+  
+    scrollToBottom();
+  });
+  
+  function scrollToBottom() {
+    const messagesContainer = document.querySelector(".chats-box");
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
   }
   
