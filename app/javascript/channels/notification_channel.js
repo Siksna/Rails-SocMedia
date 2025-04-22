@@ -14,9 +14,16 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
     console.log("New notification received:", data);
 
     
-    
+    const currentChatBox = document.querySelector(".chats-box");
+    const currentConversationId = currentChatBox?.dataset.chatConversationId;
+  
     if (data.notification_type === "chats") {
 
+
+      if (currentChatBox && currentConversationId == data.conversation_id) {
+        console.log("In current chat conversation, skipping notification");
+        return;
+      }
       const messageNotificationCount = document.getElementById("message-notification-count");
       let count = parseInt(messageNotificationCount.textContent, 10) || 0;
       count += 1;

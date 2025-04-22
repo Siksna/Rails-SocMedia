@@ -340,12 +340,27 @@ function displayFileName() {
   });
   
   /* chats */
-  document.addEventListener('DOMContentLoaded', function() {
-    const postButton = document.getElementById('postChat');
-    
+  let shouldAutoScroll = true;
+  let atBottomTimer = null;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const postButton = document.getElementById("postChat");
+    const chatBox = document.querySelector(".chats-box");
+    const newMessageBtn = createNewMessageButton();
+
     if (postButton) {
-      postButton.addEventListener('click', postChat);
+      postButton.addEventListener("click", postChat);
     }
+
+    if (chatBox) {
+      chatBox.addEventListener("scroll", () => {
+        const nearBottom = isNearBottom(chatBox);
+        shouldAutoScroll = nearBottom;
+        if (nearBottom) newMessageBtn.style.display = "none";
+      });
+    }
+
+    scrollToBottom();
   });
 
   function postChat(event) {
@@ -356,20 +371,16 @@ function displayFileName() {
     const messageContent = inputField.value.trim();
     const fileInput = document.getElementById("fileInput_chat");
     const file = fileInput.files[0];
-  
+
     if (!messageContent) {
       alert("Please enter a message.");
       return;
-      
-    }else{
+    }
 
     const formData = new FormData();
     formData.append("chat_conversation[content]", messageContent);
-  
-    if (file) {
-      formData.append("chat_conversation[file]", file);
-    }
-  
+    if (file) formData.append("chat_conversation[file]", file);
+
     fetch(`/chats/${chatId}/chat_conversations`, {
       method: "POST",
       body: formData,
@@ -388,29 +399,153 @@ function displayFileName() {
         if (text) {
           console.log("Response from server:", text);
           inputField.value = "";
+          scrollToBottom(); 
         }
       })
       .catch(error => console.error("Error:", error));
-    }
   }
+
   
 
-  window.addEventListener("load", function () {
-    const postButton = document.getElementById("postChat");
-  
-    if (postButton) {
-      postButton.addEventListener("click", postChat);
-    }
-  
+function isNearBottom(container, threshold = 100) {
+  return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+}
+
+function scrollToBottom() {
+  const chatBox = document.querySelector(".chats-box");
+  if (chatBox) {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+}
+
+function clearUnseen() {
+  document.querySelectorAll(".chat-message.unseen").forEach(msg =>
+    msg.classList.remove("unseen")
+  );
+  const divider = document.querySelector(".unseen-divider");
+  if (divider) divider.remove();
+}
+
+function ensureUnseenDivider() {
+  const chatMessages = document.getElementById("chats_messages");
+  if (!document.querySelector(".unseen-divider") && chatMessages) {
+    const divider = document.createElement("div");
+    divider.classList.add("unseen-divider");
+    chatMessages.appendChild(divider);
+  }
+}
+
+
+function createNewMessageButton() {
+  const btn = document.createElement("button");
+  btn.id = "newMessageBtn";
+  btn.innerText = "New message";
+  btn.style.cssText = `
+    position: absolute;
+    bottom: 90px;
+    right: 20px;
+    padding: 10px 14px;
+    border: none;
+    background: #0d6efd;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  `;
+
+  btn.addEventListener("click", () => {
     scrollToBottom();
+    btn.style.display = "none";
   });
-  
-  function scrollToBottom() {
-    const messagesContainer = document.querySelector(".chats-box");
-    if (messagesContainer) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+  document.body.appendChild(btn);
+  return btn;
+}
+
+function handleNewMessage() {
+  const chatBox = document.querySelector(".chats-box");
+
+  if (isNearBottom(chatBox)) {
+    scrollToBottom();
+    ensureUnseenDivider();
+    setTimeout(() => {
+      if (isNearBottom(chatBox)) {
+        clearUnseen();
+      }
+    }, 2000);
+  } else {
+    ensureUnseenDivider();
+    const newMessageBtn = document.getElementById("newMessageBtn");
+    if (newMessageBtn) newMessageBtn.style.display = "block";
+  }
+}
+
+function handleScroll() {
+  const chatBox = document.querySelector(".chats-box");
+
+  if (!chatBox) return;
+
+  const isAtBottom = isNearBottom(chatBox);
+
+  if (isAtBottom) {
+    if (atBottomTimer) clearTimeout(atBottomTimer);
+
+    atBottomTimer = setTimeout(() => {
+      if (isNearBottom(chatBox)) {
+        clearUnseen();
+      }
+    }, 2000);
+  } else {
+    if (atBottomTimer) clearTimeout(atBottomTimer);
+    const unseenMessages = document.querySelectorAll(".chat-message.unseen");
+    if (unseenMessages.length > 0) {
+      ensureUnseenDivider();
     }
   }
+}
+
+function scrollToFirstUnseenOrBottom() {
+  const chatBox = document.querySelector(".chats-box");
+  const firstUnseen = document.querySelector(".chat-message.unseen");
+
+  if (!chatBox) return;
+
+  if (firstUnseen) {
+    const offsetTop = firstUnseen.offsetTop;
+    const boxHeight = chatBox.clientHeight;
+    chatBox.scrollTop = offsetTop - boxHeight / 2;
+    ensureUnseenDivider();
+  } else {
+    scrollToBottom();
+  }
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const chatBox = document.querySelector(".chats-box");
+
+  if (chatBox) {
+    chatBox.addEventListener("scroll", handleScroll);
+
+    const scrollBtn = document.getElementById("scrollToLatestBtn");
+    if (scrollBtn) {
+      scrollBtn.addEventListener("click", () => {
+        scrollToBottom();
+        clearUnseen();
+        scrollBtn.style.display = "none";
+      });
+    }
+
+    setTimeout(() => {
+      scrollToFirstUnseenOrBottom();
+    }, 50);
+  }
+});
+
+  
+  
   
   
   

@@ -698,3 +698,24 @@ hr {
   max-height: calc(95vh - 200px);
   overflow-y: auto;
 }
+
+
+.unseen-divider {
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+  margin: 12px 0;
+  border-top: 1px solid #ccc;
+  position: relative;
+}
+
+.unseen-divider::before {
+  content: "New";
+  background: white;
+  position: absolute;
+  top: -0.7em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 10px;
+  color: #555;
+}
