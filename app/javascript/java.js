@@ -365,6 +365,9 @@ function displayFileName() {
 
   function postChat(event) {
     event.preventDefault();
+    
+
+    scrollToBottom(); 
 
     const chatId = document.querySelector(".chats-box").dataset.chatConversationId;
     const inputField = document.getElementById("inputField_chat");
@@ -372,6 +375,10 @@ function displayFileName() {
     const fileInput = document.getElementById("fileInput_chat");
     const file = fileInput.files[0];
 
+
+    updateLastReadAt(chatId);
+
+    
     if (!messageContent) {
       alert("Please enter a message.");
       return;
@@ -399,12 +406,27 @@ function displayFileName() {
         if (text) {
           console.log("Response from server:", text);
           inputField.value = "";
-          scrollToBottom(); 
         }
       })
       .catch(error => console.error("Error:", error));
   }
 
+  function updateLastReadAt(chatId) {
+    console.log("Updating last read at for chat id:", chatId);
+    fetch(`/chats/${chatId}/update_last_read_at`, {
+      method: "POST",
+      headers: {
+        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+        "Accept": "application/json"
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Last read at updated', data);
+      })
+      .catch(error => console.error('Error updating last_read_at:', error));
+  }
+  
   
 
 function isNearBottom(container, threshold = 100) {
@@ -422,16 +444,19 @@ function clearUnseen() {
   document.querySelectorAll(".chat-message.unseen").forEach(msg =>
     msg.classList.remove("unseen")
   );
+
   const divider = document.querySelector(".unseen-divider");
   if (divider) divider.remove();
 }
 
 function ensureUnseenDivider() {
   const chatMessages = document.getElementById("chats_messages");
-  if (!document.querySelector(".unseen-divider") && chatMessages) {
+  const firstUnseen = document.querySelector(".chat-message.unseen");
+  
+  if (firstUnseen && !document.querySelector(".unseen-divider")) {
     const divider = document.createElement("div");
     divider.classList.add("unseen-divider");
-    chatMessages.appendChild(divider);
+    chatMessages.insertBefore(divider, firstUnseen);
   }
 }
 

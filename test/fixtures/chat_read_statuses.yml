@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  chat: one
+  last_read_at: 2025-04-22 18:49:24
+
+two:
+  user: two
+  chat: two
+  last_read_at: 2025-04-22 18:49:24

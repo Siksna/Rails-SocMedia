@@ -1,7 +1,15 @@
+<% divider_inserted = false %>
 <% chat_conversations.each do |chat_conversation| %>
   <% next if chat_conversation.content.blank? %>
-  
-  <div class="<%= chat_conversation.sender == current_user ? 'sent' : 'received' %>">
+
+  <% is_unseen = @read_status.nil? || chat_conversation.created_at > @read_status.last_read_at %>
+
+  <% if is_unseen && !divider_inserted %>
+    <div class="unseen-divider"></div>
+    <% divider_inserted = true %>
+  <% end %>
+
+  <div class="chat-message <%= chat_conversation.sender == current_user ? 'sent' : 'received' %> <%= 'unseen' if is_unseen %>">
     <p><strong><%= chat_conversation.sender.username %>:</strong> <%= chat_conversation.content %></p>
   </div>
 <% end %>
