@@ -375,9 +375,6 @@ function displayFileName() {
     const fileInput = document.getElementById("fileInput_chat");
     const file = fileInput.files[0];
 
-
-    updateLastReadAt(chatId);
-
     
     if (!messageContent) {
       alert("Please enter a message.");
@@ -509,19 +506,24 @@ function handleNewMessage() {
 
 function handleScroll() {
   const chatBox = document.querySelector(".chats-box");
+  const chatId = document.querySelector(".chats-box").dataset.chatConversationId;
 
   if (!chatBox) return;
 
   const isAtBottom = isNearBottom(chatBox);
 
   if (isAtBottom) {
+    markChatAsRead(chatId);  
+
     if (atBottomTimer) clearTimeout(atBottomTimer);
 
     atBottomTimer = setTimeout(() => {
       if (isNearBottom(chatBox)) {
         clearUnseen();
+      updateLastReadAt(chatId);
+      
       }
-    }, 2000);
+    }, 5000);
   } else {
     if (atBottomTimer) clearTimeout(atBottomTimer);
     const unseenMessages = document.querySelectorAll(".chat-message.unseen");

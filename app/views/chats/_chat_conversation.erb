@@ -2,7 +2,7 @@
 <% chat_conversations.each do |chat_conversation| %>
   <% next if chat_conversation.content.blank? %>
 
-  <% is_unseen = @read_status.nil? || chat_conversation.created_at > @read_status.last_read_at %>
+  <% is_unseen = (@read_status.nil? || chat_conversation.created_at > @read_status.last_read_at) && chat_conversation.sender != current_user %>
 
   <% if is_unseen && !divider_inserted %>
     <div class="unseen-divider"></div>

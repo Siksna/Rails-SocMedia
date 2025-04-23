@@ -55,37 +55,28 @@ class ChatsController < ApplicationController
       redirect_to root_path, alert: "You are not authorized to access this chat."
     end
   
-    @read_status = ChatReadStatus.find_or_initialize_by(user: current_user, chat: @conversation)
-  
-    Rails.logger.debug "ChatReadStatus for User: #{@read_status.user_id} and Conversation: #{@read_status.chat_id}"
-    Rails.logger.debug "Current last_read_at: #{@read_status.last_read_at}"
-  
+    @read_status = ChatReadStatus.find_by(user: current_user, chat: @conversation)
     if @read_status.last_read_at.nil?
-      Rails.logger.debug "last_read_at is nil, updating to current time"
       @read_status.update(last_read_at: Time.current)
     else
-      Rails.logger.debug "last_read_at already exists: #{@read_status.last_read_at}"
     end
   
-    Rails.logger.debug "Updated last_read_at: #{@read_status.last_read_at}"
   end
   
   
   def update_last_read_at
-    @conversation = Conversation.find(params[:id])
-    @read_status = ChatReadStatus.find_or_initialize_by(user: current_user, chat: @conversation)
-    
-    Rails.logger.debug "Updating last_read_at for Chat ID: #{@conversation.id}, User: #{current_user.id}"
+    read_status = ChatReadStatus.find_or_initialize_by(user: current_user, chat_id: params[:id])
   
-    if @read_status.new_record? || @read_status.last_read_at.nil?
-      Rails.logger.debug "Updating last_read_at to current time"
-      @read_status.update(last_read_at: Time.current)
+    if read_status.last_read_at.nil? || read_status.last_read_at < Time.current
+      read_status.last_read_at = Time.current
+      read_status.save!
     else
-      Rails.logger.debug "No update needed for last_read_at"
+      Rails.logger.debug "last_read_at is up to date: #{read_status.last_read_at}"
     end
   
     render json: { success: true }
   end
+  
   
   
 
