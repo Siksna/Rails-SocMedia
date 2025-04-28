@@ -21,7 +21,9 @@ Rails.application.routes.draw do
     resources :chat_conversations, only: [:create, :destroy]
     post 'hide', on: :member
     post 'update_last_read_at', on: :member
-
+    member do
+      get :load_more
+    end
   end
   
   

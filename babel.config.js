@@ -39,6 +39,8 @@ module.exports = function(api) {
     plugins: [
       'babel-plugin-macros',
       '@babel/plugin-syntax-dynamic-import',
+      '@babel/plugin-proposal-logical-assignment-operators',
+      '@babel/plugin-proposal-nullish-coalescing-operator',
       isTestEnv && 'babel-plugin-dynamic-import-node',
       '@babel/plugin-transform-destructuring',
       [
@@ -65,6 +67,7 @@ module.exports = function(api) {
           loose: true
         }
       ],
+      '@babel/plugin-proposal-optional-chaining',
       [
         '@babel/plugin-transform-runtime',
         {

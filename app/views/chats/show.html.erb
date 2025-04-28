@@ -1,5 +1,5 @@
-<div class="chats-box" data-controller="chat" data-chat-conversation-id="<%= @conversation.id %>" data-current-user="<%= current_user.username %>">
-<div id="chats_messages" data-chat-target="messages">
+<div class="chats-box" data-controller="chat pagination" data-chat-conversation-id="<%= @conversation.id %>" data-pagination-conversation-id="<%= @conversation.id %>" data-current-user="<%= current_user.username %>">
+<div id="chats_messages" data-chat-target="messages" data-pagination-target="messages">
 <%= render 'chats/chat_conversation', chat_conversations: @chat_conversations %>
 </div>
 </div>

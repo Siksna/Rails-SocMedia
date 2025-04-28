@@ -1,3 +1,9 @@
+<% if chat_conversations.any? %>
+<div id="load-more-trigger" data-action="pagination#loadMore" data-message-id="<%= chat_conversations.first.id %>"></div>
+<% end %>
+
+
+
 <% divider_inserted = false %>
 <% chat_conversations.each do |chat_conversation| %>
   <% next if chat_conversation.content.blank? %>

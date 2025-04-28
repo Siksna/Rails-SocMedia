@@ -49,19 +49,34 @@ class ChatsController < ApplicationController
 
   def show
     @conversation = Conversation.find(params[:id])
-    @chat_conversations = @conversation.chat_conversations.order(created_at: :asc)
   
     unless [@conversation.sender, @conversation.receiver].include?(current_user)
       redirect_to root_path, alert: "You are not authorized to access this chat."
+      return
     end
+  
+    if params[:before]
+      before_message = @conversation.chat_conversations.find_by(id: params[:before])
+      @chat_conversations = if before_message
+        @conversation.chat_conversations.where("created_at < ?", before_message.created_at).order(created_at: :desc).limit(20)
+      else
+        []
+      end
+    else
+      @chat_conversations = @conversation.chat_conversations.order(created_at: :desc).limit(20)
+    end
+  
+    @chat_conversations = @chat_conversations.reverse
   
     @read_status = ChatReadStatus.find_by(user: current_user, chat: @conversation)
-    if @read_status.last_read_at.nil?
-      @read_status.update(last_read_at: Time.current)
-    else
-    end
   
+    if @read_status.nil?
+      @read_status = ChatReadStatus.create(user: current_user, chat: @conversation, last_read_at: Time.current)
+    elsif @read_status.last_read_at.nil?
+      @read_status.update(last_read_at: Time.current)
+    end
   end
+  
   
   
   def update_last_read_at
@@ -77,6 +92,32 @@ class ChatsController < ApplicationController
     render json: { success: true }
   end
   
+  
+  def load_more
+    @conversation = Conversation.find(params[:id])
+  
+    unless [@conversation.sender, @conversation.receiver].include?(current_user)
+      head :forbidden
+      return
+    end
+  
+    if params[:before]
+      before_message = @conversation.chat_conversations.find_by(id: params[:before])
+      @chat_conversations = if before_message
+        @conversation.chat_conversations.where("created_at < ?", before_message.created_at).order(created_at: :desc).limit(20)
+      else
+        []
+      end
+    else
+      @chat_conversations = @conversation.chat_conversations.order(created_at: :desc).limit(20)
+    end
+  
+    @chat_conversations = @chat_conversations.reverse
+  
+    @read_status = ChatReadStatus.find_by(user: current_user, chat: @conversation)
+  
+    render partial: "chats/chat_conversation", locals: { chat_conversations: @chat_conversations }
+  end
   
   
 
