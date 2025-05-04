@@ -48,6 +48,7 @@ class ChatsController < ApplicationController
   
 
   def show
+  
     @conversation = Conversation.find(params[:id])
   
     unless [@conversation.sender, @conversation.receiver].include?(current_user)
@@ -58,12 +59,12 @@ class ChatsController < ApplicationController
     if params[:before]
       before_message = @conversation.chat_conversations.find_by(id: params[:before])
       @chat_conversations = if before_message
-        @conversation.chat_conversations.where("created_at < ?", before_message.created_at).order(created_at: :desc).limit(20)
+        @conversation.chat_conversations.where("created_at < ?", before_message.created_at).order(created_at: :desc).limit(10)
       else
         []
       end
     else
-      @chat_conversations = @conversation.chat_conversations.order(created_at: :desc).limit(20)
+      @chat_conversations = @conversation.chat_conversations.order(created_at: :desc).limit(30)
     end
   
     @chat_conversations = @chat_conversations.reverse
@@ -75,24 +76,12 @@ class ChatsController < ApplicationController
     elsif @read_status.last_read_at.nil?
       @read_status.update(last_read_at: Time.current)
     end
+
   end
   
-  
-  
-  def update_last_read_at
-    read_status = ChatReadStatus.find_or_initialize_by(user: current_user, chat_id: params[:id])
-  
-    if read_status.last_read_at.nil? || read_status.last_read_at < Time.current
-      read_status.last_read_at = Time.current
-      read_status.save!
-    else
-      Rails.logger.debug "last_read_at is up to date: #{read_status.last_read_at}"
-    end
-  
-    render json: { success: true }
-  end
-  
-  
+
+
+
   def load_more
     @conversation = Conversation.find(params[:id])
   
@@ -119,8 +108,24 @@ class ChatsController < ApplicationController
     render partial: "chats/chat_conversation", locals: { chat_conversations: @chat_conversations }
   end
   
-  
 
+
+
+
+  def update_last_read_at
+    read_status = ChatReadStatus.find_or_initialize_by(user: current_user, chat_id: params[:id])
+  
+    if read_status.last_read_at.nil? || read_status.last_read_at < Time.current
+      read_status.last_read_at = Time.current
+      read_status.save!
+    else
+      Rails.logger.debug "last_read_at is up to date: #{read_status.last_read_at}"
+    end
+  
+    render json: { success: true }
+  end
+  
+  
 
   def hide
     conversation = Conversation.find(params[:id])

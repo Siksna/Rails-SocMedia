@@ -20,8 +20,9 @@ export default class extends Controller {
   loadMore() {
     const trigger = document.getElementById("load-more-trigger")
     if (!trigger) return
-
+  
     const messageId = trigger.dataset.messageId
+  
     fetch(`/chats/${this.conversationIdValue}/load_more?before=${messageId}`, {
       headers: { "X-Requested-With": "XMLHttpRequest" }
     })
@@ -29,7 +30,18 @@ export default class extends Controller {
       .then(html => {
         trigger.remove()
         this.messagesTarget.insertAdjacentHTML("afterbegin", html)
+  
+        const newTrigger = document.getElementById("load-more-trigger")
+        if (newTrigger) this.observer.observe(newTrigger)
       })
       .catch(err => console.error("Pagination load error", err))
   }
+  
+
+  disconnect() {
+    if (this.observer) {
+      this.observer.disconnect()
+    }
+  }
+  
 }
