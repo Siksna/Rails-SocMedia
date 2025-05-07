@@ -59,45 +59,39 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       received(data) {
         console.log("Received data from ChatChannel:", data);
-
-        if (!data.content || data.content.trim() === "") {
-          console.warn("Empty message. Ignoring...");
-          return;
-        }
-
+      
         const chatBox = document.querySelector(".chats-box");
         const chatMessages = document.getElementById("chats_messages");
         const scrollBtn = document.getElementById("scrollToLatestBtn");
-        
-        const isScrolledToBottom = isNearBottom(chatBox);
-
-        const newMessage = document.createElement("div");
-        newMessage.classList.add(data.sender_username === chatBox.dataset.currentUser ? 'sent' : 'received');
-        newMessage.innerHTML = `<p><strong>${data.sender_username}:</strong> ${data.content}</p>`;
-
-        if (!isScrolledToBottom) {
-          newMessage.classList.add("unseen");
       
-          if (!document.querySelector(".unseen-divider")) {
-            const divider = document.createElement("div");
-            divider.classList.add("unseen-divider");
-            chatMessages.appendChild(divider);
+        const isScrolledToBottom = isNearBottom(chatBox);
+      
+        if (data.html) {
+          chatMessages.insertAdjacentHTML("beforeend", data.html);
+      
+          if (!isScrolledToBottom) {
+            const lastMessage = chatMessages.lastElementChild;
+            if (lastMessage) lastMessage.classList.add("unseen");
+      
+            if (!document.querySelector(".unseen-divider")) {
+              const divider = document.createElement("div");
+              divider.classList.add("unseen-divider");
+              chatMessages.appendChild(divider);
+            }
+      
+            if (scrollBtn) scrollBtn.style.display = "block";
+          } else {
+            scrollToBottom();
           }
       
-          if (scrollBtn) scrollBtn.style.display = "block";
+          const inputField = document.getElementById("inputField_chat");
+          if (inputField) inputField.value = "";
+      
+          const fileInput = document.getElementById("fileInput");
+          if (fileInput) fileInput.value = "";
         }
-
-        newMessage.classList.add("chat-message", "unseen");
-        chatMessages.appendChild(newMessage);
-        handleNewMessage();
-
-
-        const inputField = document.getElementById("inputField_chat");
-        if (inputField) {
-          inputField.value = "";
-        }
-
       }
+      
     }
   );
 

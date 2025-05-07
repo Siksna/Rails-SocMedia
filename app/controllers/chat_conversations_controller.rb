@@ -33,6 +33,17 @@ class ChatConversationsController < ApplicationController
       )
 
 
+      rendered_message = ApplicationController.renderer.render(
+        partial: 'chats/chat_conversation',
+        locals: { chat_conversations: [@chat_conversation], current_user: current_user }
+      )
+    
+      ActionCable.server.broadcast("chat_#{@conversation.id}", {
+        html: rendered_message
+      })
+    
+      render plain: "Message sent"
+
     else
       render plain: "Message could not be sent", status: :unprocessable_entity
     end
@@ -57,6 +68,6 @@ class ChatConversationsController < ApplicationController
   private
 
   def chat_message_params
-    params.require(:chat_conversation).permit(:content)
+    params.require(:chat_conversation).permit(:content, :file)
   end
 end

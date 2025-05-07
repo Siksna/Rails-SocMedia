@@ -719,3 +719,38 @@ hr {
   padding: 0 10px;
   color: #555;
 }
+
+.chat-image-wrapper {
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chat-image {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+.chat-video-wrapper {
+  height: 200px;
+  width: 40%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.chat-video-wrapper video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+

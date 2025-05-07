@@ -2,20 +2,44 @@
 <div id="load-more-trigger" data-action="pagination#loadMore" data-message-id="<%= chat_conversations.first.id %>"></div>
 <% end %>
 
+<div data-current-user-id="<%= current_user.id %>"></div>
 
 
 <% divider_inserted = false %>
 <% chat_conversations.each do |chat_conversation| %>
-  <% next if chat_conversation.content.blank? %>
+  <% next if chat_conversation.content.blank? && !chat_conversation.file.attached? %>
 
   <% is_unseen = (@read_status.nil? || chat_conversation.created_at > @read_status.last_read_at) && chat_conversation.sender != current_user %>
 
-  <% if is_unseen && !divider_inserted %>
+  <% if is_unseen && !divider_inserted && chat_conversation.sender != current_user %>
     <div class="unseen-divider"></div>
     <% divider_inserted = true %>
   <% end %>
 
-  <div class="chat-message <%= chat_conversation.sender == current_user ? 'sent' : 'received' %> <%= 'unseen' if is_unseen %>">
+  <div
+    class="chat-message <%= chat_conversation.sender == current_user ? 'sent' : 'received' %> <%= 'unseen' if is_unseen %>"
+    data-sender-id="<%= chat_conversation.sender.id %>">
     <p><strong><%= chat_conversation.sender.username %>:</strong> <%= chat_conversation.content %></p>
+
+    <% if chat_conversation.file.attached? %>
+      <div class="message-media mt-2">
+        <% if chat_conversation.file.content_type.start_with?('image/') %>
+          <div class="chat-image-wrapper">
+            <%= image_tag url_for(chat_conversation.file), alt: 'Attached image', class: "chat-image" %>
+          </div>     
+         <% elsif chat_conversation.file.content_type.start_with?('video/') %>
+          <div class="chat-video-wrapper">
+        <video controls>
+          <source src="<%= url_for(chat_conversation.file) %>" type="<%= chat_conversation.file.content_type %>">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <% else %>
+      <%= link_to chat_conversation.file.filename.to_s, url_for(chat_conversation.file), target: "_blank", rel: "noopener", class: "text-primary" %>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 <% end %>
+

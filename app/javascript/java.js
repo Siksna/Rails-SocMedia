@@ -33,6 +33,12 @@ function displayFileName() {
     }
   }
   
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.getElementById('fileInput_chat');
+    fileInput.addEventListener('change', displayFileName);
+  });
+  
   
   function displayReplyFileName() {
     const fileInput = document.getElementById('replyFileInput');
@@ -372,7 +378,7 @@ function displayFileName() {
     const chatId = document.querySelector(".chats-box").dataset.chatConversationId;
     const inputField = document.getElementById("inputField_chat");
     const messageContent = inputField.value.trim();
-    const fileInput = document.getElementById("fileInput_chat");
+    const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
 
     
@@ -448,14 +454,18 @@ function clearUnseen() {
 
 function ensureUnseenDivider() {
   const chatMessages = document.getElementById("chats_messages");
-  const firstUnseen = document.querySelector(".chat-message.unseen");
-  
+  const currentUserId = document.body.dataset.currentUserId;
+
+  const firstUnseen = [...document.querySelectorAll(".chat-message.unseen")]
+    .find(msg => msg.dataset.senderId !== currentUserId);
+
   if (firstUnseen && !document.querySelector(".unseen-divider")) {
     const divider = document.createElement("div");
     divider.classList.add("unseen-divider");
     chatMessages.insertBefore(divider, firstUnseen);
   }
 }
+
 
 
 function createNewMessageButton() {
@@ -513,8 +523,7 @@ function handleScroll() {
   const isAtBottom = isNearBottom(chatBox);
 
   if (isAtBottom) {
-    markChatAsRead(chatId);  
-
+    debouncedMarkChatAsRead(chatId);
     if (atBottomTimer) clearTimeout(atBottomTimer);
 
     atBottomTimer = setTimeout(() => {
@@ -523,7 +532,7 @@ function handleScroll() {
       updateLastReadAt(chatId);
       
       }
-    }, 5000);
+    }, 2000);
   } else {
     if (atBottomTimer) clearTimeout(atBottomTimer);
     const unseenMessages = document.querySelectorAll(".chat-message.unseen");
@@ -670,16 +679,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
 
-    function markChatAsRead(conversationId) {
-      console.log("Marking chat as read for conversation ID:", conversationId);
-    
-      fetch(`/notifications/mark_as_read/${conversationId}`, {
-        method: "POST",
-        headers: {
-          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
-          "Content-Type": "application/json"
-        }
-      })
+  function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+  
+  
+  const debouncedMarkChatAsRead = debounce(function(conversationId) {
+    console.log("Marking chat as read (debounced) for conversation ID:", conversationId);
+  
+    fetch(`/notifications/mark_as_read/${conversationId}`, {
+      method: "POST",
+      headers: {
+        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+        "Content-Type": "application/json"
+      }
+    })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
@@ -691,19 +709,17 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           localStorage.setItem("unreadChatCount", "0");
         } else {
-          console.error("Error marking messages as read:", data.error);
+          console.error(" Error marking messages as read:", data.error);
         }
       })
-      .catch(error => console.error("Error marking messages as read:", error));
-    }    
-
-
-if (window.location.pathname.includes("/chats/")) {
+      .catch(error => console.error(" Error marking messages as read:", error));
+  }, 1000); 
+  
+  
+  if (window.location.pathname.includes("/chats/")) {
     const conversationId = window.location.pathname.split("/").pop();
-    markChatAsRead(conversationId);
-}
-
-
+    debouncedMarkChatAsRead(conversationId);
+  }
 
 
 
@@ -727,3 +743,8 @@ function markSingleNotificationAsRead(notificationId, element) {
   })
   .catch(error => console.error("Error marking notification as read:", error));
 }
+
+
+//  un neparadas bildes displays pirms posto,
+//  taspats galvenaja lapa un reply komentaros, bet tur kaurkadi error,
+//  pagination visas vietās
