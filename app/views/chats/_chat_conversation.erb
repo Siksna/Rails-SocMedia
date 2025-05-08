@@ -1,5 +1,5 @@
 <% if chat_conversations.any? %>
-<div id="load-more-trigger" data-action="pagination#loadMore" data-message-id="<%= chat_conversations.first.id %>"></div>
+<div id="load-more-trigger" data-action="pagination#loadMore" data-pagination-direction-value="up" data-message-id="<%= chat_conversations.first.id %>"></div>
 <% end %>
 
 <div data-current-user-id="<%= current_user.id %>"></div>

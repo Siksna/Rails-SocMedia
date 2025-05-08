@@ -3,6 +3,21 @@
   max-width: 100%;
 }
 
+.mainFaili{
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.mainFaili-wrapper {
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
 .input-container {
   display: flex;
   justify-content: center;

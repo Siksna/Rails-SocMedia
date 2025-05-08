@@ -35,7 +35,7 @@ function displayFileName() {
   
 
   document.addEventListener("DOMContentLoaded", function() {
-    const fileInput = document.getElementById('fileInput_chat');
+    const fileInput = document.getElementById('fileInput');
     fileInput.addEventListener('change', displayFileName);
   });
   
@@ -745,6 +745,8 @@ function markSingleNotificationAsRead(notificationId, element) {
 }
 
 
-//  un neparadas bildes displays pirms posto,
-//  taspats galvenaja lapa un reply komentaros, bet tur kaurkadi error,
-//  pagination visas vietās
+// pagination visas vietās
+// display images var pievienot vairakus images un nospiest x uz jebkuru image
+// chat message spam if delay, should instantly clear the field and show up grey in the chat while its loading
+// galvenaja lapa load more nestrada
+// like poga saka undefined un post comment ari

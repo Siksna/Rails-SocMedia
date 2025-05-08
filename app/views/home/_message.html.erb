@@ -1,0 +1,64 @@
+<div class="post" id="post-<%= message.id %>" onclick="window.location.href='/messages/<%= message.id %>';">
+  <div class="user-info d-flex align-items-center">
+    <% if message.user %>
+      <a href="<%= profile_path(message.user) %>" class="d-flex align-items-center">
+        <% if message.user.profile_picture.attached? %>
+          <%= image_tag url_for(message.user.profile_picture), alt: message.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit: cover;' %>
+        <% else %>
+          <div class="default-profile-picture me-2" style="background-color: <%= message.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block; object-fit: cover;">
+            <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
+          </div>
+        <% end %>
+        <span class="fw-bold"><%= message.user.username %></span>
+      </a>
+      <p><small class="activity-time"><%= time_ago_in_words(message.created_at)  %> ago</small></p>
+    <% else %>
+      <img src="assets/images/default_profile.png" class="profile-pic me-2" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+      <span>Anonīms</span>
+    <% end %>
+
+    <% if message.user == current_user || (current_user && current_user.admin?) %>
+      <div class="nav-item dropdown ms-auto">
+        <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="event.stopPropagation();"></a>
+        <ul class="dropdown-menu">
+          <li><%= link_to 'Rediģēt ziņu', edit_message_path(message), class: 'dropdown-item btn btn-primary' %></li>
+          <li><%= button_to 'Dzēst ziņu', message_path(message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+
+  <p><%= message.content || 'Nav datu' %></p>
+
+  <% if message.file_url %>
+    <% if message.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) %>
+      <div class="mainFaili-wrapper">
+        <img src="<%= message.file_url %>" alt="Pievienota bilde" class="mainFaili">
+      </div>
+    <% elsif message.file_url.match(/\.(mp4|webm|ogg)$/i) %>
+      <div class="mainFaili-wrapper">
+        <video src="<%= message.file_url %>" controls style="width: 100%;" class="mainFaili"></video>
+      </div>
+    <% else %>
+      <a href="<%= message.file_url %>">Nolādēt failu</a>
+    <% end %>
+  <% end %>
+
+  <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
+    <p style="margin:auto 0;"><i class="fa-regular fa-message"></i> <%= message.comment_count %></p>
+    <div class="like-section d-flex align-items-center">
+      <% if current_user %>
+        <button class="heart me-2" method: :post, remote: true, onclick="toggleLike('<%= message.id %>', this); event.stopPropagation(); event.preventDefault();">
+          <% if current_user.liked?(message) %>
+            <i class="fa-solid fa-heart"></i>
+          <% else %>
+            <i class="fa-regular fa-heart"></i>
+          <% end %>
+        </button>
+      <% else %>
+        <i class="fa-regular fa-heart me-2"></i>
+      <% end %>
+      <span><%= message.likes.count %></span>
+    </div>
+  </div>
+</div>

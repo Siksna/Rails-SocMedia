@@ -1,9 +1,22 @@
 class HomeController < ApplicationController
   def index
    
-      @messages = Message.all.includes(:user).all.order(created_at: :desc)
+      @messages = Message.all.includes(:user).all.order(created_at: :desc).limit(10)
       logger.debug "Ziņas: #{@messages.inspect}"  
    
+  end
+
+
+  def load_more
+    if params[:before]
+      messages = Message.visible.where("messages.id < ?", params[:before]).order(id: :desc).limit(10)
+    elsif params[:after]
+      messages = Message.visible.where("messages.id > ?", params[:after]).order(id: :asc).limit(10)
+    else
+      messages = Message.visible.order(id: :desc).limit(10)
+    end
+
+    render partial: "home/message", collection: messages, formats: [:html]
   end
 
   def about

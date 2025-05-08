@@ -58,6 +58,8 @@ Rails.application.routes.draw do
     end    
   end
   
+  get 'home/load_more', to: 'home#load_more', as: 'load_more_home'
+
 
   get 'search_users', to: 'home#search_users'
   
