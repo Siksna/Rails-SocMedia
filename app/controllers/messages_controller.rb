@@ -2,21 +2,24 @@ class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy, :toggle_like]
   before_action :authenticate_user!, only: [:edit, :update, :destroy]
   
- 
-
-  
-  
-
-  
 
   def show
     @message = Message.find(params[:id])
     @reply = Reply.new
-    @replies = @message.replies.includes(:user, :children).where(parent_id: nil).order(created_at: :desc)
+    @replies = @message.replies.includes(:user, :children).where(parent_id: nil).order(created_at: :desc).limit(5)
     @comment_count = message_data(@message)[:comment_count]
     render 'home/show'
   end
   
+  def load_more_replies
+  message = Message.find(params[:message_id])
+  after_id = params[:after].to_i
+
+  replies = message.replies.where(parent_id: nil).where("id < ?", after_id).order(id: :desc).limit(5)
+
+  render partial: "home/reply", collection: replies, as: :reply
+end
+
   
 
   def new

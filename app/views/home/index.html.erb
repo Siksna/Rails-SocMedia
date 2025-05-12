@@ -20,7 +20,7 @@
     <%= render partial: "home/message", collection: @messages.visible %>
 
     <% if @messages.visible.any? %>
-      <div id="load-more-trigger" data-message-id="<%= @messages.visible.last.id %>"></div>
+      <div id="load-more-trigger"  data-message-id="<%= @messages.visible.last.id %>"></div>
     <% end %>
   <% else %>
     <p>Nav ziņas.</p>

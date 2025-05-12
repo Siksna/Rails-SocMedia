@@ -86,9 +86,9 @@
 
   <hr>
 
-  <div class="replies">
+  <div class="replies" data-controller="pagination" data-pagination-url-value="<%= load_more_replies_message_path(@message) %>">
     <h4>Komenti:</h4>
-    <ul class="reply-list">
+  <ul class="reply-list" data-pagination-target="messages">
       <% @replies.where(parent_id: nil).each do |reply| %>
         <li>
           <div class="reply-header d-flex align-items-center mb-2">
@@ -174,10 +174,17 @@
              <ul class="reply-list" style="padding-left: 3rem;"> 
                 <%= render partial: 'home/reply', collection: reply.children, as: :reply %>
               </ul>
+
+    
             <% end %>
           </div>
         </li>
       <% end %>
     </ul>
+
+     <% if @replies.where(parent_id: nil).count > 5 %>
+  <% last_reply_id = @replies.where(parent_id: nil).last.id %>
+  <div id="load-more-replies-<%= last_reply_id %>" class="load-more-trigger" data-message-id="<%= last_reply_id %>"></div>
+<% end %>
   </div>
 </div>

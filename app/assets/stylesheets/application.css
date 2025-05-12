@@ -8,8 +8,7 @@
   max-width: 100%;
   object-fit: contain;
   position: absolute;
-  top: 0;
-  left: 0;
+  text-align: center;
 }
 
 .mainFaili-wrapper {
@@ -164,6 +163,18 @@ hr {
   margin: 20px 0;
 }
 
+.input-error {
+  border: 1px solid red !important;
+  border-radius: 4px;
+}
+
+.input-error::placeholder {
+  color: red;
+}
+
+
+
+
 .reply-form .input-container {
   display: flex;
   justify-content: space-between;
@@ -274,7 +285,7 @@ hr {
   background-color: rgb(170, 30, 30);
   color: white;
   border: none;
-  border-radius: 50%;
+  border-radius: 15%;
   font-size: 16px;
   padding: 5px 10px;
   cursor: pointer;

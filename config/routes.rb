@@ -59,6 +59,7 @@ Rails.application.routes.draw do
   end
   
   get 'home/load_more', to: 'home#load_more', as: 'load_more_home'
+  get 'messages/:message_id/load_more_replies', to: 'messages#load_more_replies', as: 'load_more_replies_message'
 
 
   get 'search_users', to: 'home#search_users'

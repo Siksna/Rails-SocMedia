@@ -380,12 +380,30 @@ function displayFileName() {
     const messageContent = inputField.value.trim();
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
+    const previewContainer = document.getElementById('filePreview');
 
     
-    if (!messageContent) {
-      alert("Please enter a message.");
-      return;
-    }
+  if (!messageContent && !file) {
+  inputField.classList.add("input-error");
+  inputField.placeholder = "Please enter a message";
+
+  fileInput.classList.add("input-error");
+
+  return;
+}
+
+
+inputField.classList.remove("input-error");
+fileInput.classList.remove("input-error");
+inputField.placeholder = "Enter your message...";
+
+
+
+
+    inputField.value = "";
+    fileInput.value = "";
+    previewContainer.innerHTML = "";
+
 
     const formData = new FormData();
     formData.append("chat_conversation[content]", messageContent);
@@ -747,6 +765,9 @@ function markSingleNotificationAsRead(notificationId, element) {
 
 // pagination visas vietās
 // display images var pievienot vairakus images un nospiest x uz jebkuru image
-// chat message spam if delay, should instantly clear the field and show up grey in the chat while its loading
-// galvenaja lapa load more nestrada
 // like poga saka undefined un post comment ari
+// admin panel poga nestrada dazreiz kad ieiet kada no vina sekcijam
+// janonem aizmirsi paroli funkciju
+// var pieslegties ar google kontu
+// galvena lapa un follower lapa
+// suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija

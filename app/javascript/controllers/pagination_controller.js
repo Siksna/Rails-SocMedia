@@ -14,19 +14,21 @@ export default class extends Controller {
     this.loading = false;
 
     this.observer = new IntersectionObserver(entries => {
-      console.log(entries);
       if (entries[0].isIntersecting && !this.loading) {
         if (this.directionValue === "up") {
           this.loadMoreUp();
-        } else if (this.directionValue === "down") {
+        }
+        
+        if (this.directionValue === "down") {
           this.loadMoreDown();
         }
       }
     }, {
       threshold: 1,
-      root: this.scrollContainer,
-      rootMargin: this.directionValue === "up" ? "500px 0px 0px 0px" : "0px 0px 200px 0px"
+      root: this.directionValue === "up" ? this.scrollContainer : null,
+      rootMargin: this.directionValue === "up" ? "500px 0px 0px 0px" : "0px 0px 1000px 0px"
     });
+
 
     const trigger = document.getElementById("load-more-trigger");
     if (trigger) this.observer.observe(trigger);
@@ -69,35 +71,53 @@ export default class extends Controller {
       });
   }
 
-  loadMoreDown() {
-    console.log("Loading down");
+ loadMoreDown() {
+  console.log("Loading down");
 
-    const trigger = document.getElementById("load-more-trigger");
-    if (!trigger || !this.scrollContainer || this.loading) return;
+  const trigger = document.getElementById("load-more-trigger");
+  if (!trigger || !this.scrollContainer || this.loading) return;
 
-    this.loading = true;
-    this.observer.unobserve(trigger);
+  this.loading = true;
+  this.observer.unobserve(trigger);
 
-    const messageId = trigger.dataset.messageId;
+  const messageId = trigger.dataset.messageId;
 
-    fetch(`/home/load_more?after=${messageId}`, {
-      headers: { "X-Requested-With": "XMLHttpRequest" }
+const url = this.hasUrlValue ? `${this.urlValue}?after=${messageId}` : `/home/load_more?after=${messageId}`;
+
+fetch(url, {
+  headers: { "X-Requested-With": "XMLHttpRequest" }
+  })
+    .then(response => response.text())
+    .then(html => {
+      trigger.remove();
+      this.messagesTarget.insertAdjacentHTML("beforeend", html);
+
+      const allMessages = this.messagesTarget.querySelectorAll("[data-message-id]");
+      const lastMessage = allMessages[allMessages.length - 1];
+
+      if (!lastMessage || lastMessage.dataset.messageId === messageId) {
+        this.loading = false;
+        return;
+      }
+
+      const newMessageId = lastMessage.dataset.messageId;
+
+      const newTrigger = document.createElement("div");
+      newTrigger.id = "load-more-trigger";
+      newTrigger.dataset.messageId = newMessageId;
+      this.messagesTarget.appendChild(newTrigger);
+      this.observer.observe(newTrigger);
+
+      this.loading = false;
     })
-      .then(response => response.text())
-      .then(html => {
-        trigger.remove();
-        this.messagesTarget.insertAdjacentHTML("beforeend", html);
+    .catch(err => {
+      console.error("Pagination load error (down)", err);
+      this.loading = false;
+    });
+}
 
-        const newTrigger = document.getElementById("load-more-trigger");
-        if (newTrigger) this.observer.observe(newTrigger);
 
-        this.loading = false;
-      })
-      .catch(err => {
-        console.error("Pagination load error (down)", err);
-        this.loading = false;
-      });
-  }
+
 
   disconnect() {
     if (this.observer) {

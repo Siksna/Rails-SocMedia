@@ -28,18 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-function handleNewMessage() {
-  const chatBox = document.querySelector(".chats-box");
-  const newMessageBtn = document.getElementById("newMessageBtn");
-
-  if (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 100) {
-    chatBox.scrollTop = chatBox.scrollHeight;
-  } else if (newMessageBtn) {
-    newMessageBtn.style.display = "block";
-  }
-}
-
-
 document.addEventListener("DOMContentLoaded", () => {
   const chatBox = document.querySelector(".chats-box");
   const chatId = chatBox?.dataset?.chatConversationId;
