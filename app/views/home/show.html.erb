@@ -18,7 +18,7 @@
         <ul class="dropdown-menu">
           <li><%= link_to 'Rediģēt ziņu', edit_message_path(@message), class: 'dropdown-item btn btn-primary' %></li>
           <li><hr class="dropdown-divider"></li>
-          <li><%= button_to 'Dzēst ziņu', message_path(@message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
+          <li><%= button_to 'Dzēst ziņu', message_path(@message), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
         </ul>
       </div>
     <% end %>
@@ -33,7 +33,7 @@
       <% elsif @message.file.content_type.start_with?('video/') %>
         <video width="100%" controls>
           <source src="<%= url_for(@message.file) %>" type="<%= @message.file.content_type %>">
-          Jūsu pārlūkprogramma neatbalsta video tagu.
+          Video tag not supported.
         </video>
       <% else %>
         <%= link_to 'Download File', rails_blob_path(@message.file, disposition: 'attachment') %>
@@ -86,8 +86,8 @@
 
   <hr>
 
-  <div class="replies" data-controller="pagination" data-pagination-url-value="<%= load_more_replies_message_path(@message) %>">
-    <h4>Komenti:</h4>
+<div class="replies" data-controller="pagination" data-pagination-url-value="<%= load_more_message_replies_path(@message) %>" data-pagination-mode-value="replies" data-pagination-direction-value="down">
+    <h4>Comments:</h4>
   <ul class="reply-list" data-pagination-target="messages">
       <% @replies.where(parent_id: nil).each do |reply| %>
         <li>
@@ -102,7 +102,7 @@
               <% end %>
             <% end %>
 
-            <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user), class: 'fw-bold' %>
+            <%= link_to reply.user&.username || 'Anonymous', profile_path(reply.user), class: 'fw-bold' %>
             <small class="activity-time"><%= time_ago_in_words(reply.created_at) %> ago</small>
 
             <% if current_user && (reply.user == current_user || current_user.admin?) %>
@@ -125,7 +125,7 @@
               <% elsif reply.file.content_type.start_with?('video/') %>
                 <video width="100%" controls>
                   <source src="<%= url_for(reply.file) %>" type="<%= reply.file.content_type %>">
-                  Jūsu pārlūkprogramma neatbalsta video tagu.
+                  Video tag not supported.
                 </video>
               <% else %>
                 <%= link_to 'Nolādēt failu', rails_blob_path(reply.file, disposition: 'attachment') %>
@@ -161,7 +161,7 @@
             <%= form_with model: [@message, @message.replies.build], local: true do |form| %>
               <%= form.hidden_field :parent_id, value: reply.id %> 
               <div class="input-container">
-                <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", class: "form-control" %>
+                <%= form.text_field :content, placeholder: "Enter your message here...", class: "form-control" %>
                 <label class="file-upload">
                  <i class="fas fa-paperclip"></i>
                   <%= form.file_field :file %>
@@ -182,9 +182,11 @@
       <% end %>
     </ul>
 
-     <% if @replies.where(parent_id: nil).count > 5 %>
-  <% last_reply_id = @replies.where(parent_id: nil).last.id %>
-  <div id="load-more-replies-<%= last_reply_id %>" class="load-more-trigger" data-message-id="<%= last_reply_id %>"></div>
-<% end %>
+     
+ <% last_reply = @replies.where(parent_id: nil).last %>
+<% last_reply_id = last_reply.present? ? last_reply.id : nil %>
+<div id="load-more-trigger" data-message-id="<%= @message.id %>" data-after-id="<%= last_reply_id %>"></div>
+
+
   </div>
 </div>

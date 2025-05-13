@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       end
   end
 
+get 'admin/history/load_more_history', to: 'admin#load_more_history', as: 'load_more_history'
 
   resources :chats, only: [:index, :show] do
     resources :chat_conversations, only: [:create, :destroy]
@@ -32,6 +33,9 @@ Rails.application.routes.draw do
   resources :messages do
     resources :replies, only: [:create, :edit, :update, :destroy] do
       post 'toggle_like', on: :member, controller: 'replies'
+      collection do
+      get 'load_more'
+    end
     end
     post 'toggle_like', on: :member
   end
@@ -59,7 +63,7 @@ Rails.application.routes.draw do
   end
   
   get 'home/load_more', to: 'home#load_more', as: 'load_more_home'
-  get 'messages/:message_id/load_more_replies', to: 'messages#load_more_replies', as: 'load_more_replies_message'
+  get 'admin/load_more_history', to: 'admin#load_more_history'
 
 
   get 'search_users', to: 'home#search_users'

@@ -39,6 +39,8 @@ function displayFileName() {
     fileInput.addEventListener('change', displayFileName);
   });
   
+  window.displayFileName = displayFileName;
+
   
   function displayReplyFileName() {
     const fileInput = document.getElementById('replyFileInput');
@@ -75,7 +77,8 @@ function displayFileName() {
   }
   
   
-  
+  window.displayReplyFileName = displayReplyFileName;
+
   
   
   
@@ -107,7 +110,8 @@ function displayFileName() {
     .catch(error => console.error('Error:', error));
   }
   
-  
+    window.toggleLike = toggleLike;
+
   
   
   function toggleReplyLike(replyId, button) {
@@ -136,7 +140,7 @@ function displayFileName() {
     .catch(error => console.error('Error:', error));
   }
   
-  
+  window.toggleReplyLike = toggleReplyLike;
   
   
   
@@ -167,47 +171,47 @@ function displayFileName() {
   
   
   
-  /* Ziņu publicēšana */
-  
-  function postComment() {
-    const inputField = document.getElementById('inputField');
-    const fileInput = document.getElementById('fileInput');
-    const messageContent = inputField.value;
-    const file = fileInput.files[0];
-  
-    if (messageContent.trim() === "") {
-      alert("Lūdzu ievadiet ziņu.");
-      return;
-    }
-  
-    const formData = new FormData();
-    formData.append('message[content]', messageContent);
-    
-    if (file) {
-      formData.append('message[file]', file);
-    }
-  
-    fetch('/messages', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      }
-    })
-    .then(response => {
-      if (response.ok) {
-        
-        location.reload();
-      } else {
-        window.location.href = '/users/sign_in';
-        alert("Neizdevās ievietot ziņu.");
-      }
-    })
-    .catch(error => {
-      console.error('Kļūda:', error);
-    });
+  // Ziņu publicēšana
+function postComment() {
+  const inputField = document.getElementById('inputField');
+  const fileInput = document.getElementById('fileInput');
+  const messageContent = inputField.value;
+  const file = fileInput.files[0];
+
+  if (messageContent.trim() === "") {
+    alert("Lūdzu ievadiet ziņu.");
+    return;
   }
-  
+
+  const formData = new FormData();
+  formData.append('message[content]', messageContent);
+
+  if (file) {
+    formData.append('message[file]', file);
+  }
+
+  fetch('/messages', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      location.reload();
+    } else {
+      window.location.href = '/users/sign_in';
+      alert("Neizdevās ievietot ziņu.");
+    }
+  })
+  .catch(error => {
+    console.error('Kļūda:', error);
+  });
+}
+
+window.postComment = postComment;
+
   
   
   
@@ -251,7 +255,8 @@ function displayFileName() {
       .catch(error => console.error('Error posting reply:', error));
   }
   
-  
+  window.postReply = postReply;
+
   /* Taustiņu aktivizācija */
   
   document.addEventListener("DOMContentLoaded", function () {
@@ -762,12 +767,28 @@ function markSingleNotificationAsRead(notificationId, element) {
   .catch(error => console.error("Error marking notification as read:", error));
 }
 
+// OBLIGATI
 
 // pagination visas vietās
-// display images var pievienot vairakus images un nospiest x uz jebkuru image
-// like poga saka undefined un post comment ari
-// admin panel poga nestrada dazreiz kad ieiet kada no vina sekcijam
+// dropdowni nestrada un citas lietas dazreiz pirmaja lapas ieladē
 // janonem aizmirsi paroli funkciju
-// var pieslegties ar google kontu
-// galvena lapa un follower lapa
+// reply reply bilde ir zemak pa like
+// edit un delete pogas galvenaja lapa redirecto uz reply lapu
+// chata kkas kad nosuta bildi, vienreizi neizsutas otru aizsutas
+// admin history vajag uztaisit lai var sortot pec target
+// gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
+// ja kads kommente uz tavu postu vai reply tad atnak notifikacija
+// jauztais lai instantly connected uz chat channel
+// default profile pic ir offcentered
+
+// EXTRA
+
+// Search bars kas atrod ziņas kuriem ir saistiti vardi, piemeram lietotajvards vai content vards un parada tas zinas uz ekran
+// save posts
+// linkos nevajadzetu redzet id un citas lietas
 // suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
+// galvena lapa un follower content lapa
+// display images var pievienot vairakus images un nospiest x uz jebkuru image
+// var pieslegties ar google kontu
+// var @ot kadu reply reply sekcija
+// algoritms prieks messagiem

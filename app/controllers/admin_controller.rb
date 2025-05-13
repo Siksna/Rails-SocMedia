@@ -39,6 +39,8 @@ class AdminController < ApplicationController
     @user = User.find(params[:id]) 
   end
 
+
+
   def edit
     @user = User.find(params[:id])
   end
@@ -158,7 +160,7 @@ class AdminController < ApplicationController
  def history
   @admins = User.where(admin_type: ['admin', 'head_admin'])
   @unique_actions = AdminActivity.distinct.pluck(:action)
-  @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc)
+  @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc).limit(4)
 
   @admin_activities = @admin_activities.where(admin_id: params[:admin]) if params[:admin].present?
   @admin_activities = @admin_activities.where(action: params[:activity_action]) if params[:activity_action].present?
@@ -177,6 +179,50 @@ class AdminController < ApplicationController
 
   render 'admin/history'
 end
+
+def load_more_history
+  after_id = params[:after]
+  @admins = User.where(admin_type: ['admin', 'head_admin'])
+  @unique_actions = AdminActivity.distinct.pluck(:action)
+
+  activities = AdminActivity.includes(:admin)
+
+  activities = activities.where(admin_id: params[:admin]) if params[:admin].present?
+  activities = activities.where(action: params[:activity_action]) if params[:activity_action].present?
+
+  if params[:start_date].present? && params[:end_date].present?
+    start_date = Date.parse(params[:start_date]).beginning_of_day
+    end_date = Date.parse(params[:end_date]).end_of_day
+    activities = activities.where(created_at: start_date..end_date)
+  elsif params[:start_date].present?
+    start_date = Date.parse(params[:start_date]).beginning_of_day
+    activities = activities.where("created_at >= ?", start_date)
+  elsif params[:end_date].present?
+    end_date = Date.parse(params[:end_date]).end_of_day
+    activities = activities.where("created_at <= ?", end_date)
+  end
+
+  activities = activities.order(created_at: :desc, id: :desc)
+
+  if after_id.present?
+    last = AdminActivity.find(after_id)
+    activities = activities.where(
+      "(created_at < ?) OR (created_at = ? AND id < ?)",
+      last.created_at, last.created_at, last.id
+    )
+  end
+
+  @admin_activities = activities.limit(4)
+
+  if @admin_activities.empty?
+    head :no_content
+  else
+    render partial: "admin/history_data", layout: false
+  end
+end
+
+
+
 
 
   private

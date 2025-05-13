@@ -10,11 +10,23 @@ class RepliesController < ApplicationController
     @reply.parent_id = params[:reply][:parent_id]
 
     if @reply.save
-      redirect_to @message, notice: 'Atbilde veiksmīgi izveidota.'
+      redirect_to @message, notice: 'Reply succesfuly made.'
     else
       render :new
     end
   end
+
+def load_more
+  
+if params[:message_id].blank?
+  render plain: "Missing message_id", status: :bad_request and return
+end
+
+@message = Message.find(params[:message_id])
+  @replies = @message.replies.where(parent_id: nil).where('id > ?', params[:after]).limit(5)
+  render partial: 'home/reply', collection: @replies, as: :reply, formats: :html
+end
+
 
   def edit
     render 'home/_edit_replies'
@@ -37,7 +49,7 @@ class RepliesController < ApplicationController
         )
       end
   
-      redirect_to message_path(@message), notice: 'Atbilde atjaunināta.'
+      redirect_to message_path(@message), notice: 'Reply renewed.'
     else
       render :edit
     end
@@ -56,9 +68,9 @@ def destroy
     end
 
     @reply.destroy
-    redirect_to message_path(@message), notice: 'Atbilde dzēsta.'
+    redirect_to message_path(@message), notice: 'Deleted reply.'
   else
-    redirect_to message_path(@message), alert: 'Jūs nēsat autorizēts dzēst šo atbildi.'
+    redirect_to message_path(@message), alert: 'You are not autherized to delete this reply.'
   end
 end
 
@@ -109,7 +121,7 @@ end
 
   def authorize_user!
     unless @reply.user == current_user || (current_user&.admin? || current_user&.moderator?)
-      redirect_to message_path(@message), alert: 'Jūs nēsat autorizēts rediģēt vai dzēst šo atbildi.'
+      redirect_to message_path(@message), alert: 'You are not autherized to delete or edit the reply.'
     end
   end  
 end

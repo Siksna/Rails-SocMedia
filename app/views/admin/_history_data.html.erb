@@ -1,0 +1,11 @@
+<% if @admin_activities.any? %>
+  <% @admin_activities.each do |activity| %>
+    <tr data-message-id="<%= activity.id %>">
+      <td class="text-center"><%= activity.admin&.username %></td>
+      <td class="text-center"><%= activity.action %></td>
+      <td class="text-center"><%= activity.description %></td>
+      <td class="text-center"><%= activity.target %></td>
+      <td class="text-center"><%= activity.created_at.strftime("%d-%m-%Y %H:%M:%S") %></td>
+    </tr>
+  <% end %>
+<% end %>

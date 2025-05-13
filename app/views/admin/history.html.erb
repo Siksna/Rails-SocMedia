@@ -59,21 +59,13 @@
       <th class="text-center fw-bold">Time</th>
     </tr>
   </thead>
-  <tbody>
-    <% if @admin_activities.any? %>
-      <% @admin_activities.each do |activity| %>
-        <tr>
-          <td class="text-center"><%= activity.admin&.username %></td>
-          <td class="text-center"><%= activity.action %></td>
-          <td class="text-center"><%= activity.description %></td>
-          <td class="text-center"><%= activity.target %></td>
-          <td class="text-center"><%= activity.created_at.strftime("%d-%m-%Y %H:%M:%S") %></td>
-        </tr>
-      <% end %>
-    <% else %>
-      <tr>
-        <td colspan="5" class="text-center text-warning">Nav atrasts neviens ieraksts</td>
-      </tr>
-    <% end %>
-  </tbody>
+  <tbody class="admin-history" data-controller="pagination" data-pagination-direction-value="down" data-pagination-url-value="/admin/history/load_more_history" data-pagination-mode-value="admin" data-pagination-target="messages">
+  <%= render partial: "admin/history_data", locals: { admin_activities: @admin_activities } %>
+
+  <% if @admin_activities.present? && @admin_activities.size == 4 %>
+  <% last_id = @admin_activities.last.id %>
+  <tr id="load-more-trigger" data-message-id="<%= last_id %>" data-after-id="<%= last_id %>"></tr>
+<% end %>
+
+</tbody>
 </table>

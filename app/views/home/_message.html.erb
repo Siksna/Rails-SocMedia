@@ -14,7 +14,7 @@
       <p><small class="activity-time"><%= time_ago_in_words(message.created_at)  %> ago</small></p>
     <% else %>
       <img src="assets/images/default_profile.png" class="profile-pic me-2" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
-      <span>Anonīms</span>
+      <span>Anonymous</span>
     <% end %>
 
     <% if message.user == current_user || (current_user && current_user.admin?) %>

@@ -23,6 +23,7 @@
   align-items: center;
   width: 100%;
 }
+
 .input-container input[type="text"] {
   width: 60%;
   margin-right: 10px;
@@ -702,6 +703,10 @@ hr {
   display:none;
 }
 
+.mainProfile{
+  display:flex;
+  justify-content: flex-end;
+}
 
 /* notifications */
 #message-notification-count, #notification-count {

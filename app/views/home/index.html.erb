@@ -10,12 +10,12 @@
 
 <% if user_signed_in? && current_user.deleted? %>
   <div class="alert alert-warning">
-   Jūsu konts tika bloķēts kopš <%= current_user.deleted_at.strftime("%Y-%m-%d %H:%M:%S") %>.
+   Your account has been blocked since <%= current_user.deleted_at.strftime("%Y-%m-%d %H:%M:%S") %>.
   </div>
 <% else %>
 
 
-<div id="post-container" data-controller="pagination" data-pagination-direction-value="down" data-pagination-target="messages">
+<div id="post-container" data-controller="pagination" data-pagination-direction-value="down" data-pagination-mode-value="messages" data-pagination-target="messages">
   <% if @messages.visible.present? %>
     <%= render partial: "home/message", collection: @messages.visible %>
 
