@@ -16,9 +16,8 @@
     <% divider_inserted = true %>
   <% end %>
 
-  <div
-    class="chat-message <%= chat_conversation.sender == current_user ? 'sent' : 'received' %> <%= 'unseen' if is_unseen %>"
-    data-sender-id="<%= chat_conversation.sender.id %>">
+    <div class="chat-message-wrapper <%= chat_conversation.sender == current_user ? 'justify-end' : 'justify-start' %>">
+  <div class="chat-message <%= chat_conversation.sender == current_user ? 'sent' : 'received' %> <%= 'unseen' if is_unseen %>" data-sender-id="<%= chat_conversation.sender.id %>">
     <p><strong><%= chat_conversation.sender.username %>:</strong> <%= chat_conversation.content %></p>
 
     <% if chat_conversation.file.attached? %>
@@ -40,6 +39,7 @@
         <% end %>
       </div>
     <% end %>
+  </div>
   </div>
 <% end %>
 

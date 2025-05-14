@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
 
+get 'admin/history/load_more_history', to: 'admin#load_more_history', as: 'load_more_history'
+get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'load_more_personas'
 
+ get 'home/load_more', to: 'home#load_more', as: 'load_more_home'
+  get 'admin/load_more_history', to: 'admin#load_more_history'
+  get 'chats/load_more_conversations', to: 'chats#load_more_conversations'
 
   resources :admin do
     resources :users, only: [ :edit, :update, :show, :destroy]
@@ -16,7 +21,6 @@ Rails.application.routes.draw do
       end
   end
 
-get 'admin/history/load_more_history', to: 'admin#load_more_history', as: 'load_more_history'
 
   resources :chats, only: [:index, :show] do
     resources :chat_conversations, only: [:create, :destroy]
@@ -62,8 +66,6 @@ get 'admin/history/load_more_history', to: 'admin#load_more_history', as: 'load_
     end    
   end
   
-  get 'home/load_more', to: 'home#load_more', as: 'load_more_home'
-  get 'admin/load_more_history', to: 'admin#load_more_history'
 
 
   get 'search_users', to: 'home#search_users'

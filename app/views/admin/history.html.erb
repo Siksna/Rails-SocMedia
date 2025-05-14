@@ -62,10 +62,9 @@
   <tbody class="admin-history" data-controller="pagination" data-pagination-direction-value="down" data-pagination-url-value="/admin/history/load_more_history" data-pagination-mode-value="admin" data-pagination-target="messages">
   <%= render partial: "admin/history_data", locals: { admin_activities: @admin_activities } %>
 
-  <% if @admin_activities.present? && @admin_activities.size == 4 %>
   <% last_id = @admin_activities.last.id %>
   <tr id="load-more-trigger" data-message-id="<%= last_id %>" data-after-id="<%= last_id %>"></tr>
-<% end %>
+
 
 </tbody>
 </table>

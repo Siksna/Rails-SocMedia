@@ -770,9 +770,9 @@ function markSingleNotificationAsRead(notificationId, element) {
 // OBLIGATI
 
 // pagination visas vietās
-// dropdowni nestrada un citas lietas dazreiz pirmaja lapas ieladē
 // janonem aizmirsi paroli funkciju
 // reply reply bilde ir zemak pa like
+// reply sekcija neradas image preview
 // edit un delete pogas galvenaja lapa redirecto uz reply lapu
 // chata kkas kad nosuta bildi, vienreizi neizsutas otru aizsutas
 // admin history vajag uztaisit lai var sortot pec target
@@ -780,6 +780,13 @@ function markSingleNotificationAsRead(notificationId, element) {
 // ja kads kommente uz tavu postu vai reply tad atnak notifikacija
 // jauztais lai instantly connected uz chat channel
 // default profile pic ir offcentered
+// chata new line glitchojas, un neparadas poga scroll to bottom
+// profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
+// file poga visas lapas divains borders kad mouse hovero over
+// admini var nomainit lietotaja profila bildi
+// admin sadala table pakustas kad ieladejas lapa
+// admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
+// notifikacijam ir max limits
 
 // EXTRA
 
@@ -792,3 +799,5 @@ function markSingleNotificationAsRead(notificationId, element) {
 // var pieslegties ar google kontu
 // var @ot kadu reply reply sekcija
 // algoritms prieks messagiem
+// notifikacijas lapa
+// datuma linija chata japievieno

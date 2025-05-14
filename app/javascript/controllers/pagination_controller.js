@@ -10,32 +10,22 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("✅ Pagination controller connected");
-    console.log("↕️ Direction:", this.directionValue);
+    console.log("Pagination connected");
 
-this.scrollContainer = document.querySelector(".admin-history") || document.querySelector(".chats-box") || document.getElementById("post-container") || this.element.querySelector(".reply-list");
-
-    if (!this.scrollContainer) {
-      console.warn("⚠️ No scrollContainer found");
-    }
+    this.scrollContainer = document.querySelector(".admin-history") || document.querySelector(".chats-box") || document.getElementById("post-container") 
+    || document.querySelector(".personas-container") || this.element.querySelector(".reply-list") || document.getElementById("friends-grid");
 
     this.loading = false;
 
     this.observer = new IntersectionObserver(entries => {
-      console.log("👀 Observer triggered", entries[0]);
       if (entries[0].isIntersecting && !this.loading) {
-        console.log("✅ Entry is intersecting and not loading");
         if (this.directionValue === "up") {
-          console.log("⬆️ Calling loadMoreUp()");
           this.loadMoreUp();
-        }
-
-        if (this.directionValue === "down") {
-          console.log("⬇️ Calling loadMoreDown()");
+        }else if (this.directionValue === "down") {
           this.loadMoreDown();
         }
       } else {
-        console.log("🚫 Not intersecting or loading");
+        console.log("Pagination not loading");
       }
     }, {
       threshold: 1,
@@ -45,15 +35,14 @@ this.scrollContainer = document.querySelector(".admin-history") || document.quer
 
     const trigger = document.getElementById("load-more-trigger");
     if (trigger) {
-      console.log("📍 Found load-more-trigger, starting observer");
       this.observer.observe(trigger);
     } else {
-      console.warn("❌ No #load-more-trigger found at connect");
+      console.warn("No trigger found");
     }
   }
 
   loadMoreUp() {
-    console.log("⬆️ Loading up");
+    console.log("Loading");
     const trigger = document.getElementById("load-more-trigger");
     if (!trigger || !this.scrollContainer || this.loading) return;
 
@@ -83,13 +72,13 @@ this.scrollContainer = document.querySelector(".admin-history") || document.quer
         });
       })
       .catch(err => {
-        console.error("❌ Pagination load error (up)", err);
+        console.error("Pagination load error (up)", err);
         this.loading = false;
       });
   }
 
   loadMoreDown() {
-    console.log("⬇️ Loading down");
+    console.log("Loading");
     const trigger = document.getElementById("load-more-trigger");
     if (!trigger || !this.scrollContainer || this.loading) return;
 
@@ -107,14 +96,24 @@ switch (this.modeValue) {
   currentParams.set("after", messageId); 
   url = `/admin/history/load_more_history?${currentParams.toString()}`;
   break;
-
+  case "personas":
+    const personasParams = new URLSearchParams(window.location.search);
+    personasParams.set("after", messageId);
+url = `/admin/personas/load_more_personas?${personasParams.toString()}`;
+  break;
   case "replies":
     url = `/messages/${messageId}/replies/load_more?after=${afterId}`;
     break;
   case "messages":
     url = `/home/load_more?after=${messageId}`;
     break;
+    case "friends":
+  url = `chats/load_more_conversations?after=${messageId}`;
+  break;
+
 }
+
+
    console.log("🌐 Fetching from:", url);
 
     fetch(url, {
@@ -129,13 +128,13 @@ switch (this.modeValue) {
         const lastMessage = allMessages[allMessages.length - 1];
 
         if (!lastMessage || lastMessage.dataset.messageId === messageId) {
-          console.log("⚠️ No new messages loaded");
+          console.log("No new messages loaded");
           this.loading = false;
           return;
         }
 
         const newMessageId = lastMessage.dataset.messageId;
-        console.log("🆕 New trigger messageId:", newMessageId);
+        console.log("New trigger messageId:", newMessageId);
 
         const newTrigger = document.createElement("div");
         newTrigger.id = "load-more-trigger";

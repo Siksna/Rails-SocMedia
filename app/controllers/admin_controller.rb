@@ -9,7 +9,6 @@ class AdminController < ApplicationController
     if params[:username_search].present?
       @users = @users.where("username LIKE ?", "%#{params[:username_search]}%")
     end
-
     if params[:email_search].present?
       @users = @users.where("email LIKE ?", "%#{params[:email_search]}%")
     end
@@ -19,12 +18,44 @@ class AdminController < ApplicationController
       @users = @users.where(admin_type: ['admin', 'head_admin'])   
     when 'user'
       @users = @users.where(admin_type: 'user')   
-    when 'default', nil
     end
-    
 
+    @users = @users.order(created_at: :asc, id: :asc).limit(15)
     render 'admin/personas'
   end
+
+  
+
+  def load_more_personas
+  @users = User.all
+
+  if params[:username_search].present?
+    @users = @users.where("username LIKE ?", "%#{params[:username_search]}%")
+  end
+
+  if params[:email_search].present?
+    @users = @users.where("email LIKE ?", "%#{params[:email_search]}%")
+  end
+
+  case params[:role_filter]
+  when 'admin'
+    @users = @users.where(admin_type: ['admin', 'head_admin'])
+  when 'user'
+    @users = @users.where(admin_type: 'user')
+  end
+
+  if params[:after].present?
+    after_id = params[:after]
+    @users = @users.where("id > ?", after_id)
+  end
+
+  @users = @users.order(created_at: :asc, id: :asc).limit(15) 
+
+  render partial: 'admin/personas_data', locals: { users: @users }
+end
+
+
+
 
   def index
     if user_signed_in?
@@ -160,7 +191,7 @@ class AdminController < ApplicationController
  def history
   @admins = User.where(admin_type: ['admin', 'head_admin'])
   @unique_actions = AdminActivity.distinct.pluck(:action)
-  @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc).limit(4)
+  @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc).limit(20)
 
   @admin_activities = @admin_activities.where(admin_id: params[:admin]) if params[:admin].present?
   @admin_activities = @admin_activities.where(action: params[:activity_action]) if params[:activity_action].present?
@@ -212,7 +243,7 @@ def load_more_history
     )
   end
 
-  @admin_activities = activities.limit(4)
+  @admin_activities = activities.limit(20)
 
   if @admin_activities.empty?
     head :no_content
@@ -240,11 +271,11 @@ end
     if current_user.head_admin?
     elsif current_user.admin?
       if @user.admin? || @user.head_admin?
-        flash[:errors] = 'Nēsat autorizēts rediģēt citus administratorus'
+        flash[:errors] = 'You are not authorized to edit other admins'
         redirect_to admin_personas_path
       end
     else
-      flash[:errors] = 'Jūs nēsat autorizēts rediģēt šo lietotāju'
+      flash[:errors] = 'You are not authorized to edit this user'
       redirect_to admin_index_path
     end
   end

@@ -1,5 +1,11 @@
 
- img {
+:root {
+  --primary-light: rgb(220, 180, 180);
+  --primary-dark: rgb(150, 40, 40);
+  --gray: rgb(230, 230, 230);
+}
+
+img {
   max-width: 100%;
 }
 
@@ -35,14 +41,14 @@
   font-size: 16px;
   font-weight: bold;
   color: #fff;
-  background-color: rgb(170, 30, 30);
+  background-color: var(--primary-dark);
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
 .mainbtn:hover{
-  background-color: rgb(140, 30, 30);
+  background-color: var(--primary-dark);
 }
 
 .file-info {
@@ -193,7 +199,7 @@ hr {
 .file-upload {
   margin: 0.5rem;
   position: relative;
-  background-color: rgb(170, 40, 40);
+  background-color: var(--primary-dark);
   color: white;
   padding: 6px 12px;
   border: none;
@@ -226,7 +232,7 @@ hr {
 }
 
 .reply-form button, .input-container button {
-  background-color: rgb(170 40 40);
+  background-color: var(--primary-dark);
   color: white;
   padding: 6px 12px;
   border: none;
@@ -283,7 +289,7 @@ hr {
 }
 
 .remove-file-btn {
-  background-color: rgb(170, 30, 30);
+  background-color: var(--primary-dark);
   color: white;
   border: none;
   border-radius: 15%;
@@ -296,7 +302,7 @@ hr {
 }
 
 .remove-file-btn:hover {
-  background-color: rgb(140, 30, 30);
+  background-color: var(--primary-dark);
 }
 
 /* Profila bilde */
@@ -730,6 +736,60 @@ hr {
   overflow-y: auto;
 }
 
+.chat-message-wrapper {
+  display: flex;
+  width: 100%;
+}
+
+.chat-message-wrapper.justify-end {
+  justify-content: flex-end;
+}
+
+.chat-message-wrapper.justify-start {
+  justify-content: flex-start;
+}
+
+
+.chat-message.sent {
+  background-color: var(--gray);
+  color: #000000; 
+  border: 1px solid black;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 8px 12px;
+  border-radius: 20px 20px 0 20px;
+  margin-bottom: 10px;
+  max-width: 50%;
+  word-wrap: break-word;
+}
+
+.chat-message.received {
+  background-color:  var(--primary-light);
+  color: black;
+  border: 1px solid black;
+  padding: 8px 12px;
+  border-radius: 20px 20px 20px 0;
+  margin-bottom: 10px;
+  max-width: 50%;
+  word-wrap: break-word;
+}
+
+
+.chat-message.unseen {
+  border: 3px solid black;
+  color: black;
+  background-color: rgb(214, 138, 138);
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 20px 20px 20px 0;
+  margin-bottom: 10px;
+  max-width: 50%;
+  word-wrap: break-word;
+}
+
+.chat-message p {
+  margin: 0;
+  font-size: 14px;
+}
 
 .unseen-divider {
   text-align: center;
@@ -753,6 +813,7 @@ hr {
 
 .chat-image-wrapper {
   height: 200px;
+  width:200px;
   overflow: hidden;
   position: relative;
 }
@@ -761,11 +822,10 @@ hr {
   max-height: 100%;
   max-width: 100%;
   object-fit: contain;
-  position: absolute;
   top: 0;
   left: 0;
+  border-radius: 5px;
 }
-
 
 .chat-video-wrapper {
   height: 200px;
@@ -783,5 +843,6 @@ hr {
   width: 100%;
   object-fit: contain;
 }
+
 
 

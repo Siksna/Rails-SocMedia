@@ -1,6 +1,8 @@
 class ChatConversationsController < ApplicationController
   before_action :authenticate_user!
 
+  
+
   def create
     @conversation = Conversation.find(params[:chat_id])
     @chat_conversation = @conversation.chat_conversations.build(chat_message_params)

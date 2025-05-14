@@ -90,7 +90,7 @@ class User < ApplicationRecord
   
 
   def randomize_attributes
-    self.username = "Lietotājs #{SecureRandom.hex(4)}"
+    self.username = "User #{SecureRandom.hex(4)}"
     save
   end
   private

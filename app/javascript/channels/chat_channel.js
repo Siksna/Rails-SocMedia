@@ -11,7 +11,7 @@ function scrollToBottom() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("turbo:load", () => {
   const scrollBtn = document.getElementById("scrollToLatestBtn");
 
   if (scrollBtn) {
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("turbo:load", () => {
   const chatBox = document.querySelector(".chats-box");
   const chatId = chatBox?.dataset?.chatConversationId;
 

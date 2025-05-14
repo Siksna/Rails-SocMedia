@@ -4,9 +4,7 @@ class ChatsController < ApplicationController
   def index
     hidden_convo_ids = HiddenChat.where(user: current_user).pluck(:conversation_id)
   
-    @conversations = Conversation
-      .includes(:sender, :receiver, chat_conversations: [:sender, :receiver])
-      .where("sender_id = :id OR receiver_id = :id", id: current_user.id)
+    @conversations = Conversation.includes(:sender, :receiver, chat_conversations: [:sender, :receiver]).where("sender_id = :id OR receiver_id = :id", id: current_user.id)
   
       @conversations = @conversations.reject do |convo|
         hidden = HiddenChat.find_by(user: current_user, conversation: convo)
@@ -26,15 +24,12 @@ class ChatsController < ApplicationController
           false
         end
       end
-      
-      
-      
   
     convo_times = @conversations.index_with do |convo|
       convo.chat_conversations.maximum(:created_at)&.to_i || 0
     end
   
-    @sorted_conversations = convo_times.sort_by { |_, time| -time }.map(&:first)
+    @sorted_conversations = convo_times.sort_by { |_, time| -time }.map(&:first).first(10)
   
     @last_messages = {}
     @sorted_conversations.each do |convo|
@@ -45,6 +40,41 @@ class ChatsController < ApplicationController
   end
   
   
+  def load_more_conversations
+  after_timestamp = Time.at(params[:after].to_i)
+
+  hidden_convo_ids = HiddenChat.where(user: current_user).pluck(:conversation_id)
+
+  conversations = Conversation
+    .includes(:sender, :receiver, chat_conversations: [:sender, :receiver])
+    .where("sender_id = :id OR receiver_id = :id", id: current_user.id)
+    .reject { |c| hidden_convo_ids.include?(c.id) }
+
+  sorted = conversations.select do |convo|
+    last_time = convo.chat_conversations.maximum(:created_at)&.to_i
+    last_time.present? && last_time < after_timestamp.to_i
+  end
+
+  convo_times = sorted.index_with do |convo|
+    convo.chat_conversations.maximum(:created_at)&.to_i || 0
+  end
+  sorted_convos = convo_times.sort_by { |_, time| -time }.map(&:first)
+  @index_conversations = sorted_convos.first(10) 
+  @has_more = sorted_convos.size > 10
+
+  @last_messages = {}
+  @index_conversations.each do |convo|
+    last_message = convo.chat_conversations.order(created_at: :desc).first
+    @last_messages[convo.id] = last_message&.content
+  end
+
+  render partial: "chats/index_conversation", locals: {
+    index_conversations: @index_conversations,
+    has_more: @has_more
+  }
+end
+
+
   
 
   def show

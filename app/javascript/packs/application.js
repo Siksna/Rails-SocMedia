@@ -1,8 +1,9 @@
-import "../channels/consumer";
 import "../channels/chat_channel";
 import "../channels/notification_channel";
+import "../controllers"
+import "../channels/consumer";
 import "../channels";
 import "../java.js";
-import "@hotwired/turbo-rails"
-import "../controllers"
+import { Turbo } from "@hotwired/turbo-rails"
+Turbo.session.drive = false
 
