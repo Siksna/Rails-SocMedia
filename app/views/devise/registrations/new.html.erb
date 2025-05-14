@@ -1,5 +1,5 @@
 <div class="card border-light mb-3" style="max-width: 18rem;">
-<div class="card-header">Reģistrēties</div>
+<div class="card-header">Register</div>
 
 
 <div class="card-body">
@@ -8,32 +8,32 @@
 
 
   <div class="field">
-  <h5 class="card-title"><%= f.label :epasts %></h5>
+  <h5 class="card-title"><%= f.label :email %></h5>
     <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
   </div>
 
 
   <div class="field">
-  <h5 class="card-title"><%= f.label :lietotājvārds %></h5>
+  <h5 class="card-title"><%= f.label :username %></h5>
    <%= f.text_field :username %>
  </div>
  
   <div class="field">
-  <h5 class="card-title"><%= f.label :parole %></h5>
+  <h5 class="card-title"><%= f.label :password %></h5>
   <% if @minimum_password_length %>
     <em><% @minimum_password_length %></em>
   <% end %>
-  <%= f.password_field :password, autocomplete: "new-password", placeholder: "#{@minimum_password_length} rakstzīmes minimums" %>
+  <%= f.password_field :password, autocomplete: "new-password", placeholder: "#{@minimum_password_length} characters minimum" %>
 </div>
 
 
   <div class="field">
-  <h5 class="card-title"><%= f.label :paroles_apstiprināšana %></h5>
+  <h5 class="card-title"><%= f.label :password_confirmation %></h5>
     <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
   </div>
 
   <div class="actions">
-    <%= f.submit "Reģistrēties", class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
+    <%= f.submit "Register", class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
   </div>
 <% end %>
 

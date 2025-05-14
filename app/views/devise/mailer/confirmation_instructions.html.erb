@@ -1,5 +1,4 @@
-<p>Labdien <%= @email %>!</p>
+<p>Hello <%= @email %>!</p>
 
-<p>Jūs varat apstiprināt savu kontu ar linku apakšējā nodaļa:</p>
-
-<p><%= link_to 'Apstiprināt manu kontu', confirmation_url(@resource, confirmation_token: @token) %></p>
+<p>You can verify your account with the link below:</p>
+<p><%= link_to 'Verify my account', confirmation_url(@resource, confirmation_token: @token) %></p>

@@ -1,14 +1,14 @@
 <div class="card border-light mb-3" style="max-width: 18rem;">
-<div class="card-header"><h2>Pieslēgties</h2></div>
+<div class="card-header"><h2>Login</h2></div>
 
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
   <div class="field form-group">
-    <%= f.label :epasts %><br />
+    <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true, class:"form-control", autocomplete: "email" %>
   </div>
 
   <div class="field form-group">
-    <%= f.label :parole %><br />
+    <%= f.label :password %><br />
     <%= f.password_field :password, class:"form-control", autocomplete: "current-password" %>
   </div>
 
@@ -20,7 +20,7 @@
   <% end %>
 
   <div class="actions">
-    <%= f.submit "Pieslēgties", class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
+    <%= f.submit "Login", class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
   </div>
 <% end %>
 

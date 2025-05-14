@@ -1,7 +1,5 @@
-<p>Sveiki <%= @resource.email %>!</p>
+<p>Hello <%= @resource.email %>!</p>
 
-<p>Jūsu konts ir bloķēts, jo ir bijis pārāk daudz neveiksmīgu pierakstīšanās mēģinājumu.</p>
-
-<p>Noklikšķiniet uz tālāk esošās saites, lai atbloķētu savu kontu:</p>
-
-<p><%= link_to 'Atvērt manu kontu', unlock_url(@resource, unlock_token: @token) %></p>
+<p>Your account has been locked because there have been too many failed sign-in attempts.</p>
+<p>Click on the link below to unlock your account:</p>
+<p><%= link_to 'Open my account', unlock_url(@resource, unlock_token: @token) %></p>

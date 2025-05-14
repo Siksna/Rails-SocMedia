@@ -1,4 +1,4 @@
-<h2>Lietotāja rediģēšana</h2>
+<h2>User editing</h2>
 
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, multipart: true }) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
@@ -6,12 +6,12 @@
   
 
   <div class="field form-group">
-    <%= f.label :profile_picture, "Profila bilde" %><br />
+    <%= f.label :profile_picture, "Profile picture" %><br />
     <%= f.file_field :profile_picture, accept: "image/*", id: "profile_picture_input" %>
    <div id="preview-container" class="mt-2" style="width: 200px; height: 200px; overflow: hidden; border-radius: 50%; border: 2px solid #ddd; position: relative;">
   <img id="preview-image" 
        src="<%= resource.profile_picture.present? ? url_for(resource.profile_picture) : asset_path('default_profile.png') %>"
-       alt="Profila bilde"
+       alt="Profile picture"
        style="width: 100%; height: 100%; object-fit: cover;" />
 </div>
 
@@ -21,51 +21,51 @@
 
 
   <div class="field form-group">
-  <%= f.label :lietotājvārds %><br />
+  <%= f.label :username %><br />
   <%= f.text_field :username, value: resource.username, autocomplete: "username", class: "form-control", required:true%>
 </div>
 
 
 <div class="field form-group">
-    <%= f.label :epasts %><br />
+    <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true, autocomplete: "email", class:"form-control" %>
   </div>
 
 
   <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-  <div>Pašlaik tiek gaidīts apstiprinājums priekš: <%= resource.unconfirmed_email %></div>
+  <div>Currently awaiting approval for: <%= resource.unconfirmed_email %></div>
 <% end %>
 
 <div class="field form-group">
-  <%= f.label :parole %><br />
+  <%= f.label :password %><br />
   <%= f.password_field :password, autocomplete: "new-password", class:"form-control", placeholder:"(atstājiet tukšu, ja nevēlaties to mainīt)" %>
   <% if @minimum_password_length %>
-    <em><%= @minimum_password_length %> rakstzīmes minimums</em>
+    <em><%= @minimum_password_length %> character minimum</em>
   <% end %>
 </div>
 
 <div class="field form-group">
-  <%= f.label :paroles_apstiprinasana %><br />
+  <%= f.label :password_confirmation %><br />
   <%= f.password_field :password_confirmation, autocomplete: "new-password",class:"form-control" %>
 </div>
 
 <div class="field form-group">
-  <%= f.label :pašreizējā_parole %><br />
+  <%= f.label :current_password %><br />
   <%= f.password_field :current_password, autocomplete: "current-password" , class:"form-control", placeholder:"(mums ir nepieciešama jūsu pašreizējā parole, lai apstiprinātu izmaiņas)"%>
 </div>
 
   <div class="actions">
-    <%= f.submit "Saglabāt", class:"btn btn-success border-0 rounded-pill shadow p-2 m-2" %>
+    <%= f.submit "Save", class:"btn btn-success border-0 rounded-pill shadow p-2 m-2" %>
   
 <% end %>
 
-  <%= link_to "Atpakaļ", :back, class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
+  <%= link_to "Back", :back, class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
 </div>
 <div class="card">
-  <h5 class="card-header">Dzēst manu kontu</h5>
+  <h5 class="card-header">Delete my account</h5>
   <div class="card-body">
-    <h5 class="card-title">Neapmierināti?</h5>
-     <%= button_to "Dzēst manu kontu", registration_path(resource_name), data: { confirm: "Pārliecināti?", turbo_confirm: "Vai tiešām parliecināti?" }, method: :delete, class:"btn btn-danger border-0 rounded-pill shadow p-2 m-2" %></div> 
+    <h5 class="card-title">Dissatisfied?</h5>
+     <%= button_to "Delete my account", registration_path(resource_name), data: { confirm: "Pārliecināti?", turbo_confirm: "Vai tiešām parliecināti?" }, method: :delete, class:"btn btn-danger border-0 rounded-pill shadow p-2 m-2" %></div> 
   </div>
 
  
