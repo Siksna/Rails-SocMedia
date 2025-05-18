@@ -9,16 +9,16 @@
         </div>
       <% end %>
     <% end %>
-    <%= link_to @message.user&.username || 'Anonīms', profile_path(@message.user), class: 'fw-bold' %>
+    <%= link_to @message.user&.username || 'Anonīms', profile_path(@message.user), class: 'Profile-username fw-bold' %>
     <small class="activity-time"><%= time_ago_in_words(@message.created_at) %> ago</small>
 
 <% if current_user && (@message.user == current_user || current_user.admin?) %>
       <div class="nav-item dropdown ms-auto">
         <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
         <ul class="dropdown-menu">
-          <li><%= link_to 'Rediģēt ziņu', edit_message_path(@message), class: 'dropdown-item btn btn-primary' %></li>
+          <li><%= link_to 'Edit', edit_message_path(@message), class: 'dropdown-item btn btn-primary' %></li>
           <li><hr class="dropdown-divider"></li>
-          <li><%= button_to 'Dzēst ziņu', message_path(@message), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
+          <li><%= button_to 'Delete', message_path(@message), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
         </ul>
       </div>
     <% end %>
@@ -74,7 +74,7 @@
     <div id="replyFilePreview" class="file-preview"></div>
     <%= form_with model: [@message, @message.replies.build], local: false do |form| %>
       <div class="input-container">
-        <%= form.text_field :content, placeholder: "Ievadiet savu atbildi šeit...", autocomplete: "off", class: "form-control", id: "replyInputField" %>
+        <%= form.text_field :content, placeholder: "Enter your message here...", autocomplete: "off", class: "form-control", id: "replyInputField", maxlength: 255 %>
         <label class="file-upload">
           <i class="fas fa-paperclip"></i>
           <%= form.file_field :file, id: "replyFileInput", onchange: "displayReplyFileName()" %>
@@ -85,108 +85,24 @@
   </div>
 
   <hr>
-
 <div class="replies" data-controller="pagination" data-pagination-url-value="<%= load_more_message_replies_path(@message) %>" data-pagination-mode-value="replies" data-pagination-direction-value="down">
     <h4>Comments:</h4>
   <ul class="reply-list" data-pagination-target="messages">
-      <% @replies.where(parent_id: nil).each do |reply| %>
-        <li>
-          <div class="reply-header d-flex align-items-center mb-2">
-            <%= link_to profile_path(reply.user) do %>
-              <% if reply.user.profile_picture.attached? %>
-                <%= image_tag url_for(reply.user.profile_picture), alt: reply.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' %>
-              <% else %>
-                <div class="default-profile-picture" style="background-color: <%= reply.user.profile_color %>;">
-                  <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
-                </div>
-              <% end %>
-            <% end %>
 
-            <%= link_to reply.user&.username || 'Anonymous', profile_path(reply.user), class: 'fw-bold' %>
-            <small class="activity-time"><%= time_ago_in_words(reply.created_at) %> ago</small>
+<% @replies.where(parent_id: nil).each do |reply| %>
+<%= render partial: 'home/reply', locals: { reply: reply, message: @message, current_user: current_user } %>
+<% end %>
 
-            <% if current_user && (reply.user == current_user || current_user.admin?) %>
-              <div class="nav-item dropdown ms-auto">
-                <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
-                <ul class="dropdown-menu">
-                  <li><%= link_to 'Rediģēt atbildi', edit_message_reply_path(@message, reply), class: 'dropdown-item btn btn-primary' %></li>
-                  <li><%= button_to 'Dzēst atbildi', message_reply_path(@message, reply), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
-                </ul>
-              </div>
-            <% end %>
-          </div>
-
-          <p><%= reply.content %></p>
-
-          <% if reply.file.attached? %>
-            <div class="reply-file">
-              <% if reply.file.content_type.start_with?('image/') %>
-                <%= image_tag reply.file, alt: 'Nolādētā bilde' %>
-              <% elsif reply.file.content_type.start_with?('video/') %>
-                <video width="100%" controls>
-                  <source src="<%= url_for(reply.file) %>" type="<%= reply.file.content_type %>">
-                  Video tag not supported.
-                </video>
-              <% else %>
-                <%= link_to 'Nolādēt failu', rails_blob_path(reply.file, disposition: 'attachment') %>
-              <% end %>
-            </div>
-          <% end %>
-
-         
-          <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
-          <button class="btn btn-sm btn-link" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
-            <i class="fa-regular fa-message"></i>
-            <%= pluralize(reply.children.count, 'koments', 'komenti') %>
-          </button>
-
-            <!-- Like funkcija prieks replijiem -->
-         <div class="like-section d-flex align-items-center">
-            <% if current_user %>
-              <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'heart me-2', onclick: "toggleReplyLike(#{reply.id}, this); event.stopPropagation();" do %>
-             <% if current_user.liked?(reply) %>
-               <i class="fa-solid fa-heart"></i>
-               <% else %>
-                <i class="fa-regular fa-heart"></i>
-              <% end %>
-             <% end %>
-           <% else %>
-               <i class="fa-regular fa-heart me-2"></i>
-            <% end %>
-           <span id="like-reply-count-<%= reply.id %>"><%= reply.likes.count %></span>
-          </div>
-          </div>
-
-          <div id="replyToReply<%= reply.id %>" class="collapse">
-            <%= form_with model: [@message, @message.replies.build], local: true do |form| %>
-              <%= form.hidden_field :parent_id, value: reply.id %> 
-              <div class="input-container">
-                <%= form.text_field :content, placeholder: "Enter your message here...", class: "form-control" %>
-                <label class="file-upload">
-                 <i class="fas fa-paperclip"></i>
-                  <%= form.file_field :file %>
-                </label>
-                <button><i class="fas fa-paper-plane"></i></button>
-              </div>
-            <% end %>
-
-            <% if reply.children.any? %>
-             <ul class="reply-list" style="padding-left: 3rem;"> 
-                <%= render partial: 'home/reply', collection: reply.children, as: :reply %>
-              </ul>
-
-    
-            <% end %>
-          </div>
-        </li>
-      <% end %>
-    </ul>
-
-     
- <% last_reply = @replies.where(parent_id: nil).last %>
-<% last_reply_id = last_reply.present? ? last_reply.id : nil %>
-<div id="load-more-trigger" data-message-id="<%= @message.id %>" data-after-id="<%= last_reply_id %>"></div>
+</ul>
 
 
-  </div>
 </div>
+
+<% last_reply = @replies.where(parent_id: nil).last %>
+<% if last_reply.present? %>
+  <div 
+    id="load-more-trigger"
+    data-message-id="<%= last_reply.id %>" 
+    data-after-id="<%= @message.id%>">
+  </div>
+<% end %>

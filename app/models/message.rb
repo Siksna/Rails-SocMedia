@@ -2,7 +2,7 @@ class Message < ApplicationRecord
     has_many :replies, dependent: :destroy
     has_one_attached :file
     has_many :likes, as: :likeable
-    validates :content, presence: true
+    validates :content, presence: true, length: { maximum: 255 }
     scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
     belongs_to :user
 

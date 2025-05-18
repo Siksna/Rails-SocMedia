@@ -6,7 +6,7 @@ class MessagesController < ApplicationController
   def show
     @message = Message.find(params[:id])
     @reply = Reply.new
-    @replies = @message.replies.includes(:user, :children).where(parent_id: nil).order(created_at: :desc).limit(10)
+    @replies = @message.replies.includes(:user, :children).where(parent_id: nil).order(created_at: :desc).limit(15)
     @comment_count = message_data(@message)[:comment_count]
     render 'home/show'
   end

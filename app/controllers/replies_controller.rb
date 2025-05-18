@@ -17,15 +17,18 @@ class RepliesController < ApplicationController
   end
 
 def load_more
-  
-if params[:message_id].blank?
-  render plain: "Missing message_id", status: :bad_request and return
-end
+  if params[:message_id].blank?
+    render plain: "Missing message_id", status: :bad_request and return
+  end
 
-@message = Message.find(params[:message_id])
-  @replies = @message.replies.where(parent_id: nil).where('id > ?', params[:after]).limit(5)
-  render partial: 'home/reply', collection: @replies, as: :reply, formats: :html
-end
+  @message = Message.find(params[:message_id])
+
+  @replies = @message.replies.where(parent_id: nil).where('id < ?', params[:after]).order(id: :desc).limit(15)
+@last_reply_id = @replies.last&.id
+
+render partial: 'home/reply', collection: @replies, as: :reply, locals: { last_reply: @last_reply_id }
+      end
+
 
 
   def edit

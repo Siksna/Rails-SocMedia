@@ -1,32 +1,32 @@
-<h1>Rediģēt ziņu un failu</h1>
+<h1>Edit message</h1>
 
 <%= form_with model: @message, local: true do |form| %>
   <div class="form-group">
-    <%= form.label :content, 'Ziņas Saturs' %>
+    <%= form.label :content, 'Message content' %>
     <%= form.text_area :content, class: "form-control" %>
   </div>
 
   <div class="form-group">
-    <%= form.label :file, 'Pievienot vai nomainīt failu' %>
+    <%= form.label :file, 'Add or change a file' %>
     <%= form.file_field :file, class: "form-control" %>
   </div>
 
   <% if @message.file.attached? %>
-  <p>Esošais fails:</p>
+  <p>Current file:</p>
   <% if @message.file.content_type.start_with?('image/') %>
-    <%= image_tag @message.file, alt: 'Esošais fails', style: 'max-width: 100%; height: auto;' %>
+    <%= image_tag @message.file, alt: 'Current file', style: 'max-width: 100%; height: auto;' %>
   <% else %>
-    <%= link_to 'Lejupielādēt esošo failu', rails_blob_path(@message.file, disposition: 'attachment') %>
+    <%= link_to 'Download current file', rails_blob_path(@message.file, disposition: 'attachment') %>
   <% end %>
   <div class="form-group">
     <%= form.check_box :remove_file %>
-    <%= form.label :remove_file, 'Noņemt pašreizējo failu' %>
+    <%= form.label :remove_file, 'Remove current file' %>
   </div>
 <% end %>
 
 
-  <%= form.submit 'Saglabāt', class: "btn btn-primary" %>
+  <%= form.submit 'Save', class: "btn btn-primary" %>
 <% end %>
 
-<%= link_to 'Atpakaļ', message_path(@message), class: "btn btn-secondary" %>
+<%= link_to 'Back', message_path(@message), class: "btn btn-secondary" %>
 

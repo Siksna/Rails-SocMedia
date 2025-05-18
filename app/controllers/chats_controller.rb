@@ -112,31 +112,48 @@ end
 
 
 
-  def load_more
-    @conversation = Conversation.find(params[:id])
-  
-    unless [@conversation.sender, @conversation.receiver].include?(current_user)
-      head :forbidden
-      return
-    end
-  
-    if params[:before]
-      before_message = @conversation.chat_conversations.find_by(id: params[:before])
-      @chat_conversations = if before_message
-        @conversation.chat_conversations.where("created_at < ?", before_message.created_at).order(created_at: :desc).limit(20)
-      else
-        []
-      end
-    else
-      @chat_conversations = @conversation.chat_conversations.order(created_at: :desc).limit(20)
-    end
-  
-    @chat_conversations = @chat_conversations.reverse
-  
-    @read_status = ChatReadStatus.find_by(user: current_user, chat: @conversation)
-  
-    render partial: "chats/chat_conversation", locals: { chat_conversations: @chat_conversations }
+ def load_more
+  # Atrod sarunu (conversation) pēc ID, kas tika padots kā parametrs.
+  @conversation = Conversation.find(params[:id])
+
+  # Pārbauda, vai pašreizējais lietotājs ir vai nu sarunas sūtītājs vai saņēmējs.
+  unless [@conversation.sender, @conversation.receiver].include?(current_user)
+    head :forbidden # Ja nav, nosūta kļūdas ziņojumu.
+    return
   end
+
+  # Pārbauda vai tika padots `before` parametrs
+  if params[:before]
+    # Atrod konkrēto ziņu, no kuras jāsāk filtrēt vecākas ziņas
+    before_message = @conversation.chat_conversations.find_by(id: params[:before])
+
+    # Ja tā ziņa tika atrasta, tiek atgrieztas 20 ziņas, vecākas par to
+    @chat_conversations = if before_message
+      @conversation.chat_conversations
+        .where("created_at < ?", before_message.created_at) # Ņemtas tikai ziņas, kas izveidotas pirms šīs
+        .order(created_at: :desc)                          # Sakārto pēc auguma dilstoši, jaunākās vispirms
+        .limit(20)                                          # Tikai 20 ziņas atgriež
+    else
+      [] # Ja ziņa netika atrasta, atgriež tukšu masīvu
+    end
+  else
+    # Ja `before` parametrs nav padots, ielādē pēdējās 20 ziņas šajā sarunā
+    @chat_conversations = @conversation.chat_conversations
+      .order(created_at: :desc)
+      .limit(20)
+  end
+
+  # Ziņas tiek apgrieztas, lai tās būtu hronoloģiskā secībā (vecākās vispirms, kā parasti tiek rādīts čatā)
+  @chat_conversations = @chat_conversations.reverse
+
+  # Tiek apskatīts vai lietotājs ir redzējis sūtītās ziņas no otras personas
+  @read_status = ChatReadStatus.find_by(user: current_user, chat: @conversation)
+
+# Atgriež tikai HTML fragmentu (_chat_conversation.html.erb), kas tiks ielādēts dinamiski ar JavaScript
+# Padod tam mainīgo `chat_conversations`, kas satur iepriekš atlasītās ziņas
+  render partial: "chats/chat_conversation", locals: { chat_conversations: @chat_conversations }
+end
+
   
 
 

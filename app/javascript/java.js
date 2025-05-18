@@ -767,26 +767,32 @@ function markSingleNotificationAsRead(notificationId, element) {
   .catch(error => console.error("Error marking notification as read:", error));
 }
 
+// EXTRA OBLIGATI
+
+// Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
+
 // OBLIGATI
 
-// pagination visas vietās
+// chata new line glitchojas, un neparadas poga scroll to bottom
+// Čata sadaļā nav pareizi sent un sender vizualie izskati, vienmer ja ir current user jabut pelekais teksts tam kas suta
+// PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā
+// Javascript priekš čata kautkur delayed inptu value uztaisa par "" un nodzesas zinas inputs bisk delayed
+// algoritms prieks messagiem
 // janonem aizmirsi paroli funkciju
-// reply reply bilde ir zemak pa like
-// reply sekcija neradas image preview
+// reply reply sekcija neradas inputs, un image preview
 // edit un delete pogas galvenaja lapa redirecto uz reply lapu
-// chata kkas kad nosuta bildi, vienreizi neizsutas otru aizsutas
 // admin history vajag uztaisit lai var sortot pec target
 // gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
+// reply lapā jauztaisa lai var bez parlades komentet un likot ziņas
 // ja kads kommente uz tavu postu vai reply tad atnak notifikacija
 // jauztais lai instantly connected uz chat channel
 // default profile pic ir offcentered
-// chata new line glitchojas, un neparadas poga scroll to bottom
 // profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
-// file poga visas lapas divains borders kad mouse hovero over
 // admini var nomainit lietotaja profila bildi
-// admin sadala table pakustas kad ieladejas lapa
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
 // notifikacijam ir max limits
+// chata zinam japievieno laiki
+// friends chata lapa ari japievieno laiki kad tika pedeja zina sutita
 
 // EXTRA
 
@@ -798,6 +804,8 @@ function markSingleNotificationAsRead(notificationId, element) {
 // display images var pievienot vairakus images un nospiest x uz jebkuru image
 // var pieslegties ar google kontu
 // var @ot kadu reply reply sekcija
-// algoritms prieks messagiem
 // notifikacijas lapa
 // datuma linija chata japievieno
+// friends page laba puse maybe parada notification vesturi
+// Var čatot ar jebkuru personu
+// file poga visas lapas divains borders kad mouse hovero over

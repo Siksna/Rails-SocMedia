@@ -10,7 +10,6 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("Pagination connected");
 
     this.scrollContainer = document.querySelector(".admin-history") || document.querySelector(".chats-box") || document.getElementById("post-container") 
     || document.querySelector(".personas-container") || this.element.querySelector(".reply-list") || document.getElementById("friends-grid");
@@ -21,11 +20,11 @@ export default class extends Controller {
       if (entries[0].isIntersecting && !this.loading) {
         if (this.directionValue === "up") {
           this.loadMoreUp();
-        }else if (this.directionValue === "down") {
+        } else if (this.directionValue === "down") {
           this.loadMoreDown();
         }
       } else {
-        console.log("Pagination not loading");
+        console.log("Trigger not loading");
       }
     }, {
       threshold: 1,
@@ -44,13 +43,16 @@ export default class extends Controller {
   loadMoreUp() {
     console.log("Loading");
     const trigger = document.getElementById("load-more-trigger");
-    if (!trigger || !this.scrollContainer || this.loading) return;
+    if (!trigger || !this.scrollContainer || this.loading) {
+      console.log("Scroll container missing");
+      return;
+    }
 
     this.loading = true;
     this.observer.unobserve(trigger);
-
     const messageId = trigger.dataset.messageId;
     const previousScrollHeight = this.scrollContainer.scrollHeight;
+
 
     fetch(`/chats/${this.conversationIdValue}/load_more?before=${messageId}`, {
       headers: { "X-Requested-With": "XMLHttpRequest" }
@@ -61,18 +63,24 @@ export default class extends Controller {
         this.messagesTarget.insertAdjacentHTML("afterbegin", html);
 
         requestAnimationFrame(() => {
+          const newScrollHeight = this.scrollContainer.scrollHeight;
+          const scrollDiff = newScrollHeight - previousScrollHeight;
           if (this.scrollContainer.scrollTop <= 0) {
-            const newScrollHeight = this.scrollContainer.scrollHeight;
-            const scrollDiff = newScrollHeight - previousScrollHeight;
             this.scrollContainer.scrollTop += scrollDiff;
           }
+
           const newTrigger = document.getElementById("load-more-trigger");
-          if (newTrigger) this.observer.observe(newTrigger);
+          if (newTrigger) {
+            this.observer.observe(newTrigger);
+          } else {
+            console.warn("No new trigger found");
+          }
+
           this.loading = false;
         });
       })
       .catch(err => {
-        console.error("Pagination load error (up)", err);
+        console.error("Pagination load error", err);
         this.loading = false;
       });
   }
@@ -80,7 +88,10 @@ export default class extends Controller {
   loadMoreDown() {
     console.log("Loading");
     const trigger = document.getElementById("load-more-trigger");
-    if (!trigger || !this.scrollContainer || this.loading) return;
+    if (!trigger || !this.scrollContainer || this.loading) {
+      console.log("Scroll container missing");
+      return;
+    }
 
     this.loading = true;
     this.observer.unobserve(trigger);
@@ -88,33 +99,29 @@ export default class extends Controller {
     const messageId = trigger.dataset.messageId;
     const afterId = trigger.dataset.afterId;
 
-let url;
+    let url;
 
-switch (this.modeValue) {
-  case "admin":
-  const currentParams = new URLSearchParams(window.location.search);
-  currentParams.set("after", messageId); 
-  url = `/admin/history/load_more_history?${currentParams.toString()}`;
-  break;
-  case "personas":
-    const personasParams = new URLSearchParams(window.location.search);
-    personasParams.set("after", messageId);
-url = `/admin/personas/load_more_personas?${personasParams.toString()}`;
-  break;
-  case "replies":
-    url = `/messages/${messageId}/replies/load_more?after=${afterId}`;
-    break;
-  case "messages":
-    url = `/home/load_more?after=${messageId}`;
-    break;
-    case "friends":
-  url = `chats/load_more_conversations?after=${messageId}`;
-  break;
-
-}
-
-
-   console.log("🌐 Fetching from:", url);
+    switch (this.modeValue) {
+      case "admin":
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set("after", messageId); 
+        url = `/admin/history/load_more_history?${currentParams.toString()}`;
+        break;
+      case "personas":
+        const personasParams = new URLSearchParams(window.location.search);
+        personasParams.set("after", messageId);
+        url = `/admin/personas/load_more_personas?${personasParams.toString()}`;
+        break;
+      case "replies":
+        url = `/messages/${afterId}/replies/load_more?after=${messageId}`;
+        break;
+      case "messages":
+        url = `/home/load_more?after=${messageId}`;
+        break;
+      case "friends":
+        url = `chats/load_more_conversations?after=${messageId}`;
+        break;
+    }
 
     fetch(url, {
       headers: { "X-Requested-With": "XMLHttpRequest" }
@@ -124,30 +131,35 @@ url = `/admin/personas/load_more_personas?${personasParams.toString()}`;
         trigger.remove();
         this.messagesTarget.insertAdjacentHTML("beforeend", html);
 
+        let lastMessage;
+      if (this.modeValue === "replies") {
+        const parentReplies = Array.from(this.messagesTarget.querySelectorAll("[data-message-id]")).filter(el => !el.dataset.parentId || el.dataset.parentId === "");
+        lastMessage = parentReplies[parentReplies.length - 1];
+      } else {
         const allMessages = this.messagesTarget.querySelectorAll("[data-message-id]");
-        const lastMessage = allMessages[allMessages.length - 1];
+        lastMessage = allMessages[allMessages.length - 1];
+      }
 
-        if (!lastMessage || lastMessage.dataset.messageId === messageId) {
-          console.log("No new messages loaded");
-          this.loading = false;
-          return;
-        }
+      if (!lastMessage || lastMessage.dataset.messageId === messageId) {
+        console.log("No new messages loaded");
+        this.loading = false;
+        return;
+      }
 
-        const newMessageId = lastMessage.dataset.messageId;
-        console.log("New trigger messageId:", newMessageId);
+    const newMessageId = lastMessage.dataset.messageId;
 
         const newTrigger = document.createElement("div");
         newTrigger.id = "load-more-trigger";
         newTrigger.dataset.messageId = newMessageId;
+        newTrigger.dataset.afterId = trigger.dataset.afterId;
         this.messagesTarget.appendChild(newTrigger);
         this.observer.observe(newTrigger);
 
         this.loading = false;
       })
       .catch(err => {
-        console.error("Pagination load error (down)", err);
+        console.error("Pagination load error", err);
         this.loading = false;
       });
   }
-
 }
