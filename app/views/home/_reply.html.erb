@@ -1,4 +1,4 @@
-<li data-message-id="<%= reply.id if reply.parent_id.nil? %>" data-parent-id="<%= reply.parent_id %>">
+<li id="reply-<%= reply.id %>" data-message-id="<%= reply.id if reply.parent_id.nil? %>" data-parent-id="<%= reply.parent_id %>" class="reply-block clickable-reply" data-reply-username="<%= reply.user.username %>" >
   <div class="reply-header d-flex align-items-center mb-2">
     <% if reply.user.profile_picture.attached? %>
       <%= image_tag reply.user.profile_picture, alt: "#{reply.user.username}", class: "profile-picture", style: "width: 50px; height: 50px; object-fit: cover;" %>
@@ -8,12 +8,10 @@
       </div>
     <% end %>
 
-    <div class="ms-2">
       <span class="fw-bold">
         <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user) %>
       </span>
       <small class="activity-time d-block"><%= time_ago_in_words(reply.created_at) %> ago</small>
-    </div>
 
     <% if current_user && (reply.user == current_user || current_user.admin?) %>
       <div class="nav-item dropdown ms-auto">
@@ -22,7 +20,7 @@
           <li><%= link_to 'Edit', edit_message_reply_path(@message, reply), class: 'dropdown-item btn btn-primary' %></li>
           <li>
             <%= button_to 'Delete', message_reply_path(@message, reply), method: :delete,
-                data: { confirm: 'Vai tiešām vēlaties dzēst?' },
+                data: { confirm: 'Are you sure you want to delete?' },
                 class: 'dropdown-item btn btn-danger', "data-turbolinks": false %>
           </li>
         </ul>
@@ -35,51 +33,55 @@
   <% if reply.file.attached? %>
     <div class="reply-file mt-2">
       <% if reply.file.content_type.start_with?('image/') %>
-        <%= image_tag reply.file, alt: 'Nolādētā bilde', class: "img-fluid rounded" %>
+        <%= image_tag reply.file, alt: 'Downloaded image', class: "img-fluid rounded" %>
       <% elsif reply.file.content_type.start_with?('video/') %>
         <video width="100%" controls class="rounded">
           <source src="<%= url_for(reply.file) %>" type="<%= reply.file.content_type %>">
-          Jūsu pārlūkprogramma neatbalsta video tagu.
+          Video tag not supported.
         </video>
       <% else %>
-        <%= link_to 'Nolādēt failu', rails_blob_path(reply.file, disposition: 'attachment'), class: "btn btn-outline-secondary mt-2" %>
+        <%= link_to 'Download file', rails_blob_path(reply.file, disposition: 'attachment'), class: "btn btn-outline-secondary mt-2" %>
       <% end %>
     </div>
   <% end %>
 
-  <% if reply.parent_id.nil? %>
-    <div class="d-flex justify-content-between px-5 mt-2">
-      <button class="btn btn-sm btn-link text-decoration-none text-dark" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
-        <i class="fa-regular fa-message"></i>
-        <%= pluralize(reply.children.count, 'comment', 'comments') %>
-      </button>
-    </div>
+ 
+
+  <div class="ComAndLike d-flex justify-content-between align-items-center mt-2" id="ReplyReplyLikes">
+   <% if reply.parent_id.nil? %>
+      <button class="comment btn btn-sm btn-link text-decoration-none text-dark" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
+  <i class="fa-regular fa-message"></i>
+  <span id="comment-count-<%= reply.id %>">
+    <%= pluralize(reply.children.count, 'comment', 'comments') %>
+  </span>
+</button>
   <% end %>
+  <div class="like-section d-flex align-items-center">
+  <% if current_user %>
+    <%= button_tag type: 'button', class: 'heart me-2 border-0 bg-transparent p-0', onclick: "toggleReplyLike(#{reply.id}, this, #{@message.id}); event.stopPropagation();" do %>
+  <% if current_user.liked?(reply) %>
+    <i class="fa-solid fa-heart"></i>
+  <% else %>
+    <i class="fa-regular fa-heart"></i>
+  <% end %>
+<% end %>
 
-  <div class="d-flex justify-content-between align-items-center px-5 mt-2" id="ReplyReplyLikes">
-    <div class="like-section d-flex align-items-center">
-      <% if current_user %>
-        <%= button_to toggle_like_message_reply_path(@message, reply), method: :post, remote: true, class: 'heart me-2 border-0 bg-transparent p-0', onclick: "toggleReplyLike(#{reply.id}, this); event.stopPropagation();" do %>
-          <% if current_user.liked?(reply) %>
-            <i class="fa-solid fa-heart text-danger"></i>
-          <% else %>
-            <i class="fa-regular fa-heart"></i>
-          <% end %>
-        <% end %>
-      <% else %>
-        <i class="fa-regular fa-heart me-2"></i>
-      <% end %>
-      <span id="like-reply-count-<%= reply.id %>"><%= reply.likes.count %></span>
-    </div>
-  </div>
+  <% else %>
+    <i class="fa-regular fa-heart me-2"></i>
+  <% end %>
+  <span id="like-reply-count-<%= reply.id %>"><%= reply.likes.count %></span>
+</div>
+</div>
 
-  <% if reply.children.any? %>
-  <div class="collapse mt-3" id="replyToReply<%= reply.id %>" style="padding: 0 20px;">
+
+  
+  <div class="child-replies collapse mt-3" id="replyToReply<%= reply.id %>" style="padding: 0 20px;">
     <ul class="reply-list">
-      <%= render partial: 'home/reply', collection: reply.children.select { |r| r.user && !r.user.deleted? }, as: :reply %>
+    <% reply.children.each do |child| %>
+    <%= render partial: 'home/reply', locals: { reply: child } %>
+    <% end %>
     </ul>
   </div>
-<% end %>
 
 </li>
 

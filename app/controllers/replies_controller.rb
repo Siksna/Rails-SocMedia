@@ -4,17 +4,26 @@ class RepliesController < ApplicationController
   before_action :authorize_user!, only: [:edit, :update, :destroy]
 
   def create
-    @message = Message.find(params[:message_id])
-    @reply = @message.replies.build(reply_params)
-    @reply.user = current_user  
-    @reply.parent_id = params[:reply][:parent_id]
+  @message = Message.find(params[:message_id])
+  @reply = @message.replies.build(reply_params)
+  @reply.user = current_user  
+  @reply.parent_id = params[:reply][:parent_id]
 
-    if @reply.save
-      redirect_to @message, notice: 'Reply succesfuly made.'
-    else
-      render :new
+  if @reply.save
+    respond_to do |format|
+      format.html do
+        render partial: 'home/reply', locals: { reply: @reply }
+      end
+      format.turbo_stream
+      format.json do
+        render partial: 'home/reply', locals: { reply: @reply }, formats: [:html]
+      end
     end
+  else
+    render json: { error: 'Could not save reply' }, status: :unprocessable_entity
   end
+end
+
 
 def load_more
   if params[:message_id].blank?
@@ -83,8 +92,10 @@ end
     @reply = Reply.find(params[:id])
     if current_user.liked?(@reply)
       current_user.unlike(@reply)
+      liked = false
     else
       current_user.like(@reply)
+      liked = true
 
       if @reply.user != current_user
         notification = Notification.create!(
@@ -105,8 +116,11 @@ end
         )
       end
     end
-    redirect_to request.referer
-  end
+    respond_to do |format|
+      format.json { render json: { likes_count: @reply.likes.count, liked: liked } }
+      format.html { redirect_to request.referer } 
+    end 
+    end
 
   private
 

@@ -10,6 +10,8 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+
   def restrict_deleted_user_access
     return unless user_signed_in? && current_user.deleted?
 

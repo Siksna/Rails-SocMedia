@@ -174,10 +174,6 @@ height: 100%;
 object-fit: contain;
 }
 
-#ReplyReplyLikes{
-  flex-direction: row-reverse;
-}
-
 hr {
   margin: 20px 0;
 }
@@ -206,6 +202,20 @@ hr {
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 5px;
+}
+
+#dynamic-reply-form-wrapper {
+  max-height: 150px;
+  opacity: 1;
+  z-index: 2;
+}
+
+
+.reply-block:hover{
+  transition: all 0.3s ease;
+  box-shadow: 1px 2px 5px rgba(0,0,0,0.1);
+  cursor: pointer;
+  border-radius: 10px;
 }
 
 .file-upload {
@@ -276,9 +286,18 @@ hr {
   margin: 0;
 }
 
+.ComAndLike {
+    padding-right: 3rem !important;
+}
+
 .replies .reply-file img {
   max-width: 100%;
   border-radius: 5px;
+}
+
+.comment:hover{
+  transition: all 0.3s ease ;
+  border-bottom: 1px solid black;
 }
 
 
@@ -744,7 +763,7 @@ hr {
 
 /* CHAT */
 .chats-box {
-  max-height: calc(95vh - 150px);
+  max-height: calc(95vh - 155px);
   overflow-y: auto;
 }
 
@@ -787,7 +806,6 @@ hr {
 
 
 .chat-message.unseen {
-  border: 3px solid black;
   color: black;
   background-color: rgb(214, 138, 138);
   font-weight: bold;

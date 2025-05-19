@@ -45,7 +45,7 @@
   <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
   <div class="comment-section d-flex align-items-center">
   <i class="fa-regular fa-message me-2"></i>
-  <span><%= @comment_count %></span>
+  <span id="comment-count-<%= @message.id %>"><%= @comment_count %></span>
 </div>
 
 
@@ -53,40 +53,29 @@
   <!-- Like funkcija -->
   <div class="like-section d-flex align-items-center">
   <% if current_user %>
-  <!--   onclick: "toggleLike(#{@message.id}, this); event.stopPropagation();"  -->
-    <%= button_to toggle_like_message_path(@message), method: :post, remote: true, class: 'heart me-2', id: "like-button-#{@message.id}" do %>
+    <button class="heart me-2 border-0 bg-transparent p-0"
+            onclick="toggleLike(<%= @message.id %>, this); event.stopPropagation();"
+            id="like-button-<%= @message.id %>">
       <% if current_user.liked?(@message) %>
         <i class="fa-solid fa-heart"></i>
       <% else %>
         <i class="fa-regular fa-heart"></i>
       <% end %>
-    <% end %>
+    </button>
   <% else %>
     <i class="fa-regular fa-heart me-2"></i>
   <% end %>
-  <span><%= @message.likes.count %></span>
+  <span id="like-count-<%= @message.id %>"><%= @message.likes.count %></span>
 </div>
+
 
 </div>
 </div>
 <div class="card-container">
-  <div class="reply-form">
-    <div id="replyFilePreview" class="file-preview"></div>
-    <%= form_with model: [@message, @message.replies.build], local: false do |form| %>
-      <div class="input-container">
-        <%= form.text_field :content, placeholder: "Enter your message here...", autocomplete: "off", class: "form-control", id: "replyInputField", maxlength: 255 %>
-        <label class="file-upload">
-          <i class="fas fa-paperclip"></i>
-          <%= form.file_field :file, id: "replyFileInput", onchange: "displayReplyFileName()" %>
-        </label>
-        <button><i class="fas fa-paper-plane"></i></button>
-      </div>
-    <% end %>
-  </div>
+  <h1>Comments</h1>
 
   <hr>
 <div class="replies" data-controller="pagination" data-pagination-url-value="<%= load_more_message_replies_path(@message) %>" data-pagination-mode-value="replies" data-pagination-direction-value="down">
-    <h4>Comments:</h4>
   <ul class="reply-list" data-pagination-target="messages">
 
 <% @replies.where(parent_id: nil).each do |reply| %>
@@ -98,11 +87,41 @@
 
 </div>
 
+
+<div id="dynamic-reply-form-wrapper" class="bg-dark text-center p-2 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center z-index-1000">
+    <div id="replyFilePreview" class="file-preview"></div>
+
+  <div id="replying-to-label" class="text-white mb-2">
+  Replying to <span id="replying-to-username" class="fw-bold"></span>
+  <button class="btn btn-sm btn-light ms-2" onclick="clearReplyTarget(); return false;">Cancel</button>
+  </div>
+
+<%= form_with model: [@message, @message.replies.build], local: false, html: { id: 'dynamic-reply-form', onsubmit: 'postReply(event); return false;' } do |form| %>
+<%= form.hidden_field :parent_id, id: 'dynamic-reply-parent-id' %>
+    <input type="hidden" id="message-id-hidden" value="<%= @message.id %>">
+
+    <div class="input-container d-flex">
+      <%= form.text_field :content, placeholder: "Enter your reply here...", autocomplete: "off", class: "form-control me-2", id: "replyInputField", maxlength: 255 %>
+
+      <label class="file-upload me-2">
+        <i class="fas fa-paperclip"></i>
+        <%= form.file_field :file, id: "replyFileInput", onchange: "displayReplyFileName()" %>
+      </label>
+
+<button class="mainbtn" id="replySubmitButton"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  <% end %>
+
+
+  </div>
+
+
+
+
+
 <% last_reply = @replies.where(parent_id: nil).last %>
 <% if last_reply.present? %>
-  <div 
-    id="load-more-trigger"
-    data-message-id="<%= last_reply.id %>" 
-    data-after-id="<%= @message.id%>">
+  <div id="load-more-trigger" data-message-id="<%= last_reply.id %>" data-after-id="<%= @message.id%>">
   </div>
 <% end %>
+

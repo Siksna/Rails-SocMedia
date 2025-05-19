@@ -24,7 +24,7 @@ export default class extends Controller {
           this.loadMoreDown();
         }
       } else {
-        console.log("Trigger not loading");
+        console.log("Trigger busy");
       }
     }, {
       threshold: 1,

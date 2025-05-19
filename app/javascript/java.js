@@ -114,31 +114,33 @@ function displayFileName() {
 
   
   
-  function toggleReplyLike(replyId, button) {
-    fetch(`/messages/${replyId}/toggle_like`, {
-      method: 'POST',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        'Accept': 'application/json',
-      },
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      const likeCountSpan = document.getElementById(`like-reply-count-${replyId}`);
-      if (data.liked) {
-        button.innerHTML = '<i class="fa-solid fa-heart"></i>'; 
-      } else {
-        button.innerHTML = '<i class="fa-regular fa-heart"></i>'; 
-      }
-      likeCountSpan.innerText = data.likes_count;
-    })
-    .catch(error => console.error('Error:', error));
-  }
+  function toggleReplyLike(replyId, button, messageId) {
+  fetch(`/messages/${messageId}/replies/${replyId}/toggle_like`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Accept': 'application/json',
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    const likeCountSpan = document.getElementById(`like-reply-count-${replyId}`);
+    if (data.liked) {
+      button.innerHTML = '<i class="fa-solid fa-heart"></i>'; 
+    } else {
+      button.innerHTML = '<i class="fa-regular fa-heart"></i>'; 
+    }
+    likeCountSpan.innerText = data.likes_count;
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+
   
   window.toggleReplyLike = toggleReplyLike;
   
@@ -213,49 +215,160 @@ function postComment() {
 window.postComment = postComment;
 
   
-  
-  
-  function postReply() {
-    const replyInputField = document.getElementById('replyInputField');
-    const replyText = replyInputField.value.trim();
-    const replyFileInput = document.getElementById('replyFileInput');
-    const file = replyFileInput.files[0];
-    const replyPreviewContainer = document.getElementById('replyFilePreview');
-  
-    if (!replyText && !file) {
-      alert('Lūdzu, ievadiet ziņu vai pievienojiet failu, lai atbildētu.');
-      return;
-    }
-  
-    const formData = new FormData();
-    if (replyText) {
-      formData.append('reply[content]', replyText);
-    }
-    if (file) {
-      formData.append('reply[file]', file);
-    }
-  
-    fetch('/messages/${messageId}/replies', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-Token': document.querySelector('[name=csrf-token]').content
-      },
-      body: formData
-    })
-      .then(response => response.json())
-      .then(data => {
-        const newReply = createReplyElement(data);
-        const replyContainer = document.getElementById('reply-container');
-        replyContainer.appendChild(newReply);
-  
-        replyInputField.value = '';
-        replyFileInput.value = '';
-        replyPreviewContainer.innerHTML = ''; 
-      })
-      .catch(error => console.error('Error posting reply:', error));
+
+let currentParentReplyId = null;
+
+function postReply(event) {
+  event.preventDefault();
+
+  const replyInputField = document.getElementById('replyInputField');
+  const replyText = replyInputField.value.trim();
+  const replyFileInput = document.getElementById('replyFileInput');
+  const file = replyFileInput.files[0];
+  const replyPreviewContainer = document.getElementById('replyFilePreview');
+  const parentIdInput = document.getElementById('dynamic-reply-parent-id');
+  const submitButton = document.getElementById('replySubmitButton');
+
+  const parentId = parentIdInput.value;
+
+  if (!replyText && !file) {
+    alert('Lūdzu, ievadiet ziņu vai pievienojiet failu, lai atbildētu.');
+    return;
   }
-  
-  window.postReply = postReply;
+
+  submitButton.disabled = true;
+
+  const formData = new FormData();
+  if (replyText) formData.append('reply[content]', replyText);
+  if (file) formData.append('reply[file]', file);
+  if (currentParentReplyId) formData.append('reply[parent_id]', currentParentReplyId);
+
+  const messageId = document.getElementById('message-id-hidden').value;
+
+  fetch(`/messages/${messageId}/replies`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('[name=csrf-token]').content,
+      'Accept': 'text/html'
+    },
+    body: formData
+  })
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.text();
+    })
+    .then(html => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html.trim();
+
+      Array.from(tempDiv.children).forEach(child => {
+        const isChildReply = !!currentParentReplyId;
+        if (isChildReply) {
+          const parentReplyElement = document.querySelector(`#reply-${currentParentReplyId}`);
+          const childRepliesContainer = parentReplyElement?.querySelector('.child-replies');
+          if (childRepliesContainer) {
+            childRepliesContainer.appendChild(child);
+          }
+        } else {
+          const replyList = document.querySelector('.reply-list');
+          replyList.insertBefore(child, replyList.firstChild);
+        }
+
+        bindClickableReplyEvent(child);
+      });
+
+      replyInputField.value = '';
+      replyFileInput.value = '';
+      replyPreviewContainer.innerHTML = '';
+      parentIdInput.value = '';
+      document.getElementById('replying-to-label').style.display = 'none';
+
+     if (currentParentReplyId) {
+        console.log("Updating parent comment count for ID:", currentParentReplyId);
+
+        const parentCommentCountSpan = document.getElementById(`comment-count-${currentParentReplyId}`);
+        console.log("Found span:", parentCommentCountSpan);
+
+        if (parentCommentCountSpan) {
+          const match = parentCommentCountSpan.innerText.match(/\d+/);
+          const currentCount = match ? parseInt(match[0], 10) : 0;
+          const newCount = currentCount + 1;
+          parentCommentCountSpan.innerText = `${newCount} comment${newCount !== 1 ? 's' : ''}`;
+      }
+      }
+      else {
+       const commentCountSpan = document.getElementById(`comment-count-${messageId}`);
+      if (commentCountSpan) {
+        const currentCount = parseInt(commentCountSpan.innerText, 10);
+        commentCountSpan.innerText = currentCount + 1;
+      }
+    }
+
+      currentParentReplyId = null;
+
+
+    })
+    .catch(error => {
+      console.error('Error posting reply:', error);
+      alert('Error, try again.');
+    })
+    .finally(() => {
+      submitButton.disabled = false;
+    });
+}
+
+window.postReply = postReply;
+
+function bindClickableReplyEvent(replyElement) {
+  if (!replyElement || !replyElement.classList.contains('clickable-reply')) return;
+
+  replyElement.addEventListener("click", function (e) {
+    if (e.target.closest("a") || e.target.closest("button") || e.target.closest("i")) return;
+    const clickedReply = e.currentTarget;
+    currentParentReplyId = clickedReply.dataset.parentId || clickedReply.dataset.messageId;
+
+    const username = clickedReply.dataset.replyUsername;
+    const replyId = clickedReply.getAttribute('id').replace('reply-', '');
+
+    document.getElementById("dynamic-reply-parent-id").value = replyId;
+    document.getElementById("replying-to-username").textContent = "@" + username;
+    document.getElementById("replying-to-label").style.display = "block";
+
+    setTimeout(() => document.getElementById("replyInputField").focus(), 10);
+    e.stopPropagation();
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const replyFormWrapper = document.getElementById("dynamic-reply-form-wrapper");
+  const parentIdInput = document.getElementById("dynamic-reply-parent-id");
+  const replyingToLabel = document.getElementById("replying-to-label");
+
+  replyingToLabel.style.display = "none";
+
+  document.querySelectorAll(".clickable-reply").forEach(bindClickableReplyEvent);
+
+  window.clearReplyTarget = function () {
+    parentIdInput.value = "";
+    replyingToLabel.style.display = "none";
+    currentParentReplyId = null;
+  };
+
+  document.addEventListener("click", function (e) {
+    if (
+      !replyFormWrapper.contains(e.target) &&
+      !e.target.closest(".clickable-reply")
+    ) {
+      clearReplyTarget();
+    }
+  });
+});
+
+
+
+
+
+
 
   /* Taustiņu aktivizācija */
   
@@ -773,14 +886,12 @@ function markSingleNotificationAsRead(notificationId, element) {
 
 // OBLIGATI
 
+// var @ot citus child replies child replijos
 // chata new line glitchojas, un neparadas poga scroll to bottom
 // Čata sadaļā nav pareizi sent un sender vizualie izskati, vienmer ja ir current user jabut pelekais teksts tam kas suta
-// PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā
 // Javascript priekš čata kautkur delayed inptu value uztaisa par "" un nodzesas zinas inputs bisk delayed
 // algoritms prieks messagiem
 // janonem aizmirsi paroli funkciju
-// reply reply sekcija neradas inputs, un image preview
-// edit un delete pogas galvenaja lapa redirecto uz reply lapu
 // admin history vajag uztaisit lai var sortot pec target
 // gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
 // reply lapā jauztaisa lai var bez parlades komentet un likot ziņas
@@ -809,3 +920,4 @@ function markSingleNotificationAsRead(notificationId, element) {
 // friends page laba puse maybe parada notification vesturi
 // Var čatot ar jebkuru personu
 // file poga visas lapas divains borders kad mouse hovero over
+// PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā
