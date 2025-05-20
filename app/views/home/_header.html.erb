@@ -26,7 +26,7 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
        
         <li class="nav-item">
-         <%= link_to "Par mums", home_about_path, class:"nav-link" %>
+         <%= link_to "About us", home_about_path, class:"nav-link" %>
         </li>
 
         
@@ -34,12 +34,12 @@
            <% if user_signed_in? && (current_user.admin? || current_user.head_admin?) %>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Admin panelis
+            Admin panel
           </a>
           <ul class="dropdown-menu">
-            <li><%= link_to "Personu dati", admin_personas_path, class: "dropdown-item" %></li>
+            <li><%= link_to "User data", admin_personas_path, class: "dropdown-item" %></li>
             <li><hr class="dropdown-divider"></li>
-            <li><%= link_to "Vēsture", admin_history_path, class: "dropdown-item" %></li>
+            <li><%= link_to "History", admin_history_path, class: "dropdown-item" %></li>
             </ul>
         </li>
         <% end %>
@@ -50,8 +50,8 @@
       </ul>
 <div class="d-flex">
 <form class="d-flex" action="<%= search_users_path %>" method="get" role="search" id="user-search-form">
-  <input class="form-control me-2" type="search" name="query" placeholder="Meklēt" aria-label="Search" id="user-search-input" autocomplete="off">
-  <button class="mainbtn btn-outline-success" type="submit">Meklēt</button>
+  <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" id="user-search-input" autocomplete="off">
+  <button class="mainbtn btn-outline-success" type="submit">Search</button>
   <ul id="suggestions-dropdown" class="dropdown-menu" style="display: none;"></ul>
 </form>
 

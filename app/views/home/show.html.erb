@@ -98,6 +98,8 @@
 
 <%= form_with model: [@message, @message.replies.build], local: false, html: { id: 'dynamic-reply-form', onsubmit: 'postReply(event); return false;' } do |form| %>
 <%= form.hidden_field :parent_id, id: 'dynamic-reply-parent-id' %>
+<%= form.hidden_field :mentioned_username, id: 'dynamic-reply-mentioned-username' %>
+<input type="hidden" id="replying-to-should-mention" value="0">
     <input type="hidden" id="message-id-hidden" value="<%= @message.id %>">
 
     <div class="input-container d-flex">

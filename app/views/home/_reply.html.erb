@@ -1,4 +1,4 @@
-<li id="reply-<%= reply.id %>" data-message-id="<%= reply.id if reply.parent_id.nil? %>" data-parent-id="<%= reply.parent_id %>" class="reply-block clickable-reply" data-reply-username="<%= reply.user.username %>" >
+<li id="reply-<%= reply.id %>" data-message-id="<%= reply.id if reply.parent_id.nil? %>" data-parent-id="<%= reply.parent_id %>" class="reply-block clickable-reply" data-reply-username="<%= reply.user.username %>" data-reply-id="<%= reply.id %>" >
   <div class="reply-header d-flex align-items-center mb-2">
     <% if reply.user.profile_picture.attached? %>
       <%= image_tag reply.user.profile_picture, alt: "#{reply.user.username}", class: "profile-picture", style: "width: 50px; height: 50px; object-fit: cover;" %>
@@ -28,7 +28,13 @@
     <% end %>
   </div>
 
-  <p class="reply-content"><%= reply.content %></p>
+ <% if reply.content.present? %>
+  <%= simple_format(reply.content.gsub(/@(\w+)/) do |mention|
+    user = User.find_by(username: $1)
+    user ? link_to(mention, profile_path(user), class: "text-info fw-bold") : mention
+  end.html_safe) %>
+<% end %>
+
 
   <% if reply.file.attached? %>
     <div class="reply-file mt-2">

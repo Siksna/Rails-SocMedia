@@ -222,15 +222,19 @@ function postReply(event) {
   event.preventDefault();
 
   const replyInputField = document.getElementById('replyInputField');
-  const replyText = replyInputField.value.trim();
+  const mentionedUsername = document.getElementById('dynamic-reply-mentioned-username').value.trim();
+  let replyText = replyInputField.value.trim();
+  const shouldMention = document.getElementById('replying-to-should-mention').value === "1";
+
+    if (mentionedUsername && currentParentReplyId && shouldMention) {
+  replyText = `@${mentionedUsername} ${replyText}`;
+    }
+
   const replyFileInput = document.getElementById('replyFileInput');
   const file = replyFileInput.files[0];
   const replyPreviewContainer = document.getElementById('replyFilePreview');
   const parentIdInput = document.getElementById('dynamic-reply-parent-id');
   const submitButton = document.getElementById('replySubmitButton');
-
-  const parentId = parentIdInput.value;
-
   if (!replyText && !file) {
     alert('Lūdzu, ievadiet ziņu vai pievienojiet failu, lai atbildētu.');
     return;
@@ -324,25 +328,43 @@ function bindClickableReplyEvent(replyElement) {
 
   replyElement.addEventListener("click", function (e) {
     if (e.target.closest("a") || e.target.closest("button") || e.target.closest("i")) return;
+
     const clickedReply = e.currentTarget;
     currentParentReplyId = clickedReply.dataset.parentId || clickedReply.dataset.messageId;
 
+    const isParentReply = !clickedReply.dataset.parentId; 
     const username = clickedReply.dataset.replyUsername;
-    const replyId = clickedReply.getAttribute('id').replace('reply-', '');
+    const replyId = clickedReply.dataset.replyId;
 
     document.getElementById("dynamic-reply-parent-id").value = replyId;
+
+    document.getElementById("dynamic-reply-mentioned-username").value = username;
+    
+
+    const inputField = document.getElementById("replyInputField");
+
+     if (isParentReply) {
+      console.log("Parent");
+      document.getElementById("replying-to-should-mention").value = "0";
+    } else {
+      console.log("child");
+      document.getElementById("replying-to-should-mention").value = "1";
+      
+    }
     document.getElementById("replying-to-username").textContent = "@" + username;
     document.getElementById("replying-to-label").style.display = "block";
+    inputField.focus();
 
-    setTimeout(() => document.getElementById("replyInputField").focus(), 10);
     e.stopPropagation();
   });
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const replyFormWrapper = document.getElementById("dynamic-reply-form-wrapper");
   const parentIdInput = document.getElementById("dynamic-reply-parent-id");
   const replyingToLabel = document.getElementById("replying-to-label");
+  const mentionedUsername = document.getElementById("dynamic-reply-mentioned-username");
 
   replyingToLabel.style.display = "none";
 
@@ -352,6 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
     parentIdInput.value = "";
     replyingToLabel.style.display = "none";
     currentParentReplyId = null;
+    mentionedUsername.value = "";
   };
 
   document.addEventListener("click", function (e) {
@@ -886,7 +909,6 @@ function markSingleNotificationAsRead(notificationId, element) {
 
 // OBLIGATI
 
-// var @ot citus child replies child replijos
 // chata new line glitchojas, un neparadas poga scroll to bottom
 // Čata sadaļā nav pareizi sent un sender vizualie izskati, vienmer ja ir current user jabut pelekais teksts tam kas suta
 // Javascript priekš čata kautkur delayed inptu value uztaisa par "" un nodzesas zinas inputs bisk delayed
@@ -899,7 +921,7 @@ function markSingleNotificationAsRead(notificationId, element) {
 // jauztais lai instantly connected uz chat channel
 // default profile pic ir offcentered
 // profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
-// admini var nomainit lietotaja profila bildi
+// admini var noņemt lietotaja profila bildi
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
 // notifikacijam ir max limits
 // chata zinam japievieno laiki
