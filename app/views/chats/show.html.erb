@@ -1,4 +1,4 @@
-<div class="chats-box" data-controller="chat pagination" data-chat-conversation-id="<%= @conversation.id %>" data-pagination-conversation-id-value="<%= @conversation.id %>" data-current-user="<%= current_user.username %>">
+<div class="chats-box" data-controller="chat pagination" data-chat-conversation-id="<%= @conversation.id %>" data-pagination-conversation-id-value="<%= @conversation.id %>" data-current-user="<%= current_user.username %>" data-current-user-id="<%= current_user.id %>">
 <div id="chats_messages" data-chat-target="messages" data-pagination-target="messages">
 <%= render 'chats/chat_conversation', chat_conversations: @chat_conversations %>
 </div>

@@ -323,7 +323,7 @@ function postReply(event) {
 
 window.postReply = postReply;
 
-function bindClickableReplyEvent(replyElement) {
+export function bindClickableReplyEvent(replyElement) {
   if (!replyElement || !replyElement.classList.contains('clickable-reply')) return;
 
   replyElement.addEventListener("click", function (e) {
@@ -487,13 +487,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   /* chats */
-  let shouldAutoScroll = true;
   let atBottomTimer = null;
 
   document.addEventListener("DOMContentLoaded", function () {
     const postButton = document.getElementById("postChat");
     const chatBox = document.querySelector(".chats-box");
     const newMessageBtn = createNewMessageButton();
+    let shouldAutoScroll = true;
 
     if (postButton) {
       postButton.addEventListener("click", postChat);
@@ -540,7 +540,6 @@ inputField.placeholder = "Enter your message...";
 
 
 
-
     inputField.value = "";
     fileInput.value = "";
     previewContainer.innerHTML = "";
@@ -567,11 +566,11 @@ inputField.placeholder = "Enter your message...";
       .then(text => {
         if (text) {
           console.log("Response from server:", text);
-          inputField.value = "";
         }
       })
       .catch(error => console.error("Error:", error));
   }
+
 
   function updateLastReadAt(chatId) {
     console.log("Updating last read at for chat id:", chatId);
@@ -655,24 +654,6 @@ function createNewMessageButton() {
   return btn;
 }
 
-function handleNewMessage() {
-  const chatBox = document.querySelector(".chats-box");
-
-  if (isNearBottom(chatBox)) {
-    scrollToBottom();
-    ensureUnseenDivider();
-    setTimeout(() => {
-      if (isNearBottom(chatBox)) {
-        clearUnseen();
-      }
-    }, 2000);
-  } else {
-    ensureUnseenDivider();
-    const newMessageBtn = document.getElementById("newMessageBtn");
-    if (newMessageBtn) newMessageBtn.style.display = "block";
-  }
-}
-
 function handleScroll() {
   const chatBox = document.querySelector(".chats-box");
   const chatId = document.querySelector(".chats-box").dataset.chatConversationId;
@@ -738,13 +719,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 50);
   }
 });
+ 
 
   
+
+  function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
   
   
+  const debouncedMarkChatAsRead = debounce(function(conversationId) {
+    console.log("Marking chat as read (debounced) for conversation ID:", conversationId);
+  
+    fetch(`/notifications/mark_as_read/${conversationId}`, {
+      method: "POST",
+      headers: {
+        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+        "Content-Type": "application/json"
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log("All notifications for conversation marked as read.");
+          const messageNotificationCount = document.getElementById("message-notification-count");
+          if (messageNotificationCount) {
+            messageNotificationCount.textContent = "0";
+            messageNotificationCount.style.display = "none";
+          }
+          localStorage.setItem("unreadChatCount", "0");
+        } else {
+          console.error(" Error marking messages as read:", data.error);
+        }
+      })
+      .catch(error => console.error(" Error marking messages as read:", error));
+  }, 1000); 
   
   
-  /* Notifications */
+  if (window.location.pathname.includes("/chats/")) {
+    const conversationId = window.location.pathname.split("/").pop();
+    debouncedMarkChatAsRead(conversationId);
+  }
+
+
+
+function markSingleNotificationAsRead(notificationId, element) {
+  fetch(`/notifications/mark_as_read_notification/${notificationId}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`Notification ${notificationId} marked as read`);
+      if (element) element.style.display = "none";
+
+    } else {
+      console.error("Failed to mark notification as read:", data.error);
+    }
+  })
+  .catch(error => console.error("Error marking notification as read:", error));
+}
+
+
+
+ /* Notifications */
   document.addEventListener("DOMContentLoaded", function () {
    const messageNotificationCount = document.getElementById("message-notification-count");
           const generalNotificationCount = document.getElementById("notification-count");
@@ -836,72 +882,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateUnreadMessages();
   });
 
-  
-
-  function debounce(func, delay) {
-    let timeout;
-    return function(...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
-  
-  
-  const debouncedMarkChatAsRead = debounce(function(conversationId) {
-    console.log("Marking chat as read (debounced) for conversation ID:", conversationId);
-  
-    fetch(`/notifications/mark_as_read/${conversationId}`, {
-      method: "POST",
-      headers: {
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
-        "Content-Type": "application/json"
-      }
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          console.log("All notifications for conversation marked as read.");
-          const messageNotificationCount = document.getElementById("message-notification-count");
-          if (messageNotificationCount) {
-            messageNotificationCount.textContent = "0";
-            messageNotificationCount.style.display = "none";
-          }
-          localStorage.setItem("unreadChatCount", "0");
-        } else {
-          console.error(" Error marking messages as read:", data.error);
-        }
-      })
-      .catch(error => console.error(" Error marking messages as read:", error));
-  }, 1000); 
-  
-  
-  if (window.location.pathname.includes("/chats/")) {
-    const conversationId = window.location.pathname.split("/").pop();
-    debouncedMarkChatAsRead(conversationId);
-  }
-
-
-
-function markSingleNotificationAsRead(notificationId, element) {
-  fetch(`/notifications/mark_as_read_notification/${notificationId}`, {
-    method: "POST",
-    headers: {
-      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
-      "Content-Type": "application/json"
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      console.log(`Notification ${notificationId} marked as read`);
-      if (element) element.style.display = "none";
-
-    } else {
-      console.error("Failed to mark notification as read:", data.error);
-    }
-  })
-  .catch(error => console.error("Error marking notification as read:", error));
-}
 
 // EXTRA OBLIGATI
 
@@ -909,26 +889,20 @@ function markSingleNotificationAsRead(notificationId, element) {
 
 // OBLIGATI
 
-// chata new line glitchojas, un neparadas poga scroll to bottom
-// Čata sadaļā nav pareizi sent un sender vizualie izskati, vienmer ja ir current user jabut pelekais teksts tam kas suta
-// Javascript priekš čata kautkur delayed inptu value uztaisa par "" un nodzesas zinas inputs bisk delayed
+// gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
 // algoritms prieks messagiem
 // janonem aizmirsi paroli funkciju
 // admin history vajag uztaisit lai var sortot pec target
-// gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
-// reply lapā jauztaisa lai var bez parlades komentet un likot ziņas
-// ja kads kommente uz tavu postu vai reply tad atnak notifikacija
-// jauztais lai instantly connected uz chat channel
-// default profile pic ir offcentered
-// profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
 // admini var noņemt lietotaja profila bildi
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
+// default profile pic ir offcentered
+// profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
 // notifikacijam ir max limits
-// chata zinam japievieno laiki
-// friends chata lapa ari japievieno laiki kad tika pedeja zina sutita
+// ja kads kommente uz tavu postu vai reply tad atnak notifikacija
 
 // EXTRA
 
+// izmantot SLUGS hash lai neraditu url ids
 // Search bars kas atrod ziņas kuriem ir saistiti vardi, piemeram lietotajvards vai content vards un parada tas zinas uz ekran
 // save posts
 // linkos nevajadzetu redzet id un citas lietas
@@ -936,9 +910,7 @@ function markSingleNotificationAsRead(notificationId, element) {
 // galvena lapa un follower content lapa
 // display images var pievienot vairakus images un nospiest x uz jebkuru image
 // var pieslegties ar google kontu
-// var @ot kadu reply reply sekcija
 // notifikacijas lapa
-// datuma linija chata japievieno
 // friends page laba puse maybe parada notification vesturi
 // Var čatot ar jebkuru personu
 // file poga visas lapas divains borders kad mouse hovero over

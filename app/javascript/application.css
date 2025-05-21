@@ -782,9 +782,9 @@ hr {
 
 
 .chat-message.sent {
-  background-color: var(--gray);
+  background-color: #a4deff;
   color: #000000; 
-  border: 1px solid black;
+  border: 0.2px solid black;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 8px 12px;
   border-radius: 20px 20px 0 20px;
@@ -794,9 +794,9 @@ hr {
 }
 
 .chat-message.received {
-  background-color:  var(--primary-light);
+  background-color:  var(--gray);
   color: black;
-  border: 1px solid black;
+  border: 0.2px solid black;
   padding: 8px 12px;
   border-radius: 20px 20px 20px 0;
   margin-bottom: 10px;
@@ -806,9 +806,8 @@ hr {
 
 
 .chat-message.unseen {
-  color: black;
-  background-color: rgb(214, 138, 138);
-  font-weight: bold;
+  color: rgb(44, 44, 44);
+  background-color: var(--gray);
   padding: 8px 12px;
   border-radius: 20px 20px 20px 0;
   margin-bottom: 10px;
@@ -823,10 +822,10 @@ hr {
 
 .unseen-divider {
   text-align: center;
-  color: #888;
+  color: #e2182d;
   font-size: 0.85rem;
   margin: 12px 0;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #e2182d;
   position: relative;
 }
 
@@ -838,7 +837,7 @@ hr {
   left: 50%;
   transform: translateX(-50%);
   padding: 0 10px;
-  color: #555;
+   color: #e2182d;
 }
 
 .chat-image-wrapper {
@@ -871,6 +870,24 @@ hr {
   height: 100%;
   width: 100%;
   object-fit: contain;
+}
+
+
+.day-separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #888;
+  font-size: 0.75rem;
+  margin: 1rem 0;
+}
+
+.day-separator::before,
+.day-separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ccc;
+  margin: 0 10px;
 }
 
 
@@ -910,6 +927,7 @@ hr {
   color: inherit;
   display: flex;
   align-items: flex-end;
+  justify-content: space-between;
   width:100%;
 }
 
@@ -972,13 +990,30 @@ hr {
   margin:0 auto
 }
 
+.last-message-info {
+  display: flex;
+  font-size: 0.9rem;
+  align-items: center;
+  flex-direction: column;
+}
+
+.last-message-time {
+  color: #888;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+
 .chat-unread-count {
-  margin-left: auto;
+  background-color: #e3342f;
+  color: white;
+}
+
+.chat-unread-count-wrapper {
   font-size: 0.75rem;
   padding: 4px 8px;
   border-radius: 12px;
-  background-color: #e3342f;
-  color: white;
+  padding: 0.65rem;
 }
 
 button.text-red-500 {

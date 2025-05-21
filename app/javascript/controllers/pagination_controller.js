@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { bindClickableReplyEvent } from "../java";
 
 export default class extends Controller {
   static targets = ["messages"]
@@ -8,6 +9,10 @@ export default class extends Controller {
     url: String,
     mode: String
   }
+
+
+
+  
 
   connect() {
 
@@ -38,6 +43,9 @@ export default class extends Controller {
     } else {
       console.warn("No trigger found");
     }
+
+
+    
   }
 
   loadMoreUp() {
@@ -62,7 +70,13 @@ export default class extends Controller {
         trigger.remove();
         this.messagesTarget.insertAdjacentHTML("afterbegin", html);
 
+    
         requestAnimationFrame(() => {
+
+           this.messagesTarget.querySelectorAll(".date-divider").forEach(divider => divider.remove());
+        const allMessages = Array.from(this.messagesTarget.querySelectorAll(".chat-message"));
+        insertDateLinesBetweenMessages(allMessages);
+
           const newScrollHeight = this.scrollContainer.scrollHeight;
           const scrollDiff = newScrollHeight - previousScrollHeight;
           if (this.scrollContainer.scrollTop <= 0) {
@@ -75,6 +89,7 @@ export default class extends Controller {
           } else {
             console.warn("No new trigger found");
           }
+          formatMessageTimestamps();
 
           this.loading = false;
         });
@@ -98,6 +113,12 @@ export default class extends Controller {
 
     const messageId = trigger.dataset.messageId;
     const afterId = trigger.dataset.afterId;
+
+function rebindReplyEvents(container) {
+  container.querySelectorAll('.clickable-reply').forEach(replyElement => {
+    bindClickableReplyEvent(replyElement);
+  });
+}
 
     let url;
 
@@ -130,6 +151,8 @@ export default class extends Controller {
       .then(html => {
         trigger.remove();
         this.messagesTarget.insertAdjacentHTML("beforeend", html);
+        rebindReplyEvents(this.messagesTarget);
+
 
         let lastMessage;
       if (this.modeValue === "replies") {

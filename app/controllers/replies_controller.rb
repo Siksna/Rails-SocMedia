@@ -3,13 +3,80 @@ class RepliesController < ApplicationController
   before_action :set_reply, only: [:edit, :update, :destroy, :toggle_like]
   before_action :authorize_user!, only: [:edit, :update, :destroy]
 
-  def create
+def create
   @message = Message.find(params[:message_id])
   @reply = @message.replies.build(reply_params)
   @reply.user = current_user  
   @reply.parent_id = params[:reply][:parent_id]
 
   if @reply.save
+    if @message.user != current_user
+      notification = Notification.create!(
+        user: @message.user,
+        sender_id: current_user.id,
+        message: "#{current_user.username} replied to your message",
+        notification_type: "reply",
+        read: false
+      )
+
+      NotificationChannel.broadcast_to(
+        @message.user,
+        notification_id: notification.id,
+        message: notification.message,
+        notification_type: notification.notification_type,
+        sender_username: current_user.username,
+        created_at: notification.created_at.strftime("%b %d, %H:%M")
+      )
+    end
+
+    parent_reply = Reply.find_by(id: @reply.parent_id) if @reply.parent_id.present?
+    if parent_reply && parent_reply.user != current_user && parent_reply.user != @message.user
+      notification = Notification.create!(
+        user: parent_reply.user,
+        sender_id: current_user.id,
+        message: "#{current_user.username} replied to your reply",
+        notification_type: "reply",
+        read: false
+      )
+
+      NotificationChannel.broadcast_to(
+        parent_reply.user,
+        notification_id: notification.id,
+        message: notification.message,
+        notification_type: notification.notification_type,
+        sender_username: current_user.username,
+        created_at: notification.created_at.strftime("%b %d, %H:%M")
+      )
+    end
+
+    if @reply.content.present? && @reply.content.match(/^@(\w+)/)
+      mentioned_username = @reply.content.match(/^@(\w+)/)[1]
+      mentioned_user = User.find_by(username: mentioned_username)
+
+      if mentioned_user &&
+         mentioned_user != current_user &&
+         mentioned_user != @message.user &&
+         (!parent_reply || mentioned_user != parent_reply.user)
+
+        notification = Notification.create!(
+          user: mentioned_user,
+          sender_id: current_user.id,
+          message: "#{current_user.username} mentioned you in a reply",
+          notification_type: "reply",
+          read: false
+        )
+
+        NotificationChannel.broadcast_to(
+          mentioned_user,
+          notification_id: notification.id,
+          message: notification.message,
+          notification_type: notification.notification_type,
+          sender_username: current_user.username,
+          created_at: notification.created_at.strftime("%b %d, %H:%M")
+        )
+      end
+    end
+
     respond_to do |format|
       format.html do
         render partial: 'home/reply', locals: { reply: @reply }
@@ -23,6 +90,8 @@ class RepliesController < ApplicationController
     render json: { error: 'Could not save reply' }, status: :unprocessable_entity
   end
 end
+
+
 
 
 def load_more

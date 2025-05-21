@@ -33,7 +33,7 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
 
      
 
-    } else if (data.notification_type === "follow" || data.notification_type === "like") {
+    } else if (data.notification_type === "follow" || data.notification_type === "like" || data.notification_type === "reply") {
       addGeneralNotification(data);
     }
 
