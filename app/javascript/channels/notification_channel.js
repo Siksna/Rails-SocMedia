@@ -105,11 +105,30 @@ function addGeneralNotification(data) {
   const dot = document.createElement("span");
   dot.className = "blue-dot";
 
-  const messageText = document.createElement("span");
-  messageText.textContent = ` ${data.message} (${data.created_at})`;
+  const usernameLink = document.createElement("a");
+  usernameLink.href = `/profiles/${data.sender_id}`;
+  usernameLink.textContent = data.sender_username;
+  usernameLink.className = "username-link";
+  usernameLink.style.fontWeight = "bold";
+  usernameLink.style.textDecoration = "underline";
+  usernameLink.style.color = "#007bff";
+
+  const messageLink = document.createElement("a");
+  messageLink.href = data.url || "#";
+  messageLink.textContent = ` ${data.message} ${timeAgo(new Date(data.created_at * 1000))}`;
+  messageLink.className = "notification-link";
+  messageLink.style.textDecoration = "none";
+  messageLink.style.color = "inherit";
+
+  const wrapper = document.createElement("span");
+  wrapper.appendChild(usernameLink);
+  wrapper.appendChild(messageLink);
 
   li.appendChild(dot);
-  li.appendChild(messageText);
+  li.appendChild(wrapper);
+
+  li.classList.add("clickable-notification");
+  li.dataset.url = data.url || "#";
 
   li.addEventListener("mouseenter", () => {
     markSingleNotificationAsRead(data.notification_id, dot);
@@ -117,11 +136,43 @@ function addGeneralNotification(data) {
 
   notificationDropdown.prepend(li);
 
+  const allItems = notificationDropdown.querySelectorAll("li");
+  if (allItems.length > 10) {
+    for (let i = 10; i < allItems.length; i++) {
+      allItems[i].remove();
+    }
+  }
+
   let count = parseInt(notificationCount.textContent, 10) || 0;
   count += 1;
   notificationCount.textContent = count;
   notificationCount.style.display = "inline-block";
 }
+
+
+
+function timeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+  const intervals = {
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1
+  };
+
+  for (const [unit, value] of Object.entries(intervals)) {
+    const diff = Math.floor(seconds / value);
+    if (diff >= 1) return rtf.format(-diff, unit);
+  }
+
+  return "just now";
+}
+
 
 
 function markSingleNotificationAsRead(notificationId, dotElement) {

@@ -32,7 +32,7 @@ class MessagesController < ApplicationController
   def edit
     @message = Message.find(params[:id])
     if @message.user != current_user && !(current_user&.admin? || current_user&.moderator?)
-      redirect_to messages_path, alert: 'Jūs nēsat autorizēts rediģēt šo ziņu.' and return
+      redirect_to messages_path, alert: 'You are not authorized to edit this message.' and return
     end
     render 'home/edit'
   end
@@ -53,7 +53,7 @@ class MessagesController < ApplicationController
       if params[:message][:remove_file] == '1'
         @message.file.purge
       end
-      redirect_to @message, notice: 'Ziņa un fails ir veiksmīgi rediģēti.'
+      redirect_to @message, notice: 'Message and file succesfuly edited.'
     else
       render :edit
     end
@@ -75,9 +75,9 @@ class MessagesController < ApplicationController
       end
   
       @message.destroy
-      redirect_to root_path, notice: 'Ziņa veiksmīgi dzēsta.'
+      redirect_to root_path, notice: 'Message deleted.'
     else
-      redirect_to root_path, alert: 'Jūs nēsat autorizēts dzēst šo ziņu.'
+      redirect_to root_path, alert: 'You are not authorized to delete the message.'
     end
   end
   
@@ -97,18 +97,21 @@ class MessagesController < ApplicationController
         notification = Notification.create!(
           user: @message.user,
           sender_id: current_user.id,
-          message: "#{current_user.username} liked your message",
+          message: "liked your message",
           notification_type: "like",
-          read: false
+          read: false,
+          notifiable: @message
         )
   
         NotificationChannel.broadcast_to(
           @message.user,
           notification_id: notification.id,
           message: notification.message,
+          sender_id: current_user.id,
           notification_type: notification.notification_type,
           sender_username: current_user.username,
-          created_at: notification.created_at.strftime("%b %d, %H:%M")
+          created_at: notification.created_at.strftime("%b %d, %H:%M"),
+          url: message_path(@message)
         )
       end
     end
@@ -141,7 +144,7 @@ class MessagesController < ApplicationController
     username: message.user.username,
     profile_picture_url: message.user.profile_picture.attached? ? url_for(message.user.profile_picture) : 'assets/images/default_profile.png'
   } : {
-    username: 'Anonīms',
+    username: 'Anonimous',
     profile_picture_url: 'assets/images/default_profile.png'
   },
   file_url: message.file.attached? ? url_for(message.file) : nil,

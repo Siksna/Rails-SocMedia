@@ -80,6 +80,8 @@ get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'lo
   root "home#index"
   get 'home/about'
   get 'admin/personas'
+  get 'home/notifications', to: 'home#notifications'
+
 
   get "up" => "rails/health#show", as: :rails_health_check
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

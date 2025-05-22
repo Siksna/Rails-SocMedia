@@ -288,10 +288,8 @@ function postReply(event) {
       document.getElementById('replying-to-label').style.display = 'none';
 
      if (currentParentReplyId) {
-        console.log("Updating parent comment count for ID:", currentParentReplyId);
 
         const parentCommentCountSpan = document.getElementById(`comment-count-${currentParentReplyId}`);
-        console.log("Found span:", parentCommentCountSpan);
 
         if (parentCommentCountSpan) {
           const match = parentCommentCountSpan.innerText.match(/\d+/);
@@ -344,10 +342,8 @@ export function bindClickableReplyEvent(replyElement) {
     const inputField = document.getElementById("replyInputField");
 
      if (isParentReply) {
-      console.log("Parent");
       document.getElementById("replying-to-should-mention").value = "0";
     } else {
-      console.log("child");
       document.getElementById("replying-to-should-mention").value = "1";
       
     }
@@ -573,7 +569,6 @@ inputField.placeholder = "Enter your message...";
 
 
   function updateLastReadAt(chatId) {
-    console.log("Updating last read at for chat id:", chatId);
     fetch(`/chats/${chatId}/update_last_read_at`, {
       method: "POST",
       headers: {
@@ -583,7 +578,6 @@ inputField.placeholder = "Enter your message...";
     })
       .then(response => response.json())
       .then(data => {
-        console.log('Last read at updated', data);
       })
       .catch(error => console.error('Error updating last_read_at:', error));
   }
@@ -733,7 +727,6 @@ document.addEventListener("DOMContentLoaded", () => {
   
   
   const debouncedMarkChatAsRead = debounce(function(conversationId) {
-    console.log("Marking chat as read (debounced) for conversation ID:", conversationId);
   
     fetch(`/notifications/mark_as_read/${conversationId}`, {
       method: "POST",
@@ -745,7 +738,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          console.log("All notifications for conversation marked as read.");
           const messageNotificationCount = document.getElementById("message-notification-count");
           if (messageNotificationCount) {
             messageNotificationCount.textContent = "0";
@@ -778,7 +770,6 @@ function markSingleNotificationAsRead(notificationId, element) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      console.log(`Notification ${notificationId} marked as read`);
       if (element) element.style.display = "none";
 
     } else {
@@ -796,11 +787,33 @@ function markSingleNotificationAsRead(notificationId, element) {
           const generalNotificationCount = document.getElementById("notification-count");
           const notificationDropdown = document.getElementById("notifications-dropdown");
     
+
+function timeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+  const intervals = {
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1
+  };
+
+  for (const [unit, value] of Object.entries(intervals)) {
+    const diff = Math.floor(seconds / value);
+    if (diff >= 1) return rtf.format(-diff, unit);
+  }
+
+  return "just now";
+}
+
     function updateUnreadMessages() {
       fetch("/notifications/unread")
         .then(response => response.json())
         .then(data => {
-          console.log("Unread notifications:", data);
     
          
           if (messageNotificationCount) {
@@ -825,29 +838,48 @@ function markSingleNotificationAsRead(notificationId, element) {
             notificationDropdown.innerHTML = "";
     
             if (data.general_notifications && data.general_notifications.length > 0) {
-              data.general_notifications.forEach(notification => {
-                const li = document.createElement("li");
-                li.className = "dropdown-item";
-              
-                const date = new Date(notification.created_at);
-                const formattedDate = date.toLocaleString();
-              
-                const dot = document.createElement("span");
-                dot.className = "blue-dot";
+            data.general_notifications
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 10)
+            .forEach(notification => {
+              const li = document.createElement("li");
+              li.className = "dropdown-item clickable-notification";
+              li.dataset.url = notification.url || "#";
+              const dot = document.createElement("span");
+              dot.className = "blue-dot";
 
-                const messageText = document.createElement("span");
-                messageText.textContent = `${notification.message} (${formattedDate})`;
+              const usernameLink = document.createElement("a");
+              usernameLink.href = `/profiles/${notification.sender_id}`;
+              usernameLink.textContent = notification.sender_username;
+              usernameLink.className = "username-link";
+              usernameLink.style.fontWeight = "bold";
+              usernameLink.style.textDecoration = "underline";
+              usernameLink.style.color = "#007bff";
+              usernameLink.style.marginRight = "5px";
 
-                li.appendChild(dot);
-                li.appendChild(messageText);
+              const messageLink = document.createElement("a");
+              messageLink.href = `/profiles/${notification.sender_id}` || "#";
+              const createdDate = (typeof notification.created_at === "number")
+                ? new Date(notification.created_at * 1000)
+                : new Date(notification.created_at);
+              messageLink.textContent = `${notification.message} ${timeAgo(createdDate)}`;
+              messageLink.className = "notification-link";
+              messageLink.style.textDecoration = "none";
+              messageLink.style.color = "inherit";
 
-                li.addEventListener("mouseenter", () => {
-                 markSingleNotificationAsRead(notification.id, dot);
-                  });
+              const wrapper = document.createElement("span");
+              wrapper.appendChild(usernameLink);
+              wrapper.appendChild(messageLink);
 
-              
-                notificationDropdown.appendChild(li);
+              li.appendChild(dot);
+              li.appendChild(wrapper);
+
+              li.addEventListener("mouseenter", () => {
+                markSingleNotificationAsRead(notification.id, dot);
               });
+
+              notificationDropdown.appendChild(li);
+            });
             } else {
               const li = document.createElement("li");
               li.className = "dropdown-item text-muted";
@@ -883,12 +915,98 @@ function markSingleNotificationAsRead(notificationId, element) {
   });
 
 
+  /* Friend search bars */
+document.addEventListener("DOMContentLoaded", function () {
+  const toggleBtn = document.getElementById("toggle-search-button");
+  const slideContainer = document.querySelector(".search-slide-container");
+  const wrapper = document.querySelector(".search-slide-wrapper");
+  const searchInput = document.getElementById("user-search-input");
+  const form = document.getElementById("user-search-form");
+  const suggestionsDropdown = document.getElementById("suggestions-dropdown");
+
+  let isSearchActive = false;
+
+  toggleBtn.addEventListener("click", function () {
+    slideContainer.classList.add("slide-left");
+    isSearchActive = true;
+
+    setTimeout(() => {
+      wrapper.style.overflow = "visible";
+      searchInput.focus();
+    }, 400);
+  });
+
+  document.addEventListener("click", function (event) {
+    if (
+      isSearchActive &&
+      !wrapper.contains(event.target) &&
+      !suggestionsDropdown.contains(event.target)
+    ) {
+      slideContainer.classList.remove("slide-left");
+      isSearchActive = false;
+
+      setTimeout(() => {
+  wrapper.style.overflow = "hidden";
+}, 400); 
+
+    }
+  });
+});
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('user-search-input');
+  const suggestionsDropdown = document.getElementById('suggestions-dropdown');
+
+  searchInput.addEventListener('input', function() {
+    const query = this.value;
+
+    if (query.length > 0) {
+      fetch(`/search_users.json?query=${query}`)
+        .then(response => response.json())
+        .then(users => {
+          suggestionsDropdown.innerHTML = '';
+          if (users.length > 0) {
+            users.forEach(user => {
+              const listItem = document.createElement('li');
+              listItem.textContent = user;
+              listItem.classList.add('dropdown-item');
+              listItem.onclick = function() {
+                searchInput.value = user;
+                suggestionsDropdown.style.display = 'none';
+              };
+              suggestionsDropdown.appendChild(listItem);
+            });
+            suggestionsDropdown.style.display = 'block';
+          } else {
+            suggestionsDropdown.style.display = 'none';
+          }
+        });
+    } else {
+      suggestionsDropdown.style.display = 'none'; 
+    }
+  });
+
+  document.addEventListener('click', function(event) {
+    if (!searchInput.contains(event.target) && !suggestionsDropdown.contains(event.target)) {
+      suggestionsDropdown.style.display = 'none';
+    }
+  });
+});
+
+
+
+
 // EXTRA OBLIGATI
 
 // Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
 
 // OBLIGATI
 
+// tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots
+// Reply page problemas ar display image
 // gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
 // algoritms prieks messagiem
 // janonem aizmirsi paroli funkciju
@@ -897,21 +1015,18 @@ function markSingleNotificationAsRead(notificationId, element) {
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
 // default profile pic ir offcentered
 // profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
-// notifikacijam ir max limits
-// ja kads kommente uz tavu postu vai reply tad atnak notifikacija
+// paslept/ paradit input field prieks postiem
+// Biogrāfija priekš useriem profile lapā
 
 // EXTRA
 
 // izmantot SLUGS hash lai neraditu url ids
 // Search bars kas atrod ziņas kuriem ir saistiti vardi, piemeram lietotajvards vai content vards un parada tas zinas uz ekran
 // save posts
-// linkos nevajadzetu redzet id un citas lietas
 // suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
-// galvena lapa un follower content lapa
 // display images var pievienot vairakus images un nospiest x uz jebkuru image
 // var pieslegties ar google kontu
 // notifikacijas lapa
-// friends page laba puse maybe parada notification vesturi
 // Var čatot ar jebkuru personu
 // file poga visas lapas divains borders kad mouse hovero over
-// PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā
+// PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā, notifikacijas saraksta un save posts ari

@@ -1,25 +1,39 @@
 class HomeController < ApplicationController
   def index
-   
-      @messages = Message.all.includes(:user).all.order(created_at: :desc).limit(10)
-   
+    base_scope = Message.visible.includes(:user).order(created_at: :desc)
+    
+    if params[:feed] == "following"
+       @messages = base_scope.from_followed_users(current_user).limit(10)
+    else
+      @messages = base_scope.limit(10)
+    end
+  
+end
+
+
+
+ def load_more
+  puts "PARAMS FEED: #{params[:feed].inspect}"
+
+  base_scope = Message.visible.order(id: :desc)
+
+  if params[:feed] == 'following'
+    base_scope = base_scope.from_followed_users(current_user)
   end
 
-
-  def load_more
   if params[:before]
-    messages = Message.visible.where("messages.id > ?", params[:before]).order(id: :desc).limit(10)
+    messages = base_scope.where("messages.id > ?", params[:before]).limit(10)
   elsif params[:after]
-  messages = Message.visible.where("messages.id < ?", params[:after]).order(id: :desc).limit(10)
-
+    messages = base_scope.where("messages.id < ?", params[:after]).limit(10)
   else
-    messages = Message.visible.order(id: :desc).limit(10)
+    messages = base_scope.limit(10)
   end
 
   render partial: "home/message", collection: messages, formats: [:html]
 end
 
-  def about
+   def notifications
+    @notifications = current_user.notifications.includes(:sender).where.not(notification_type: 'chats').order(created_at: :desc)
   end
 
   def search_users

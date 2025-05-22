@@ -17,11 +17,22 @@ class NotificationsController < ApplicationController
       unread_notifications = chat_notifications.group(:conversation_id).count
     
       render json: {
-        chat_unread_count: chat_notifications.count,
-        general_unread_count: general_notifications.count,
-        general_notifications: general_notifications.as_json(only: [:id, :message, :created_at]),
-        unread_notifications: unread_notifications
-      }
+  chat_unread_count: chat_notifications.count,
+  general_unread_count: general_notifications.count,
+  general_notifications: general_notifications.includes(:sender).map do |notification|
+    {
+      id: notification.id,
+      message: notification.message,
+      created_at: notification.created_at,
+      sender_id: notification.sender_id,
+      sender_username: notification.sender&.username,
+      url: notification.url
+    }
+  end,
+  unread_notifications: unread_notifications
+}
+
+
     end
     
 

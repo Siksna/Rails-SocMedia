@@ -137,7 +137,8 @@ function rebindReplyEvents(container) {
         url = `/messages/${afterId}/replies/load_more?after=${messageId}`;
         break;
       case "messages":
-        url = `/home/load_more?after=${messageId}`;
+        const feed = new URLSearchParams(window.location.search).get("feed") || "all";
+        url = `/home/load_more?after=${messageId}&feed=${feed}`;
         break;
       case "friends":
         url = `chats/load_more_conversations?after=${messageId}`;

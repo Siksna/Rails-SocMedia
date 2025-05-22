@@ -4,6 +4,8 @@ class Message < ApplicationRecord
     has_many :likes, as: :likeable
     validates :content, presence: true, length: { maximum: 255 }
     scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
+    scope :from_followed_users, ->(user) { where(user_id: user.following.select(:id)) }
+
     belongs_to :user
 
     def liked_by?(user)

@@ -1,0 +1,36 @@
+<h1>Your Notifications</h1>
+
+<% if @notifications.any? %>
+  <ul class="list-group">
+    <% @notifications.each do |notification| %>
+      <li class="list-group-item d-flex justify-content-between align-items-start <%= 'bg-light' unless notification.read %>">
+        <div class="ms-2 me-auto d-flex align-items-center">
+          
+          <% sender = notification.sender %>
+          <% if sender&.profile_picture&.attached? %>
+            <%= image_tag sender.profile_picture, class: 'chat-profile-picture me-2' %>
+          <% else %>
+            <div class="default-profile-picture me-2" style="background-color: <%= sender&.profile_color || '#ccc' %>;">
+              <%= image_tag 'default_profile.png', class: 'w-10 h-10 rounded-circle object-cover' %>
+            </div>
+          <% end %>
+
+          <div>
+            <div class="fw-bold"><%= sender&.username || "System" %></div>
+            <%= notification.message %><br>
+            <small><%= time_ago_in_words(notification.created_at) %> ago</small>
+          </div>
+        </div>
+
+        <div class="text-end">
+          <%= link_to 'View', notification.url, class: "btn btn-sm btn-primary" %>
+          <% unless notification.read %>
+          <%= button_to 'Mark as Read', "/notifications/mark_as_read_notification/#{notification.id}", method: :post, class: "btn btn-sm btn-secondary" %>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>You have no notifications.</p>
+<% end %>

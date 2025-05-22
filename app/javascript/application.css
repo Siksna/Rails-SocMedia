@@ -486,7 +486,7 @@ hr {
 
 #suggestions-dropdown {
   position: absolute;
-  margin-top:3rem;
+  margin-top:1rem;
   z-index: 1000;
   background-color: white;
   border: 1px solid #ccc;
@@ -507,9 +507,8 @@ hr {
 .users-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  justify-content: space-around;
-}
+    justify-content: space-between;
+  }
 
 .user-profile-box {
   border: 1px solid #ccc;
@@ -724,6 +723,10 @@ hr {
   overflow-y: auto;
 }
 
+.sidebar .navbar-nav {
+  width: 100%;
+}
+
 .content {
   margin-left: 20%;
   margin-right: 20%;
@@ -731,10 +734,6 @@ hr {
   flex-grow: 1;
 }
 
-.nav-link{
-  justify-content: end;
-    gap: 2rem;
-}
 
 .dropdown-toggle::after{
   display:none;
@@ -744,6 +743,35 @@ hr {
   display:flex;
   justify-content: flex-end;
 }
+
+
+.search-toggle {
+  transition: left 0.4s ease;
+}
+
+.search-toggle-button.showing {
+  left: 0%;
+}
+.search-toggle-button.hiding {
+  left: -100%;
+}
+
+.search-toggle-form.hidden {
+  left: 100%;
+}
+.search-toggle-form.visible {
+  left: 0%;
+}
+
+.search-slide-container {
+  transform: translateX(0%);
+}
+
+.search-slide-container.slide-left {
+  transform: translateX(-50%);
+}
+
+
 
 /* notifications */
 #message-notification-count, #notification-count {

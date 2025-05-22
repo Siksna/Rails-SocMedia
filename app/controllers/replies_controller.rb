@@ -14,18 +14,21 @@ def create
       notification = Notification.create!(
         user: @message.user,
         sender_id: current_user.id,
-        message: "#{current_user.username} replied to your message",
+        message: "replied to your message",
         notification_type: "reply",
-        read: false
+        read: false,
+        notifiable: @message
       )
 
       NotificationChannel.broadcast_to(
         @message.user,
         notification_id: notification.id,
         message: notification.message,
+        sender_id: current_user.id,
         notification_type: notification.notification_type,
         sender_username: current_user.username,
-        created_at: notification.created_at.strftime("%b %d, %H:%M")
+        created_at: notification.created_at.strftime("%b %d, %H:%M"),
+        url: message_path(@message) 
       )
     end
 
@@ -34,18 +37,22 @@ def create
       notification = Notification.create!(
         user: parent_reply.user,
         sender_id: current_user.id,
-        message: "#{current_user.username} replied to your reply",
+        message: "replied to your reply",
         notification_type: "reply",
-        read: false
+        read: false,
+        notifiable: @reply
       )
 
       NotificationChannel.broadcast_to(
         parent_reply.user,
         notification_id: notification.id,
         message: notification.message,
+        sender_id: current_user.id,
         notification_type: notification.notification_type,
         sender_username: current_user.username,
-        created_at: notification.created_at.strftime("%b %d, %H:%M")
+        created_at: notification.created_at.strftime("%b %d, %H:%M"),
+        url: message_path(@message)
+
       )
     end
 
@@ -61,7 +68,7 @@ def create
         notification = Notification.create!(
           user: mentioned_user,
           sender_id: current_user.id,
-          message: "#{current_user.username} mentioned you in a reply",
+          message: "mentioned you in a reply",
           notification_type: "reply",
           read: false
         )
@@ -70,9 +77,11 @@ def create
           mentioned_user,
           notification_id: notification.id,
           message: notification.message,
+          sender_id: current_user.id,
           notification_type: notification.notification_type,
           sender_username: current_user.username,
-          created_at: notification.created_at.strftime("%b %d, %H:%M")
+          created_at: notification.created_at.strftime("%b %d, %H:%M"),
+          url: message_path(@message)
         )
       end
     end
@@ -179,9 +188,12 @@ end
           @message.user,
           notification_id: notification.id,
           message: notification.message,
+          sender_id: current_user.id,
           notification_type: notification.notification_type,
           sender_username: current_user.username,
-          created_at: notification.created_at.strftime("%b %d, %H:%M")
+          created_at: notification.created_at.strftime("%b %d, %H:%M"),
+          url: message_path(@message)
+
         )
       end
     end

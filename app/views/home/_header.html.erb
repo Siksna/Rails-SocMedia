@@ -16,18 +16,10 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <div class="container-fluid" >
 
+  <div class="d-flex">
   <%= link_to 'Galvena', root_path, class: "navbar-brand", data: { turbo: 'false' } %>
 
-    
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-       
-        <li class="nav-item">
-         <%= link_to "About us", home_about_path, class:"nav-link" %>
-        </li>
 
         
           
@@ -43,60 +35,30 @@
             </ul>
         </li>
         <% end %>
-        
-      
-     
-
       </ul>
+</div>
+
+<% if user_signed_in? && request.path == root_path %>
+      <ul class="m-0 p-0">
+<div class="d-flex justify-content-around">
+  <%= link_to "All", root_path(feed: "all"), class: "btn btn-outline-light" %>
+  <%= link_to "Following", root_path(feed: "following"), class: "btn btn-outline-light" %>
+</div>
+</ul>
+<% end %>
+
 <div class="d-flex">
-<form class="d-flex" action="<%= search_users_path %>" method="get" role="search" id="user-search-form">
-  <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" id="user-search-input" autocomplete="off">
-  <button class="mainbtn btn-outline-success" type="submit">Search</button>
-  <ul id="suggestions-dropdown" class="dropdown-menu" style="display: none;"></ul>
-</form>
 
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('user-search-input');
-  const suggestionsDropdown = document.getElementById('suggestions-dropdown');
-
-  searchInput.addEventListener('input', function() {
-    const query = this.value;
-
-    if (query.length > 0) {
-      fetch(`/search_users.json?query=${query}`)
-        .then(response => response.json())
-        .then(users => {
-          suggestionsDropdown.innerHTML = '';
-          if (users.length > 0) {
-            users.forEach(user => {
-              const listItem = document.createElement('li');
-              listItem.textContent = user;
-              listItem.classList.add('dropdown-item');
-              listItem.onclick = function() {
-                searchInput.value = user;
-                suggestionsDropdown.style.display = 'none';
-              };
-              suggestionsDropdown.appendChild(listItem);
-            });
-            suggestionsDropdown.style.display = 'block';
-          } else {
-            suggestionsDropdown.style.display = 'none';
-          }
-        });
-    } else {
-      suggestionsDropdown.style.display = 'none'; 
-    }
-  });
-
-  document.addEventListener('click', function(event) {
-    if (!searchInput.contains(event.target) && !suggestionsDropdown.contains(event.target)) {
-      suggestionsDropdown.style.display = 'none';
-    }
-  });
-});
-</script>
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+  <li class="nav-item dropdown">
+  <button class="nav-link d-flex align-items-center dropdown-toggle" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fa-solid fa-bell me-2"></i>
+    <span id="notification-count" class="badge bg-danger ms-2">0</span>
+  </button>
+<ul id="notifications-dropdown" class="dropdown-menu dropdown-menu-end">
+  </ul>
+</li>
+</ul>
 
 
       
@@ -149,6 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
   </ul>
 
 
+
+
+
+
 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
   <li class="nav-item">
     <%= link_to chats_path, class: "nav-link d-flex align-items-center" do %>
@@ -160,15 +126,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-  <li class="nav-item dropdown">
-  <button class="nav-link d-flex align-items-center dropdown-toggle" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="fa-solid fa-bell me-2"></i> Notifications
-    <span id="notification-count" class="badge bg-danger ms-2">0</span>
-  </button>
-<ul id="notifications-dropdown" class="dropdown-menu">
-  </ul>
+  <li class="nav-item">
+  <%= link_to '/home/notifications', class: "nav-link d-flex align-items-center" do %>
+    <i class="fa-solid fa-bell me-2"></i> Notification tab
+  <% end %>
 </li>
 </ul>
+
 
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
     <li class="nav-item">
@@ -177,6 +141,33 @@ document.addEventListener('DOMContentLoaded', function() {
       </button>
     </li>
     </ul>
+
+
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+  <li class="nav-item w-100 position-relative" style="height: 40px;">
+    <div class="search-slide-wrapper" style="width: 100%; height: 100%; overflow: hidden; position: relative;">
+      <div class="search-slide-container d-flex position-absolute top-0 start-0" style="width: 200%; transition: transform 0.4s ease;">
+        
+        <div class="search-slide-item w-50 pe-2 d-flex align-items-center">
+          <button class="nav-link d-flex align-items-center w-100" id="toggle-search-button" type="button">
+            <i class="fa-solid fa-magnifying-glass me-2"></i> Search Users
+          </button>
+        </div>
+
+        <div class="search-slide-item w-50 ps-2">
+          <div class="position-relative w-100">
+            <form class="d-flex" action="<%= search_users_path %>" method="get" role="search" id="user-search-form">
+              <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" id="user-search-input" autocomplete="off">
+              <button class="mainbtn btn-outline-success" type="submit">Search</button>
+            </form>
+            <ul id="suggestions-dropdown" class="dropdown-menu position-absolute w-100" style="display: none; z-index: 1000;"></ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </li>
+</ul>
 </div>
 
 </html>

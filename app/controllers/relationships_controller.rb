@@ -12,18 +12,21 @@ class RelationshipsController < ApplicationController
     @notification = Notification.create!(
       user: @user,
       sender: current_user,
-      message: "New follower: #{current_user.username}",
+      message: "new follower",
       notification_type: "follow",
-      read: false
+      read: false,
+      notifiable: @user
     )
 
     NotificationChannel.broadcast_to(
       @user,
       notification_id: @notification.id,
       message: @notification.message,
+      sender_id: current_user.id,
       notification_type: @notification.notification_type,
       sender_username: current_user.username,
-      created_at: @notification.created_at.strftime("%b %d, %H:%M")
+      created_at: @notification.created_at.strftime("%b %d, %H:%M"),
+      url: profile_path(current_user)
     )
 
     respond_to do |format|
