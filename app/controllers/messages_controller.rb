@@ -97,7 +97,7 @@ class MessagesController < ApplicationController
         notification = Notification.create!(
           user: @message.user,
           sender_id: current_user.id,
-          message: "liked your message",
+          message_text: "liked your message",
           notification_type: "like",
           read: false,
           notifiable: @message
@@ -106,7 +106,7 @@ class MessagesController < ApplicationController
         NotificationChannel.broadcast_to(
           @message.user,
           notification_id: notification.id,
-          message: notification.message,
+          message_text: notification.message_text,
           sender_id: current_user.id,
           notification_type: notification.notification_type,
           sender_username: current_user.username,

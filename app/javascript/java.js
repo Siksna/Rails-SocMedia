@@ -862,7 +862,7 @@ function timeAgo(date) {
               const createdDate = (typeof notification.created_at === "number")
                 ? new Date(notification.created_at * 1000)
                 : new Date(notification.created_at);
-              messageLink.textContent = `${notification.message} ${timeAgo(createdDate)}`;
+              messageLink.textContent = `${notification.message_text} ${timeAgo(createdDate)}`;
               messageLink.className = "notification-link";
               messageLink.style.textDecoration = "none";
               messageLink.style.color = "inherit";
@@ -913,6 +913,41 @@ function timeAgo(date) {
   
     updateUnreadMessages();
   });
+
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".notification-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      const url = item.getAttribute("data-url");
+      if (url) {
+        window.location.href = url;
+      }
+    });
+
+    item.addEventListener("mouseenter", function () {
+      const alreadyRead = item.getAttribute("data-read") === "true";
+      if (alreadyRead) return;
+
+      const id = item.getAttribute("data-id");
+
+      fetch(`/notifications/mark_as_read_notification/${id}`, {
+        method: "POST",
+        headers: {
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+          "Content-Type": "application/json"
+        },
+        credentials: "same-origin"
+      })
+        .then(response => {
+          if (response.ok) {
+            item.classList.remove("bg-light");
+            item.setAttribute("data-read", "true");
+          }
+        });
+    });
+  });
+});
 
 
   /* Friend search bars */
@@ -997,7 +1032,47 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+/* bookmarks */
+function toggleBookmark(id, button, type, currentlyBookmarked) {
+  const method = currentlyBookmarked ? 'DELETE' : 'POST';
+  const url = type === 'message'
+    ? `/messages/${id}/bookmark${method === 'DELETE' ? '/delete' : ''}`
+    : `/replies/${id}/bookmark${method === 'DELETE' ? '/delete' : ''}`;
 
+  fetch(url, {
+    method: method,
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Accept': 'application/json',
+    }
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Network error');
+    return response.json();
+  })
+  .then(data => {
+    const icon = button.querySelector('i');
+    if (data.bookmarked) {
+      icon.classList.remove('fa-regular');
+      icon.classList.add('fa-solid');
+      button.setAttribute('onclick', `toggleBookmark(${id}, this, '${type}', true)`);
+    } else {
+      icon.classList.remove('fa-solid');
+      icon.classList.add('fa-regular');
+      button.setAttribute('onclick', `toggleBookmark(${id}, this, '${type}', false)`);
+    }
+  })
+  .catch(err => console.error('Error toggling bookmark:', err));
+}
+window.toggleBookmark = toggleBookmark;
+
+
+
+
+// pagination
+// saved posts
+// message algoritms
+// bookmarks kad nospiez nevar unbookmarkot main page un reply, un ar ajax kipa strada bet tiek redirectots uz message lapu
 
 // EXTRA OBLIGATI
 
@@ -1005,28 +1080,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // OBLIGATI
 
-// tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots
-// Reply page problemas ar display image
-// gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
 // algoritms prieks messagiem
+// gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
 // janonem aizmirsi paroli funkciju
 // admin history vajag uztaisit lai var sortot pec target
 // admini var noņemt lietotaja profila bildi
+// Biogrāfija priekš useriem profile lapā
+// suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
+// lietotaja profilā kad nospiez like neatnak notification
+
+//VIZUALI OBLIGATI
+
+// paslept/ paradit input field prieks postiem
+// tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots
+// Reply page problemas ar display image
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
 // default profile pic ir offcentered
 // profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
-// paslept/ paradit input field prieks postiem
-// Biogrāfija priekš useriem profile lapā
 
 // EXTRA
 
 // izmantot SLUGS hash lai neraditu url ids
 // Search bars kas atrod ziņas kuriem ir saistiti vardi, piemeram lietotajvards vai content vards un parada tas zinas uz ekran
 // save posts
-// suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
 // display images var pievienot vairakus images un nospiest x uz jebkuru image
 // var pieslegties ar google kontu
-// notifikacijas lapa
 // Var čatot ar jebkuru personu
 // file poga visas lapas divains borders kad mouse hovero over
 // PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā, notifikacijas saraksta un save posts ari

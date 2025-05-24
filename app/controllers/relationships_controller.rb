@@ -12,7 +12,7 @@ class RelationshipsController < ApplicationController
     @notification = Notification.create!(
       user: @user,
       sender: current_user,
-      message: "new follower",
+      message_text: "new follower",
       notification_type: "follow",
       read: false,
       notifiable: @user
@@ -21,7 +21,7 @@ class RelationshipsController < ApplicationController
     NotificationChannel.broadcast_to(
       @user,
       notification_id: @notification.id,
-      message: @notification.message,
+      message_text: @notification.message_text,
       sender_id: current_user.id,
       notification_type: @notification.notification_type,
       sender_username: current_user.username,

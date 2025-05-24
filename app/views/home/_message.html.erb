@@ -60,5 +60,17 @@
       <% end %>
       <span><%= message.likes.count %></span>
     </div>
+
+     <div class="bookmark-section d-flex align-items-center">
+  <% if current_user %>
+    <% bookmarked = current_user.bookmarked_messages.exists?(message.id) %>
+    <button
+      class="btn btn-sm <%= bookmarked ? 'text-warning' : 'text-secondary' %>"
+      onclick="toggleBookmark(<%= message.id %>, this, 'message', <%= bookmarked %>)">
+      <i class="fa-<%= bookmarked ? 'solid' : 'regular' %> fa-bookmark"></i>
+    </button>
+  <% end %>
+</div>
+
   </div>
 </div>

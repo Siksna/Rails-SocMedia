@@ -29,5 +29,6 @@ class ChatChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
+    logger.debug "[ChatChannel] Unsubscribed"
   end
 end

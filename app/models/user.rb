@@ -7,6 +7,14 @@ class User < ApplicationRecord
   has_many :messages, dependent: :destroy
   has_many :replies, dependent: :destroy
 
+has_many :bookmarks, dependent: :destroy
+has_many :bookmarked_messages, -> { where(bookmarks: { bookmarkable_type: 'Message' }) }, through: :bookmarks, source: :bookmarkable, source_type: 'Message'
+has_many :bookmarked_replies, -> { where(bookmarks: { bookmarkable_type: 'Reply' }) }, through: :bookmarks, source: :bookmarkable, source_type: 'Reply'
+
+def bookmarked?(message)
+  bookmarked_messages.exists?(message.id)
+end
+
   has_many :likes
   has_many :liked_messages, -> { order('likes.created_at DESC') }, through: :likes, source: :likeable, source_type: 'Message'
   has_many :liked_replies, -> { order('likes.created_at DESC') }, through: :likes, source: :likeable, source_type: 'Reply'

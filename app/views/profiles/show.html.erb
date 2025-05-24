@@ -151,7 +151,19 @@
           <span><%= activity.likes.count %></span>
             </div>
             <% end %>
+
+            <% if current_user.bookmarked_messages.exists?(activity.id) %>
+        <button class="bookmark-button" onclick="toggleBookmark(<%= activity.id %>, this, 'message', true)">
+         <i class="fa-solid fa-bookmark"></i>
+        </button>
+          <% else %>
+          <button class="bookmark-button" onclick="toggleBookmark(<%= activity.id %>, this, 'message', false)">
+            <i class="fa-regular fa-bookmark"></i>
+          </button>
+          <% end %>
         </div>
+
+
     </div>
          
        
@@ -220,6 +232,19 @@
           <% end %>
           <span><%= activity.likes.count %></span>
         </div>
+
+         <% if current_user.bookmarks.exists?(bookmarkable: activity) %>
+          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', true)">
+          <i class="fa-solid fa-bookmark"></i>
+          </button>
+        <% else %>
+          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', false)">
+            <i class="fa-regular fa-bookmark"></i>
+          </button>
+        <% end %>
+
+
+
         </div>
 
 
@@ -315,7 +340,7 @@
           </div>
 
 
-          <!-- Like reply replijiem NESTRADA-->
+          <!-- Like reply replijiem-->
           <% if activity.is_a?(Reply) %>         
             <div class="like-section d-flex align-items-center">
               <% if current_user %>
@@ -332,6 +357,19 @@
               <span><%= activity.likes.count %></span>
             </div>
           <% end %>
+
+        <% if current_user.bookmarks.exists?(bookmarkable: activity) %>
+          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', true)">
+          <i class="fa-solid fa-bookmark"></i>
+          </button>
+        <% else %>
+          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', false)">
+            <i class="fa-regular fa-bookmark"></i>
+          </button>
+        <% end %>
+
+
+          
           </div>
 
 

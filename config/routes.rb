@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
 
+  mount ActionCable.server => '/cable'
+
+
 get 'admin/history/load_more_history', to: 'admin#load_more_history', as: 'load_more_history'
 get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'load_more_personas'
 
@@ -41,8 +44,14 @@ get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'lo
       get 'load_more'
     end
     end
+     resource :bookmark, only: [:create, :destroy]
     post 'toggle_like', on: :member
   end
+
+  get '/bookmarks', to: 'bookmarks#index', as: 'bookmarked_messages'
+  post   '/replies/:id/bookmark',   to: 'bookmarks#create',  as: :reply_bookmark
+  delete '/replies/:id/bookmark',   to: 'bookmarks#destroy', as: :delete_reply_bookmark
+
   
   resources :profiles, only: [:show] do
     member do
@@ -87,8 +96,5 @@ get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'lo
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
-
-
-  mount ActionCable.server => '/cable'
 
 end

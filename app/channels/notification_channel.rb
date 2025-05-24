@@ -10,6 +10,6 @@ class NotificationChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    puts "Unsubscribed from NotificationChannel"
+  logger.debug "[NotificationChannel] Unsubscribed"
   end
 end

@@ -69,6 +69,17 @@
 </div>
 
 
+<%= form_with url: message_bookmark_path(@message), method: current_user.bookmarked_messages.exists?(@message.id) ? :delete : :post, remote: true, data: { turbo_frame: "_top" } do %>
+  <button class="bookmark border-0 bg-transparent p-0">
+    <% if current_user.bookmarked?(@message) %>
+      <i class="fa-solid fa-bookmark text-warning"></i>
+    <% else %>
+      <i class="fa-regular fa-bookmark text-secondary"></i>
+    <% end %>
+  </button>
+<% end %>
+
+
 </div>
 </div>
 <div class="card-container">

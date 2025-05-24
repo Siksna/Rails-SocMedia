@@ -6,9 +6,14 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
     console.log("Connected to the NotificationChannel");
   },
 
+   rejected() {
+    console.error("Subscription to NotificationChannel was rejected.");
+  },
+
   disconnected() {
     console.log("Disconnected from the NotificationChannel");
   },
+  
 
   received(data) {
     console.log("New notification received:", data);
@@ -115,7 +120,7 @@ function addGeneralNotification(data) {
 
   const messageLink = document.createElement("a");
   messageLink.href = data.url || "#";
-  messageLink.textContent = ` ${data.message} ${timeAgo(new Date(data.created_at * 1000))}`;
+  messageLink.textContent = ` ${data.message_text} ${timeAgo(new Date(data.created_at * 1000))}`;
   messageLink.className = "notification-link";
   messageLink.style.textDecoration = "none";
   messageLink.style.color = "inherit";

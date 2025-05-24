@@ -136,9 +136,9 @@
 
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
     <li class="nav-item">
-      <button class="nav-link d-flex align-items-center" disabled>
-        <i class="fa-solid fa-bookmark me-2"></i> Saved posts
-      </button>
+      <%= link_to bookmarked_messages_path, class: "nav-link d-flex align-items-center" do %>
+      <i class="fa-solid fa-bookmark me-2"></i> Saved posts
+    <% end %>
     </li>
     </ul>
 

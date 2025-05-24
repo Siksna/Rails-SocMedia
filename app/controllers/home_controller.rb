@@ -33,7 +33,7 @@ end
 end
 
    def notifications
-    @notifications = current_user.notifications.includes(:sender).where.not(notification_type: 'chats').order(created_at: :desc)
+    @notifications = current_user.notifications.includes(:sender, :message, reply: [:message, file_attachment: :blob]).where.not(notification_type: 'chats').order(created_at: :desc)
   end
 
   def search_users

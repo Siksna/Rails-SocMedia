@@ -189,6 +189,11 @@ hr {
 
 
 
+.reply-block::marker {
+  content: none;
+}
+
+
 
 .reply-form .input-container {
   display: flex;
@@ -787,6 +792,28 @@ hr {
   display: inline-block;
   margin-right: 8px;
 }
+
+
+/* notification tab */
+.notification-item {
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.notification-item a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.notification-item a:hover {
+  text-decoration: underline;
+}
+
+
 
 
 /* CHAT */

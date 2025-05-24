@@ -14,7 +14,7 @@ def create
       notification = Notification.create!(
         user: @message.user,
         sender_id: current_user.id,
-        message: "replied to your message",
+        message_text: "replied to your message",
         notification_type: "reply",
         read: false,
         notifiable: @message
@@ -23,7 +23,7 @@ def create
       NotificationChannel.broadcast_to(
         @message.user,
         notification_id: notification.id,
-        message: notification.message,
+        message_text: notification.message_text,
         sender_id: current_user.id,
         notification_type: notification.notification_type,
         sender_username: current_user.username,
@@ -37,7 +37,7 @@ def create
       notification = Notification.create!(
         user: parent_reply.user,
         sender_id: current_user.id,
-        message: "replied to your reply",
+        message_text: "replied to your reply",
         notification_type: "reply",
         read: false,
         notifiable: @reply
@@ -46,7 +46,7 @@ def create
       NotificationChannel.broadcast_to(
         parent_reply.user,
         notification_id: notification.id,
-        message: notification.message,
+        message_text: notification.message_text,
         sender_id: current_user.id,
         notification_type: notification.notification_type,
         sender_username: current_user.username,
@@ -68,7 +68,7 @@ def create
         notification = Notification.create!(
           user: mentioned_user,
           sender_id: current_user.id,
-          message: "mentioned you in a reply",
+          message_text: "mentioned you in a reply",
           notification_type: "reply",
           read: false
         )
@@ -76,7 +76,7 @@ def create
         NotificationChannel.broadcast_to(
           mentioned_user,
           notification_id: notification.id,
-          message: notification.message,
+          message_text: notification.message_text,
           sender_id: current_user.id,
           notification_type: notification.notification_type,
           sender_username: current_user.username,
@@ -179,7 +179,7 @@ end
         notification = Notification.create!(
           user: @reply.user,
           sender_id: current_user.id,
-          message: "#{current_user.username} liked your message",
+          message_text: "liked your reply",
           notification_type: "like",
           read: false
         )
@@ -187,7 +187,7 @@ end
         NotificationChannel.broadcast_to(
           @message.user,
           notification_id: notification.id,
-          message: notification.message,
+          message_text: notification.message_text,
           sender_id: current_user.id,
           notification_type: notification.notification_type,
           sender_username: current_user.username,

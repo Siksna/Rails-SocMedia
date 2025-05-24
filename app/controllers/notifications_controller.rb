@@ -22,7 +22,7 @@ class NotificationsController < ApplicationController
   general_notifications: general_notifications.includes(:sender).map do |notification|
     {
       id: notification.id,
-      message: notification.message,
+      message_text: notification.message_text,
       created_at: notification.created_at,
       sender_id: notification.sender_id,
       sender_username: notification.sender&.username,
