@@ -1,5 +1,6 @@
 class LikesController < ApplicationController
   before_action :find_message_or_reply, only: [:toggle]
+  before_action :authenticate_user!
 
   def toggle
     if @message

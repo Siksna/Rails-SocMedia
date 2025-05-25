@@ -61,14 +61,18 @@
       <span><%= message.likes.count %></span>
     </div>
 
-     <div class="bookmark-section d-flex align-items-center">
+    <div class="bookmark-section d-flex align-items-center">
   <% if current_user %>
     <% bookmarked = current_user.bookmarked_messages.exists?(message.id) %>
-    <button
-      class="btn btn-sm <%= bookmarked ? 'text-warning' : 'text-secondary' %>"
-      onclick="toggleBookmark(<%= message.id %>, this, 'message', <%= bookmarked %>)">
-      <i class="fa-<%= bookmarked ? 'solid' : 'regular' %> fa-bookmark"></i>
-    </button>
+    <button class="btn btn-sm bookmark-button"
+            onclick="event.stopPropagation(); toggleBookmark(<%= message.id %>, this, 'message')"
+            data-bookmarked="<%= bookmarked %>">
+<% if bookmarked %>
+    <i class="fa-solid fa-bookmark text-warning"></i>
+  <% else %>
+    <i class="fa-regular fa-bookmark text-warning"></i>
+  <% end %>
+      </button>
   <% end %>
 </div>
 

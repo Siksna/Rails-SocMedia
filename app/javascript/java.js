@@ -146,32 +146,6 @@ function displayFileName() {
   
   
   
-  /*Error meklēšana */
-  
-  
-  
-  
-  function fetchReplies() {
-    fetch(`/messages/${messageId}/replies`)
-      .then(response => response.json())
-      .then(data => {
-        const replyContainer = document.getElementById('reply-container');
-        replyContainer.innerHTML = '';
-  
-        data.forEach(reply => {
-          const replyElement = createReplyElement(reply);
-          replyContainer.appendChild(replyElement);
-        });
-      })
-      .catch(error => console.error('Error fetching replies:', error));
-  }
-  
-  
-  
-  
-  
-  
-  
   
   // Ziņu publicēšana
 function postComment() {
@@ -782,137 +756,195 @@ function markSingleNotificationAsRead(notificationId, element) {
 
 
  /* Notifications */
-  document.addEventListener("DOMContentLoaded", function () {
-   const messageNotificationCount = document.getElementById("message-notification-count");
-          const generalNotificationCount = document.getElementById("notification-count");
-          const notificationDropdown = document.getElementById("notifications-dropdown");
-    
+ document.addEventListener("DOMContentLoaded", function () {
+    const messageNotificationCount = document.getElementById("message-notification-count");
+    const generalNotificationCount = document.getElementById("notification-count");
+    const notificationDropdown = document.getElementById("notifications-dropdown");
 
-function timeAgo(date) {
-  const seconds = Math.floor((new Date() - date) / 1000);
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+    function timeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
-  const intervals = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
-    second: 1
-  };
+        const intervals = {
+            year: 31536000,
+            month: 2592000,
+            week: 604800,
+            day: 86400,
+            hour: 3600,
+            minute: 60,
+            second: 1
+        };
 
-  for (const [unit, value] of Object.entries(intervals)) {
-    const diff = Math.floor(seconds / value);
-    if (diff >= 1) return rtf.format(-diff, unit);
-  }
+        for (const [unit, value] of Object.entries(intervals)) {
+            const diff = Math.floor(seconds / value);
+            if (diff >= 1) return rtf.format(-diff, unit);
+        }
 
-  return "just now";
-}
+        return "just now";
+    }
 
     function updateUnreadMessages() {
-      fetch("/notifications/unread")
-        .then(response => response.json())
-        .then(data => {
-    
-         
-          if (messageNotificationCount) {
-            if (data.chat_unread_count > 0) {
-              messageNotificationCount.textContent = data.chat_unread_count;
-              messageNotificationCount.style.display = "inline-block";
-            } else {
-              messageNotificationCount.style.display = "none";
-            }
-          }
-    
-          if (generalNotificationCount) {
-            if (data.general_unread_count > 0) {
-              generalNotificationCount.textContent = data.general_unread_count;
-              generalNotificationCount.style.display = "inline-block";
-            } else {
-              generalNotificationCount.style.display = "none";
-            }
-          }
-    
-          if (notificationDropdown) {
-            notificationDropdown.innerHTML = "";
-    
-            if (data.general_notifications && data.general_notifications.length > 0) {
-            data.general_notifications
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 10)
-            .forEach(notification => {
-              const li = document.createElement("li");
-              li.className = "dropdown-item clickable-notification";
-              li.dataset.url = notification.url || "#";
-              const dot = document.createElement("span");
-              dot.className = "blue-dot";
+        fetch("/notifications/unread")
+            .then(response => response.json())
+            .then(data => {
 
-              const usernameLink = document.createElement("a");
-              usernameLink.href = `/profiles/${notification.sender_id}`;
-              usernameLink.textContent = notification.sender_username;
-              usernameLink.className = "username-link";
-              usernameLink.style.fontWeight = "bold";
-              usernameLink.style.textDecoration = "underline";
-              usernameLink.style.color = "#007bff";
-              usernameLink.style.marginRight = "5px";
+                if (messageNotificationCount) {
+                    if (data.chat_unread_count > 0) {
+                        messageNotificationCount.textContent = data.chat_unread_count;
+                        messageNotificationCount.style.display = "inline-block";
+                    } else {
+                        messageNotificationCount.style.display = "none";
+                    }
+                }
 
-              const messageLink = document.createElement("a");
-              messageLink.href = `/profiles/${notification.sender_id}` || "#";
-              const createdDate = (typeof notification.created_at === "number")
-                ? new Date(notification.created_at * 1000)
-                : new Date(notification.created_at);
-              messageLink.textContent = `${notification.message_text} ${timeAgo(createdDate)}`;
-              messageLink.className = "notification-link";
-              messageLink.style.textDecoration = "none";
-              messageLink.style.color = "inherit";
+                if (generalNotificationCount) {
+                    if (data.general_unread_count > 0) {
+                        generalNotificationCount.textContent = data.general_unread_count;
+                        generalNotificationCount.style.display = "inline-block";
+                    } else {
+                        generalNotificationCount.style.display = "none";
+                    }
+                }
 
-              const wrapper = document.createElement("span");
-              wrapper.appendChild(usernameLink);
-              wrapper.appendChild(messageLink);
+                if (notificationDropdown) {
+                    notificationDropdown.innerHTML = "";
 
-              li.appendChild(dot);
-              li.appendChild(wrapper);
+                    if (data.general_notifications && data.general_notifications.length > 0) {
+                       
+                        const currentUserId = data.current_user_id;
 
-              li.addEventListener("mouseenter", () => {
-                markSingleNotificationAsRead(notification.id, dot);
-              });
-
-              notificationDropdown.appendChild(li);
-            });
-            } else {
-              const li = document.createElement("li");
-              li.className = "dropdown-item text-muted";
-              li.textContent = "No new notifications.";
-              notificationDropdown.appendChild(li);
-            }
-          }
+                        const filteredNotifications = data.general_notifications.filter(notification => {
+                            return notification.sender_id !== currentUserId;
+                        });
 
 
+                        if (filteredNotifications.length > 0) {
+                            filteredNotifications
+                                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                                .slice(0, 10)
+                                .forEach(notification => {
+                                    const li = document.createElement("li");
+                                    li.className = "dropdown-item clickable-notification";
+                                    li.dataset.url = notification.url || "#";
+                                    const dot = document.createElement("span");
+                                    dot.className = "blue-dot";
 
-          const unreadCounts = data.unread_notifications || {};
-  
-        document.querySelectorAll("[data-convo-id]").forEach(card => {
-          const convoId = card.getAttribute("data-convo-id");
-          const badge = card.querySelector(".chat-unread-count");
-  
-          if (badge && unreadCounts[convoId] > 0) {
-            badge.textContent = unreadCounts[convoId];
-            badge.style.display = "inline-block";
-          } else if (badge) {
-            badge.style.display = "none";
-          }
-        });
-    
-          localStorage.setItem("unreadChatCount", data.chat_unread_count);
-          localStorage.setItem("unreadGeneralCount", data.general_unread_count);
-        })
-        .catch(error => console.error("Error fetching notifications:", error));
+                                    const usernameLink = document.createElement("a");
+                                    usernameLink.href = `/profiles/${notification.sender_id}`;
+                                    usernameLink.textContent = notification.sender_username;
+                                    usernameLink.className = "username-link";
+                                    usernameLink.style.fontWeight = "bold";
+                                    usernameLink.style.textDecoration = "underline";
+                                    usernameLink.style.color = "#007bff";
+                                    usernameLink.style.marginRight = "5px";
+
+                                    const messageLink = document.createElement("a");
+                                    messageLink.href = `/profiles/${notification.sender_id}` || "#";
+                                    const createdDate = (typeof notification.created_at === "number")
+                                        ? new Date(notification.created_at * 1000)
+                                        : new Date(notification.created_at);
+                                    messageLink.textContent = `${notification.message_text} ${timeAgo(createdDate)}`;
+                                    messageLink.className = "notification-link";
+                                    messageLink.style.textDecoration = "none";
+                                    messageLink.style.color = "inherit";
+
+                                    const wrapper = document.createElement("span");
+                                    wrapper.appendChild(usernameLink);
+                                    wrapper.appendChild(messageLink);
+
+                                    li.appendChild(dot);
+                                    li.appendChild(wrapper);
+
+                                    li.addEventListener("mouseenter", () => {
+                                        markSingleNotificationAsRead(notification.id, dot);
+                                    });
+
+                                    notificationDropdown.appendChild(li);
+                                });
+                        } else {
+                             const li = document.createElement("li");
+                             li.className = "dropdown-item text-muted";
+                             li.textContent = "No new notifications.";
+                             notificationDropdown.appendChild(li);
+                        }
+                    } else {
+                        const li = document.createElement("li");
+                        li.className = "dropdown-item text-muted";
+                        li.textContent = "No new notifications.";
+                        notificationDropdown.appendChild(li);
+                    }
+                }
+
+                if (generalNotificationCount) {
+                    const filteredGeneralCount = data.general_notifications.filter(notification => notification.sender_id !== data.current_user_id).length;
+                    if (filteredGeneralCount > 0) {
+                         generalNotificationCount.textContent = filteredGeneralCount;
+                         generalNotificationCount.style.display = "inline-block";
+                    } else {
+                         generalNotificationCount.style.display = "none";
+                    }
+                }
+
+
+                const unreadCounts = data.unread_notifications || {};
+
+                document.querySelectorAll("[data-convo-id]").forEach(card => {
+                    const convoId = card.getAttribute("data-convo-id");
+                    const badge = card.querySelector(".chat-unread-count");
+
+                    if (badge && unreadCounts[convoId] > 0) {
+                        badge.textContent = unreadCounts[convoId];
+                        badge.style.display = "inline-block";
+                    } else if (badge) {
+                        badge.style.display = "none";
+                    }
+                });
+
+                localStorage.setItem("unreadChatCount", data.chat_unread_count);
+                localStorage.setItem("unreadGeneralCount", data.general_unread_count);
+            })
+            .catch(error => console.error("Error fetching notifications:", error));
     }
+
+   
+    updateUnreadMessages();
+
+       document.querySelectorAll(".notification-item").forEach((item) => {
+        item.addEventListener("click", function () {
+            const url = item.getAttribute("data-url");
+            if (url) {
+                window.location.href = url;
+            }
+        });
+
+        item.addEventListener("mouseenter", function () {
+            const alreadyRead = item.getAttribute("data-read") === "true";
+            if (alreadyRead) return;
+
+            const id = item.getAttribute("data-id");
+
+            fetch(`/notifications/mark_as_read_notification/${id}`, {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                    "Content-Type": "application/json"
+                },
+                credentials: "same-origin"
+            })
+                .then(response => {
+                    if (response.ok) {
+                        item.classList.remove("bg-light");
+                        item.setAttribute("data-read", "true");
+                    }
+                })
+                .catch(error => console.error("Error marking notification as read:", error));
+        });
+    });    
+    updateUnreadMessages();
+
+});
     
   
-    updateUnreadMessages();
-  });
 
 
 
@@ -1033,21 +1065,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 /* bookmarks */
-function toggleBookmark(id, button, type, currentlyBookmarked) {
+function toggleBookmark(id, button, type) {
+  const currentlyBookmarked = button.dataset.bookmarked === 'true';
+
   const method = currentlyBookmarked ? 'DELETE' : 'POST';
   const url = type === 'message'
-    ? `/messages/${id}/bookmark${method === 'DELETE' ? '/delete' : ''}`
-    : `/replies/${id}/bookmark${method === 'DELETE' ? '/delete' : ''}`;
+    ? `/messages/${id}/bookmark`
+    : `/replies/${id}/bookmark${method === 'DELETE' ? '' : ''}`; 
 
   fetch(url, {
     method: method,
     headers: {
-      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
       'Accept': 'application/json',
     }
   })
   .then(response => {
-    if (!response.ok) throw new Error('Network error');
+    if (!response.ok) {
+      return response.json().then(errorData => {
+        throw new Error(`Network error: ${response.status} ${response.statusText} - ${errorData.message || 'Unknown error'}`);
+      });
+    }
     return response.json();
   })
   .then(data => {
@@ -1055,11 +1093,11 @@ function toggleBookmark(id, button, type, currentlyBookmarked) {
     if (data.bookmarked) {
       icon.classList.remove('fa-regular');
       icon.classList.add('fa-solid');
-      button.setAttribute('onclick', `toggleBookmark(${id}, this, '${type}', true)`);
+      button.dataset.bookmarked = 'true'; 
     } else {
       icon.classList.remove('fa-solid');
       icon.classList.add('fa-regular');
-      button.setAttribute('onclick', `toggleBookmark(${id}, this, '${type}', false)`);
+      button.dataset.bookmarked = 'false';
     }
   })
   .catch(err => console.error('Error toggling bookmark:', err));
@@ -1068,6 +1106,73 @@ window.toggleBookmark = toggleBookmark;
 
 
 
+/* follow */
+
+function toggleFollow(userId, button) {
+  const currentlyFollowing = button.dataset.following === 'true';
+  const method = currentlyFollowing ? 'DELETE' : 'POST';
+  const url = `/profiles/${userId}/${currentlyFollowing ? 'unfollow' : 'follow'}`;
+
+  fetch(url, {
+    method: method,
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+      'Accept': 'application/json',
+    }
+  })
+  .then(response => {
+    if (response.status === 401 || response.status === 403) {
+      window.location.href = '/users/sign_in';
+      throw new Error('Unauthorized');
+    }
+
+    if (!response.ok) {
+      return response.text().then(text => {
+        console.error(`Server response status ${response.status}:`, text);
+        try {
+          const errorData = JSON.parse(text);
+          throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorData.message || 'Unknown error'}`);
+        } catch (e) {
+          throw new Error(`Server error: ${response.status} ${response.statusText} - Response was not JSON.`);
+        }
+      });
+    }
+
+    return response.json();
+  })
+  .then(data => {
+    if (data.following) {
+      button.textContent = 'Unfollow';
+      button.classList.remove('follow');
+      button.classList.add('unfollow');
+      button.dataset.following = 'true';
+    } else {
+      button.textContent = 'Follow';
+      button.classList.remove('unfollow');
+      button.classList.add('follow');
+      button.dataset.following = 'false';
+    }
+
+    const followerCountSpan = document.getElementById(`follower-count-${userId}`);
+    if (followerCountSpan) {
+      followerCountSpan.textContent = data.followers_count;
+    }
+
+    const friendStatusContainer = document.getElementById(`friend-status-container-${userId}`);
+    if (friendStatusContainer) {
+      if (data.friends_with) {
+        friendStatusContainer.innerHTML = '<span class="friend-status">Friends</span>';
+      } else {
+        friendStatusContainer.innerHTML = ''; 
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Error toggling follow status:', error);
+  });
+}
+
+window.toggleFollow = toggleFollow;
 
 // pagination
 // saved posts

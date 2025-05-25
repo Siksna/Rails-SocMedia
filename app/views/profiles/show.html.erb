@@ -18,7 +18,6 @@
   </h1>
 
   <div class="user-details">
-    <p><%= @user.email %></p>
 
     
    
@@ -30,18 +29,23 @@
 
 <!-- Sekosanas pogas -->
   
-<% if current_user %> 
+<% if current_user %>
   <% if current_user != @user %>
     <% if !@user.deleted? %>
-      <% if current_user.friends_with?(@user) %>
-        <span class="friend-status">Friends</span>
-      <% end %>
 
-      <% if current_user.following?(@user) %>
-        <%= button_to 'Unfollow', unfollow_profile_path(@user), method: :delete, class: "unfollow" %>
-      <% else %>
-        <%= button_to 'Follow', follow_profile_path(@user), method: :post, class: "follow" %>
-      <% end %>
+      <div id="friend-status-container-<%= @user.id %>">
+        <% if current_user.friends_with?(@user) %>
+          <span class="friend-status">Friends</span>
+        <% end %>
+      </div>
+
+      <button type="button"
+              class="follow-button <%= current_user.following?(@user) ? 'unfollow' : 'follow' %>"
+              onclick="toggleFollow(<%= @user.id %>, this)"
+              data-following="<%= current_user.following?(@user) %>"
+              id="follow-button-<%= @user.id %>">
+        <%= current_user.following?(@user) ? 'Unfollow' : 'Follow' %>
+      </button>
     <% end %>
   <% end %>
 <% else %>
@@ -136,31 +140,32 @@
 
           <!-- Like originala ziņa STRADA-->
           <% if activity.is_a?(Message) %>
-            <div class="like-section d-flex align-items-center">
-              <% if current_user %>
-              <%= button_to toggle_like_message_path(activity), method: :post, remote: true, class: 'heart me-2' do %>
-                <% if current_user.liked?(activity) %>
-                  <i class="fa-solid fa-heart"></i>
-                <% else %>
-                  <i class="fa-regular fa-heart"></i>
-                <% end %>
-              <% end %>
-              <% else %>
-               <i class="fa-regular fa-heart me-2"></i>
+        <div class="like-section d-flex align-items-center">
+          <% if current_user %>
+            <button type="button" class="heart me-2" onclick="event.stopPropagation(); toggleLike(<%= activity.id %>, this, 'message')">
+            <% if current_user.liked?(activity) %>
+          <i class="fa-solid fa-heart"></i>
+        <% else %>
+          <i class="fa-regular fa-heart"></i>
+        <% end %>
+          </button>
+          <% else %>
+      <i class="fa-regular fa-heart me-2"></i>
           <% end %>
           <span><%= activity.likes.count %></span>
-            </div>
-            <% end %>
+        </div>
+        <% end %>
 
             <% if current_user.bookmarked_messages.exists?(activity.id) %>
-        <button class="bookmark-button" onclick="toggleBookmark(<%= activity.id %>, this, 'message', true)">
-         <i class="fa-solid fa-bookmark"></i>
-        </button>
-          <% else %>
-          <button class="bookmark-button" onclick="toggleBookmark(<%= activity.id %>, this, 'message', false)">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
-          <% end %>
+        <button class="btn btn-sm bookmark-button" onclick="event.stopPropagation(); toggleBookmark(<%= activity.id %>, this, 'message')" data-bookmarked="<%= current_user.bookmarked_messages.exists?(activity.id) %>">
+  <% if current_user.bookmarked_messages.exists?(activity.id) %>
+    <i class="fa-solid fa-bookmark text-warning"></i>
+  <% else %>
+    <i class="fa-regular fa-bookmark text-warning"></i>
+  <% end %>
+</button>
+        <% end %>
+
         </div>
 
 
@@ -218,30 +223,28 @@
           </div>
 
           <!-- Like originalajiem replijiem STRADA -->
-          <div class="like-section d-flex align-items-center">
-          <% if current_user %>
-            <%= button_to toggle_like_message_reply_path(activity.message, activity), method: :post, remote: true, class: 'heart me-2' do %>
-              <% if current_user.liked?(activity) %>
-                <i class="fa-solid fa-heart"></i>
-              <% else %>
-                <i class="fa-regular fa-heart"></i>
-              <% end %>
-            <% end %>
-          <% else %>
-            <i class="fa-regular fa-heart me-2"></i>
-          <% end %>
-          <span><%= activity.likes.count %></span>
-        </div>
-
-         <% if current_user.bookmarks.exists?(bookmarkable: activity) %>
-          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', true)">
-          <i class="fa-solid fa-bookmark"></i>
+         <div class="like-section d-flex align-items-center">
+        <% if current_user %>
+<button type="button" class="heart me-2" onclick="event.stopPropagation(); toggleReplyLike(<%= activity.id %>, this, <%= activity.message.id %>)">            <% if current_user.liked?(activity) %>
+        <i class="fa-solid fa-heart"></i>
+      <% else %>
+        <i class="fa-regular fa-heart"></i>
+      <% end %>
           </button>
         <% else %>
-          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', false)">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
+          <i class="fa-regular fa-heart me-2"></i>
         <% end %>
+<span id="like-reply-count-<%= activity.id %>"><%= activity.likes.count %></span>
+        </div>
+
+        <button class="btn btn-sm bookmark-button mt-1" onclick="event.stopPropagation(); toggleBookmark(<%= activity.id %>, this, 'reply')" data-bookmarked="<%= current_user.bookmarks.exists?(bookmarkable: activity) %>">
+        <% if current_user.bookmarks.exists?(bookmarkable: activity) %>
+    <i class="fa-solid fa-bookmark text-warning"></i>
+          <% else %>
+    <i class="fa-regular fa-bookmark text-warning"></i>
+          <% end %>
+          </button>
+
 
 
 
@@ -283,8 +286,6 @@
           </div>
         </div>
 
-
-        <!-- Reply uz reply -->
 
         <!-- Child replijs uz reply-->
       <% elsif activity.is_a?(Reply) && activity.parent.present? %> 
@@ -341,32 +342,27 @@
 
 
           <!-- Like reply replijiem-->
-          <% if activity.is_a?(Reply) %>         
-            <div class="like-section d-flex align-items-center">
-              <% if current_user %>
-                <%= button_to toggle_like_message_reply_path(activity.message, activity), method: :post, remote: true, class: 'heart me-2' do %>
-                  <% if current_user.liked?(activity) %>
-                    <i class="fa-solid fa-heart"></i>
-                  <% else %>
-                    <i class="fa-regular fa-heart"></i>
-                  <% end %>
-                <% end %>
+          <div class="like-section d-flex align-items-center">
+          <% if current_user %>
+          <button type="button" class="heart me-2" onclick="event.stopPropagation(); toggleReplyLike(<%= activity.id %>, this, <%= activity.message.id %>)">            <% if current_user.liked?(activity) %>
+        <i class="fa-solid fa-heart"></i>
               <% else %>
-                <i class="fa-regular fa-heart me-2"></i>
-              <% end %>
-              <span><%= activity.likes.count %></span>
-            </div>
+        <i class="fa-regular fa-heart"></i>
           <% end %>
+          </button>
+          <% else %>
+            <i class="fa-regular fa-heart me-2"></i>
+          <% end %>
+            <span id="like-reply-count-<%= activity.id %>"><%= activity.likes.count %></span>
+          </div>
 
-        <% if current_user.bookmarks.exists?(bookmarkable: activity) %>
-          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', true)">
-          <i class="fa-solid fa-bookmark"></i>
-          </button>
-        <% else %>
-          <button class="bookmark-button mt-1" onclick="toggleBookmark(<%= activity.id %>, this, 'reply', false)">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
-        <% end %>
+        <button class="btn btn-sm bookmark-button mt-1" onclick="event.stopPropagation(); toggleBookmark(<%= activity.id %>, this, 'reply')" data-bookmarked="<%= current_user.bookmarks.exists?(bookmarkable: activity) %>">
+          <% if current_user.bookmarks.exists?(bookmarkable: activity) %>
+    <i class="fa-solid fa-bookmark text-warning"></i>
+          <% else %>
+    <i class="fa-regular fa-bookmark text-warning"></i>
+          <% end %>
+        </button>
 
 
           

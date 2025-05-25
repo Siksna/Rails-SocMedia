@@ -1,5 +1,5 @@
 class ProfilesController < ApplicationController
-  before_action :find_user, only: [:follow, :unfollow]
+  before_action :authenticate_user!
 
     def show
       @user = User.find(params[:id])
@@ -27,30 +27,6 @@ class ProfilesController < ApplicationController
       @following = @user.following
     end
 
-
-    def follow
-      unless current_user.following.include?(@user)
-        current_user.following << @user
-
-
-
-      end
-    
-      respond_to do |format|
-        format.html { redirect_to profile_path(@user) }
-        format.js
-      end
-    end
-    
-    
-  
-    def unfollow
-      current_user.following.delete(@user)
-      respond_to do |format|
-        format.html { redirect_to profile_path(@user) }
-        format.js
-      end
-    end
 
   private
 

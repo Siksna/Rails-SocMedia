@@ -84,9 +84,14 @@
 
 <% if current_user %>
   <% bookmarked = current_user.bookmarks.exists?(bookmarkable: reply) %>
-  <button
-    class="btn btn-sm <%= bookmarked ? '' : 'btn-outline-secondary' %>" onclick="toggleBookmark(<%= reply.id %>, this, 'reply', <%= bookmarked %>)">
-    <i class="fa-<%= bookmarked ? 'solid' : 'regular' %> fa-bookmark"></i>
+  <button class="btn btn-sm bookmark-button"
+          onclick="event.stopPropagation(); toggleBookmark(<%= reply.id %>, this, 'reply')"
+          data-bookmarked="<%= bookmarked %>">
+    <% if bookmarked %>
+      <i class="fa-solid fa-bookmark text-warning"></i>
+    <% else %>
+      <i class="fa-regular fa-bookmark text-warning"></i>
+    <% end %>
   </button>
 <% end %>
 

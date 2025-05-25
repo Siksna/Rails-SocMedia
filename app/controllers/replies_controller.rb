@@ -185,7 +185,7 @@ end
         )
   
         NotificationChannel.broadcast_to(
-          @message.user,
+          @reply.user,
           notification_id: notification.id,
           message_text: notification.message_text,
           sender_id: current_user.id,
