@@ -7,7 +7,9 @@ export default class extends Controller {
     conversationId: String,
     direction: { type: String, default: "up" },
     url: String,
-    mode: String
+    mode: String,
+    lastMessageScore: Number,
+    lastMessageId: String  
   }
 
 
@@ -101,48 +103,55 @@ export default class extends Controller {
   }
 
   loadMoreDown() {
-    console.log("Loading");
+    console.log("Loading more down");
     const trigger = document.getElementById("load-more-trigger");
     if (!trigger || !this.scrollContainer || this.loading) {
-      console.log("Scroll container missing");
+      console.log("Scroll container missing or loading is true");
       return;
     }
 
     this.loading = true;
     this.observer.unobserve(trigger);
 
-    const messageId = trigger.dataset.messageId;
-    const afterId = trigger.dataset.afterId;
+   
+    const lastId = trigger.dataset.messageId;
+    const lastScore = trigger.dataset.messageScore;
 
-function rebindReplyEvents(container) {
-  container.querySelectorAll('.clickable-reply').forEach(replyElement => {
-    bindClickableReplyEvent(replyElement);
-  });
-}
+    const afterIdForReplies = trigger.dataset.afterId;
+
+    function rebindReplyEvents(container) {
+      container.querySelectorAll('.clickable-reply').forEach(replyElement => {
+        bindClickableReplyEvent(replyElement);
+      });
+    }
 
     let url;
 
     switch (this.modeValue) {
       case "admin":
         const currentParams = new URLSearchParams(window.location.search);
-        currentParams.set("after", messageId); 
+        currentParams.set("after", lastId);
         url = `/admin/history/load_more_history?${currentParams.toString()}`;
         break;
       case "personas":
         const personasParams = new URLSearchParams(window.location.search);
-        personasParams.set("after", messageId);
+        personasParams.set("after", lastId);
         url = `/admin/personas/load_more_personas?${personasParams.toString()}`;
         break;
       case "replies":
-        url = `/messages/${afterId}/replies/load_more?after=${messageId}`;
+        url = `/messages/${afterIdForReplies}/replies/load_more?after=${lastId}`;
         break;
       case "messages":
         const feed = new URLSearchParams(window.location.search).get("feed") || "all";
-        url = `/home/load_more?after=${messageId}&feed=${feed}`;
+        url = `/home/load_more?after=${lastScore},${lastId}&feed=${feed}`;
         break;
       case "friends":
-        url = `chats/load_more_conversations?after=${messageId}`;
+        url = `chats/load_more_conversations?after=${lastId}`;
         break;
+      default:
+        console.error("Unknown mode:", this.modeValue);
+        this.loading = false;
+        return;
     }
 
     fetch(url, {
@@ -150,32 +159,44 @@ function rebindReplyEvents(container) {
     })
       .then(response => response.text())
       .then(html => {
-        trigger.remove();
+        trigger.remove(); 
+
         this.messagesTarget.insertAdjacentHTML("beforeend", html);
         rebindReplyEvents(this.messagesTarget);
 
+        let lastLoadedMessageElement; 
 
-        let lastMessage;
-      if (this.modeValue === "replies") {
-        const parentReplies = Array.from(this.messagesTarget.querySelectorAll("[data-message-id]")).filter(el => !el.dataset.parentId || el.dataset.parentId === "");
-        lastMessage = parentReplies[parentReplies.length - 1];
-      } else {
-        const allMessages = this.messagesTarget.querySelectorAll("[data-message-id]");
-        lastMessage = allMessages[allMessages.length - 1];
-      }
+        if (this.modeValue === "replies") {
+          const parentReplies = Array.from(this.messagesTarget.querySelectorAll("[data-message-id]")).filter(el => !el.dataset.parentId || el.dataset.parentId === "");
+          lastLoadedMessageElement = parentReplies[parentReplies.length - 1];
+        } else {
+          const allMessages = this.messagesTarget.querySelectorAll("[data-message-id]");
+          lastLoadedMessageElement = allMessages[allMessages.length - 1];
+        }
 
-      if (!lastMessage || lastMessage.dataset.messageId === messageId) {
+        
+      if (!lastLoadedMessageElement) {
         console.log("No new messages loaded");
         this.loading = false;
         return;
       }
 
-    const newMessageId = lastMessage.dataset.messageId;
+        if (lastLoadedMessageElement &&
+            this.modeValue === "messages" &&
+            lastLoadedMessageElement.dataset.messageId === lastId) {
+            console.log("Last message the same");
+            this.loading = false;
+            return;
+        }
 
+
+        console.log("Next Trigger Data - ID:", lastLoadedMessageElement.dataset.messageId, "Score:", lastLoadedMessageElement.dataset.messageScore);
         const newTrigger = document.createElement("div");
         newTrigger.id = "load-more-trigger";
-        newTrigger.dataset.messageId = newMessageId;
-        newTrigger.dataset.afterId = trigger.dataset.afterId;
+        newTrigger.dataset.messageId = lastLoadedMessageElement.dataset.messageId;
+        newTrigger.dataset.messageScore = lastLoadedMessageElement.dataset.messageScore;
+        newTrigger.dataset.afterId = afterIdForReplies; 
+
         this.messagesTarget.appendChild(newTrigger);
         this.observer.observe(newTrigger);
 

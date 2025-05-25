@@ -16,14 +16,17 @@
 
 
 <div id="post-container" data-controller="pagination" data-pagination-direction-value="down" data-pagination-mode-value="messages" data-pagination-target="messages">
-  <% if @messages.visible.present? %>
-    <%= render partial: "home/message", collection: @messages.visible %>
+  <% if @messages.present? %>
+    <%= render partial: "home/message", collection: @messages %>
 
-    <% if @messages.visible.any? %>
-      <div id="load-more-trigger"  data-message-id="<%= @messages.visible.last.id %>"></div>
+     <% if @messages.any? %>
+      <div id="load-more-trigger"
+           data-message-id="<%= @messages.last.id %>"
+           <% if @messages.last.relevance_score.present? %>
+             data-message-score="<%= (@messages.last.relevance_score * 1_000_000).round %>"
+           <% end %>
+      ></div>
     <% end %>
-  <% else %>
-    <p>Nav ziņas.</p>
   <% end %>
 </div>
 

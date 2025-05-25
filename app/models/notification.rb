@@ -14,7 +14,7 @@ class Notification < ApplicationRecord
     if notifiable_type == 'Message'
       Rails.application.routes.url_helpers.message_path(notifiable_id)
     elsif notifiable_type == 'Reply'
-      if (message = notifiable.message)
+       if notifiable.present? && (message = notifiable.message).present?
         Rails.application.routes.url_helpers.message_path(message.id, anchor: "reply-#{notifiable_id}")
       else
         '#'

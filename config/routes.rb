@@ -57,6 +57,8 @@ get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'lo
     member do
       post 'follow', to: 'relationships#create', as: 'follow'
       delete 'unfollow', to: 'relationships#destroy', as: 'unfollow'
+
+      
     end
   
     get 'followers', on: :member

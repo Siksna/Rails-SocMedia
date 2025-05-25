@@ -31,7 +31,9 @@
 
     </head>
   <body>
-  <%= render 'home/header' %>
+  <% if user_signed_in? %>
+      <%= render 'home/header' %>
+    <% end %>
 
   <div class="content">
     <div class="container">

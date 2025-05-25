@@ -1,4 +1,4 @@
-<div class="post" id="post-<%= message.id %>" data-message-id="<%= message.id %>" onclick="window.location.href='/messages/<%= message.id %>';">
+<div class="post" id="post-<%= message.id %>" data-message-id="<%= message.id %>" onclick="window.location.href='/messages/<%= message.id %>';"  <% if message.relevance_score.present? %> data-message-score="<%= (message.relevance_score * 1_000_000).round %>" <% end %>>
   <div class="user-info d-flex align-items-center">
     <% if message.user %>
       <a href="<%= profile_path(message.user) %>" class="d-flex align-items-center">

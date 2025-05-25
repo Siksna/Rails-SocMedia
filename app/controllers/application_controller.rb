@@ -1,6 +1,17 @@
 class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :authenticate_user!, unless: :devise_controller?
+ 
   before_action :restrict_deleted_user_access
+
+
+RELEVANCE_WEIGHTS = {
+    likes: 1.0,
+    replies: 2.0,
+    decay_updated_at: 0.05,
+    decay_created_at: 0.005
+  }.freeze
+
 
   protected
 
@@ -11,15 +22,12 @@ class ApplicationController < ActionController::Base
 
   private
 
-
   def restrict_deleted_user_access
-    return unless user_signed_in? && current_user.deleted?
+   return unless user_signed_in? && current_user.deleted?
 
-    if request.path != root_path && request.path != destroy_user_session_path
+       if request.path != root_path && request.path != destroy_user_session_path
       redirect_to root_path
       flash[:alert] = "Jūsu konts tika bloķēts. Lūdzu ziņot mums."
-    
     end
-  end
-
+      end
 end

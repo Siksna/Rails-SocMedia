@@ -1,8 +1,10 @@
 class Message < ApplicationRecord
+    attr_accessor :relevance_score
+
     has_many :replies, dependent: :destroy
     has_one_attached :file
     has_many :likes, as: :likeable
-    has_many :bookmarks, dependent: :destroy
+    has_many :bookmarks, as: :bookmarkable, dependent: :destroy
     has_many :bookmarked_by, through: :bookmarks, source: :user
     validates :content, presence: true, length: { maximum: 255 }
     scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
