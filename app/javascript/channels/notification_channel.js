@@ -10,9 +10,6 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
     console.error("Subscription to NotificationChannel was rejected.");
   },
 
-  disconnected() {
-    console.log("Disconnected from the NotificationChannel");
-  },
   
 
   received(data) {

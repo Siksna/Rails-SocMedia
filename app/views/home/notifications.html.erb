@@ -1,126 +1,18 @@
 <h1>Your Notifications</h1>
 
-<% if @notifications.any? %>
-  <ul class="list-group" id="notifications-list">
-    <% @notifications.each do |notification| %>
-      <% sender = notification.sender %>
-      <li class="list-group-item d-flex align-items-start <%= 'bg-light' unless notification.read %> notification-item hover-pointer" data-id="<%= notification.id %>" data-url="<%= notification.url %>" data-read="<%= notification.read %>">
-
-        <div class="ms-2 d-flex align-items-center">
-          <%= link_to profile_path(sender || current_user) do %>
-            <% if sender&.profile_picture&.attached? %>
-              <%= image_tag sender.profile_picture, class: 'chat-profile-picture me-2' %>
-            <% else %>
-              <div class="default-profile-picture me-2" style="background-color: <%= sender&.profile_color || '#ccc' %>; width:70px; height:70px; border-radius:50%;">
-                <%= image_tag 'default_profile.png', class: 'w-10 h-10 rounded-circle object-cover' %>
-              </div>
-            <% end %>
-          <% end %>
-
-          <div>
-            <div class="fw-bold">
-              <%= sender ? link_to(sender.username, profile_path(sender), class: 'text-decoration-none text-dark') : 'System' %>
-            </div>
-            <%= notification.message_text %><br>
-            <small><%= time_ago_in_words(notification.created_at) %> ago</small>
-          </div>
-        </div>
-
-        <% notifiable = notification.notifiable %>
-
-        <% if notifiable.is_a?(Reply) %>
-          <% reply = notifiable %>
-          <div class="border rounded p-2 m-auto w-100% bg-white" onclick="window.location='<%= message_path(reply.message, anchor: "reply-#{reply.id}") %>'">
-            <div class="child-reply">
-              <div class="activity-header d-flex align-items-center mb-2">
-                <%= link_to profile_path(reply.user) do %>
-                  <% if reply.user.profile_picture.attached? %>
-                    <%= image_tag reply.user.profile_picture, class: 'profile-pic-activity me-2' %>
-                  <% else %>
-                    <div class="default-profile-picture me-2" style="background-color: <%= reply.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
-                      <%= image_tag 'default_profile.png', class: 'profile-pic-activity' %>
-                    </div>
-                  <% end %>
-                <% end %>
-
-                <%= link_to reply.user.username, profile_path(reply.user), class: 'activity-username me-2 text-decoration-none text-dark fw-bold' %>
-
-                <% if reply.user == current_user %>
-                  <div class="nav-item dropdown ms-auto">
-                    <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="event.stopPropagation();"></a>
-                    <ul class="dropdown-menu">
-                      <li><%= link_to 'Edit', edit_message_reply_path(reply.message, reply), class: 'dropdown-item' %></li>
-                      <li><%= button_to 'Delete', message_reply_path(reply.message, reply), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item text-danger' %></li>
-                    </ul>
-                  </div>
-                <% end %>
-              </div>
-
-              <p><%= reply.content %></p>
-
-              <% if reply.file.attached? %>
-                <div class="attached-file mt-2">
-                  <% if reply.file.image? %>
-                    <%= image_tag reply.file, class: 'img-thumbnail', style: 'max-height: 50px;' %>
-                  <% elsif reply.file.video? %>
-                    <video class="attached-video" controls style="max-height: 50px;">
-                      <source src="<%= url_for(reply.file) %>" type="<%= reply.file.content_type %>">
-                    </video>
-                  <% end %>
-                </div>
-              <% end %>
-
-              <% if reply.parent.present? %>
-                <div class="bg-light rounded p-2 mt-3">
-                  <strong>In reply to:</strong>
-                  <p class="mb-0 text-muted"><%= truncate(reply.parent.content, length: 100) %></p>
-                </div>
-              <% elsif reply.message.present? %>
-                <div class="bg-light rounded p-2 mt-3">
-                  <strong>In reply to message:</strong>
-                  <p class="mb-0 text-muted"><%= truncate(reply.message.content, length: 100) %></p>
-                </div>
-              <% end %>
-            </div>
-          </div>
-
-        <% elsif notifiable.is_a?(Message) %>
-          <% message = notifiable %>
-          <div class="border rounded p-2 m-auto w-100% bg-white" onclick="window.location='<%= message_path(message) %>'">
-            <div class="child-reply">
-              <div class="activity-header d-flex align-items-center mb-2">
-                <%= link_to profile_path(message.user) do %>
-                  <% if message.user.profile_picture.attached? %>
-                    <%= image_tag message.user.profile_picture, class: 'profile-pic-activity me-2' %>
-                  <% else %>
-                    <div class="default-profile-picture me-2" style="background-color: <%= message.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
-                      <%= image_tag 'default_profile.png', class: 'profile-pic-activity' %>
-                    </div>
-                  <% end %>
-                <% end %>
-
-                <%= link_to message.user.username, profile_path(message.user), class: 'activity-username me-2 text-decoration-none text-dark fw-bold' %>
-              </div>
-
-              <p><%= message.content %></p>
-
-              <% if message.file.attached? %>
-                <div class="attached-file mt-2">
-                  <% if message.file.image? %>
-                    <%= image_tag message.file, class: 'img-thumbnail', style: 'max-height: 50px;' %>
-                  <% elsif message.file.video? %>
-                    <video class="attached-video" controls style="max-height: 50px;">
-                      <source src="<%= url_for(message.file) %>" type="<%= message.file.content_type %>">
-                    </video>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-      </li>
+<div data-controller="pagination" data-pagination-mode-value="notifications" data-pagination-direction-value="down">
+  <div data-pagination-target="messages">
+  
+    <% if @notifications.present? %>
+      <ul class="list-group" id="notifications-list">
+        <%= render partial: 'home/notification', collection: @notifications, as: :notification %>
+      </ul>
+      <div id="load-more-trigger"
+           data-message-id="<%= @notifications.last.id %>"
+           data-user-id="<%= current_user.id %>">
+      </div>
+    <% else %>
+      <p>You have no notifications.</p>
     <% end %>
-  </ul>
-<% else %>
-  <p>You have no notifications.</p>
-<% end %>
+  </div>
+</div>

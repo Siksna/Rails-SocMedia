@@ -181,8 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
       connected() {
         console.log("Connected to the ChatChannel");
       },
-      disconnected() {
-        console.log("Disconnected from the ChatChannel");
+      rejected() {
+        console.error("Subscription to ChatChannel was rejected.");
       },
       received(data) {
         console.log("Received data from ChatChannel:", data);

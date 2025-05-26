@@ -18,30 +18,51 @@ class HomeController < ApplicationController
     end
 
     @messages = apply_relevance_cte_ordering(base_scope, 10, params[:after])
-
     if params[:after].present? && @messages.any?
       @messages.shift
     end
-
     @messages.each do |message|
     end
-
     render partial: "home/message", collection: @messages, formats: [:html]
   end
 
 
 
    def notifications
-    @notifications = current_user.notifications.includes(:sender, :message, reply: [:message, file_attachment: :blob]).where.not(notification_type: 'chats').order(created_at: :desc)
+    @notifications = current_user.notifications.includes(:sender, :message, reply: [:message, file_attachment: :blob]).where.not(notification_type: 'chats').order(created_at: :desc, id: :desc).limit(10)
   end
+
+  def load_more_notifications
+    last_notification_id = params[:after]
+    notifications_query = current_user.notifications.includes(:sender, :message, reply: [:message, file_attachment: :blob]).where.not(notification_type: 'chats').order(created_at: :desc, id: :desc)
+
+    if last_notification_id.present?
+      last_notification = Notification.find_by(id: last_notification_id)
+     if last_notification
+  notifications_query = notifications_query.where(
+    "(notifications.created_at < ?) OR (notifications.created_at = ? AND notifications.id < ?)",
+    last_notification.created_at, last_notification.created_at, last_notification.id
+  )
+
+      else
+      
+        @notifications = []
+        render partial: 'home/notification', collection: @notifications, as: :notification, layout: false
+        return
+      end
+    end
+
+    @notifications = notifications_query.limit(10)
+
+    render partial: 'home/notification', collection: @notifications, as: :notification, layout: false
+  end
+
 
   def search_users
     if params[:query].present?
       query = params[:query].downcase
       @users_start_with = User.where("LOWER(username) LIKE ?", "#{query}%").limit(10)
-      @users_rest = User.where("LOWER(username) LIKE ?", "%#{query}%")
-                         .where.not("LOWER(username) LIKE ?", "#{query}%")
-                         .limit(10)
+      @users_rest = User.where("LOWER(username) LIKE ?", "%#{query}%").where.not("LOWER(username) LIKE ?", "#{query}%").limit(10)
       
       @users = @users_start_with + @users_rest
     else
@@ -73,11 +94,7 @@ class HomeController < ApplicationController
     cte_name = 'scored_messages_cte'
 
    
-    cte_base_query = scope
-                       .select("messages.*, (#{relevance_score_sql_expression}) AS relevance_score")
-                       .left_joins(:likes, :replies)
-                       .group('messages.id')
-                       .order(Arel.sql("relevance_score DESC, messages.id DESC"))
+    cte_base_query = scope.select("messages.*, (#{relevance_score_sql_expression}) AS relevance_score").left_joins(:likes, :replies).group('messages.id').order(Arel.sql("relevance_score DESC, messages.id DESC"))
 
     outer_select_sql = "SELECT * FROM #{cte_name}"
     where_clause = ""

@@ -58,7 +58,7 @@ get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'lo
       post 'follow', to: 'relationships#create', as: 'follow'
       delete 'unfollow', to: 'relationships#destroy', as: 'unfollow'
 
-      
+      get :load_more_activities
     end
   
     get 'followers', on: :member
@@ -91,9 +91,9 @@ get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'lo
   root "home#index"
   get 'home/about'
   get 'admin/personas'
-  get 'home/notifications', to: 'home#notifications'
-
-
+  get '/home/notifications', to: 'home#notifications', as: :notifications_home
+  get '/load_more_notifications', to: 'home#load_more_notifications', as: :load_more_notifications
+ 
   get "up" => "rails/health#show", as: :rails_health_check
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

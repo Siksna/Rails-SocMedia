@@ -1174,10 +1174,6 @@ function toggleFollow(userId, button) {
 
 window.toggleFollow = toggleFollow;
 
-// pagination
-// saved posts
-// message algoritms
-// bookmarks kad nospiez nevar unbookmarkot main page un reply, un ar ajax kipa strada bet tiek redirectots uz message lapu
 
 // EXTRA OBLIGATI
 
@@ -1185,7 +1181,8 @@ window.toggleFollow = toggleFollow;
 
 // OBLIGATI
 
-// algoritms prieks messagiem
+// Delete confirmation
+// Kad registrejas username un gmail nevar but parak gari
 // gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
 // janonem aizmirsi paroli funkciju
 // admin history vajag uztaisit lai var sortot pec target
@@ -1207,7 +1204,6 @@ window.toggleFollow = toggleFollow;
 
 // izmantot SLUGS hash lai neraditu url ids
 // Search bars kas atrod ziņas kuriem ir saistiti vardi, piemeram lietotajvards vai content vards un parada tas zinas uz ekran
-// save posts
 // display images var pievienot vairakus images un nospiest x uz jebkuru image
 // var pieslegties ar google kontu
 // Var čatot ar jebkuru personu
