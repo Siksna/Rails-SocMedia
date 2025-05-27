@@ -3,4 +3,5 @@
   //= link default_profile.png
 //= link controllers/index.js
 //= link controllers/pagination_controller.js
-  
+  //= link Logo-clear.png
+  //= link Logo.png

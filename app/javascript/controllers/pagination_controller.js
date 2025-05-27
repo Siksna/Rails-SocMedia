@@ -47,60 +47,7 @@ console.log("Pagination controller connected");
     
   }
 
-  loadMoreUp() {
-    console.log("Loading");
-    const trigger = document.getElementById("load-more-trigger");
-    if (!trigger || !this.scrollContainer || this.loading) {
-      console.log("Scroll container missing");
-      return;
-    }
-
-    this.loading = true;
-    this.observer.unobserve(trigger);
-    const messageId = trigger.dataset.messageId;
-    const previousScrollHeight = this.scrollContainer.scrollHeight;
-
-
-    fetch(`/chats/${this.conversationIdValue}/load_more?before=${messageId}`, {
-      headers: { "X-Requested-With": "XMLHttpRequest" }
-    })
-      .then(response => response.text())
-      .then(html => {
-        trigger.remove();
-        this.messagesTarget.insertAdjacentHTML("afterbegin", html);
-
-    
-        requestAnimationFrame(() => {
-
-           this.messagesTarget.querySelectorAll(".date-divider").forEach(divider => divider.remove());
-        const allMessages = Array.from(this.messagesTarget.querySelectorAll(".chat-message"));
-        insertDateLinesBetweenMessages(allMessages);
-
-          const newScrollHeight = this.scrollContainer.scrollHeight;
-          const scrollDiff = newScrollHeight - previousScrollHeight;
-          if (this.scrollContainer.scrollTop <= 0) {
-            this.scrollContainer.scrollTop += scrollDiff;
-          }
-
-          const newTrigger = document.getElementById("load-more-trigger");
-          if (newTrigger) {
-            this.observer.observe(newTrigger);
-          } else {
-            console.warn("No new trigger found");
-          }
-          formatMessageTimestamps();
-
-          this.loading = false;
-        });
-      })
-      .catch(err => {
-        console.error("Pagination load error", err);
-        this.loading = false;
-      });
-  }
-
   loadMoreDown() {
-  console.log("Loading more down");
 
   const trigger = document.getElementById("load-more-trigger");
   if (!trigger) {
@@ -108,9 +55,6 @@ console.log("Pagination controller connected");
   }
   if (!this.scrollContainer) {
     console.log("Scroll container is missing");
-  }
-  if (this.loading) {
-    console.log("Already loading");
   }
 
   if (!trigger || !this.scrollContainer || this.loading) {
@@ -162,8 +106,11 @@ console.log("Pagination controller connected");
     case "profile_liked_activities":
       url = `/profiles/${userId}/load_more_activities?liked=true&last_activity_id=${lastId}`;
       break;
-      case 'notifications':
+    case 'notifications':
       url = `/load_more_notifications?after=${lastId}`;
+      break;
+    case 'bookmarks':
+      url = `/bookmarks/load_more?after=${lastId}`;
       break;
     default:
       console.error("❌ Unknown mode:", this.modeValue);
@@ -171,7 +118,6 @@ console.log("Pagination controller connected");
       return;
   }
 
-  console.log("🌐 Fetching from URL:", url);
 
   fetch(url, {
     headers: { "X-Requested-With": "XMLHttpRequest" }
@@ -193,6 +139,9 @@ console.log("Pagination controller connected");
       if (this.modeValue === "replies") {
         const parentReplies = Array.from(this.messagesTarget.querySelectorAll("[data-message-id]")).filter(el => !el.dataset.parentId || el.dataset.parentId === "");
         lastLoadedMessageElement = parentReplies[parentReplies.length - 1];
+      } else if (this.modeValue === "bookmarks"){
+      const allBookmarks = this.messagesTarget.querySelectorAll("[data-bookmark-id]");
+        lastLoadedMessageElement = allBookmarks[allBookmarks.length - 1];
       } else {
         const allMessages = this.messagesTarget.querySelectorAll("[data-message-id]");
         lastLoadedMessageElement = allMessages[allMessages.length - 1];
@@ -204,18 +153,17 @@ console.log("Pagination controller connected");
         return;
       }
 
-      if (lastLoadedMessageElement.dataset.messageId === lastId) {
-        console.log("Last message ID is the same as previous");
+
+      if (lastLoadedMessageElement.dataset.messageId === lastId || lastLoadedMessageElement.dataset.bookmarkId === lastId) {
+        console.log("🔁 Last message ID is the same as previous – nothing new loaded.");
         this.loading = false;
         return;
       }
 
-      console.log("🆕 New message ID:", lastLoadedMessageElement.dataset.messageId);
-
       const newTrigger = document.createElement("div");
       newTrigger.id = "load-more-trigger";
       newTrigger.dataset.messageId = lastLoadedMessageElement.dataset.messageId;
-      console.log("New trigger id:", newTrigger.dataset.messageId);
+
       if (this.modeValue === "messages") {
         newTrigger.dataset.messageScore = lastLoadedMessageElement.dataset.messageScore;
       } else if (this.modeValue === "replies") {
@@ -224,11 +172,15 @@ console.log("Pagination controller connected");
         newTrigger.dataset.activityType = lastLoadedMessageElement.dataset.activityType;
         newTrigger.dataset.userId = userId;
         newTrigger.dataset.likedMode = trigger.dataset.likedMode;
+      } else if (this.modeValue === "bookmarks") {
+      newTrigger.dataset.messageId = lastLoadedMessageElement.dataset.bookmarkId;
       }
 
       this.messagesTarget.appendChild(newTrigger);
       this.observer.observe(newTrigger);
 
+
+      
       this.loading = false;
     })
     .catch(err => {
@@ -236,5 +188,6 @@ console.log("Pagination controller connected");
       this.loading = false;
     });
 }
+
 
 }

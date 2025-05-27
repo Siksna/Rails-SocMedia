@@ -32,9 +32,7 @@ end
           last_like_record = @user.likes.find_by(likeable: last_liked_item)
 
           if last_like_record
-            liked_activities_query = liked_activities_query
-                                     .where("likes.created_at < ?", last_like_record.created_at)
-                                     .or(liked_activities_query.where("likes.created_at = ? AND likes.id < ?", last_like_record.created_at, last_like_record.id))
+            liked_activities_query = liked_activities_query.where("likes.created_at < ?", last_like_record.created_at).or(liked_activities_query.where("likes.created_at = ? AND likes.id < ?", last_like_record.created_at, last_like_record.id))
           end
         end
       end
@@ -57,7 +55,7 @@ end
 
       messages = messages_query.limit(10)
       replies = replies_query.limit(10)
-      @activities = (messages + replies).sort_by(&:created_at).reverse.take(10) # Combine and take top N
+      @activities = (messages + replies).sort_by(&:created_at).reverse.take(10)
     end
 
     render partial: 'activity', collection: @activities, as: :activity, layout: false

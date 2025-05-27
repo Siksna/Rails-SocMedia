@@ -17,7 +17,9 @@
   <div class="container-fluid" >
 
   <div class="d-flex">
-  <%= link_to 'Main', root_path, class: "navbar-brand", data: { turbo: 'false' } %>
+<%= link_to root_path, class: "navbar-brand", data: { turbo: 'false' } do %>
+  <%= image_tag 'Logo-clear.png', alt: 'Main Logo', height: '40' %>
+<% end %>
 
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
@@ -39,13 +41,12 @@
 </div>
 
 <% if user_signed_in? && request.path == root_path %>
-      <ul class="m-0 p-0">
-<div class="d-flex justify-content-around">
-  <%= link_to "All", root_path(feed: "all"), class: "btn btn-outline-light" %>
-  <%= link_to "Following", root_path(feed: "following"), class: "btn btn-outline-light" %>
-</div>
-</ul>
+  <div class="feed-toggle-wrapper">
+    <%= link_to "All", root_path(feed: "all"), class: "feed-toggle-btn #{params[:feed] != 'following' ? 'active' : ''}" %>
+    <%= link_to "Following", root_path(feed: "following"), class: "feed-toggle-btn #{params[:feed] == 'following' ? 'active' : ''}" %>
+  </div>
 <% end %>
+
 
 <div class="d-flex">
 
@@ -136,7 +137,7 @@
 
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
     <li class="nav-item">
-      <%= link_to bookmarked_messages_path, class: "nav-link d-flex align-items-center" do %>
+      <%= link_to bookmarks_path, class: "nav-link d-flex align-items-center" do %>
       <i class="fa-solid fa-bookmark me-2"></i> Bookmarks
     <% end %>
     </li>

@@ -1,22 +1,17 @@
 <h2>Your Bookmarks</h2>
 
-<ul>
-  <% @bookmarked_items.each do |bookmark| %>
-    <% bookmarkable = bookmark.bookmarkable %>
-
-    <% if bookmarkable.is_a?(Message) %>
-      <%= render partial: 'home/message', locals: { message: bookmarkable } %>
-    <% elsif bookmarkable.is_a?(Reply) %>
-    <div class="bookmark-reply card my-3 shadow-sm" style="max-width:50rem;">
-  <div class="card-body">
-    <div class="d-flex align-items-center mb-2">
-      <i class="fa-solid fa-reply me-2 text-muted"></i>
-      <strong>Reply</strong>
-    </div>
-    <%= render partial: 'home/reply', locals: { reply: bookmarkable } %>
+<div data-controller="pagination" 
+     data-pagination-mode-value="bookmarks" 
+     data-pagination-direction-value="down">
+  <div data-pagination-target="messages">
+ 
+        <%= render partial: 'home/bookmark', collection: @bookmarked_items, as: :bookmark %>
+       <% if @bookmarked_items.any? %>
+  <div id="load-more-trigger"
+       data-message-id="<%= @bookmarked_items.last.id %>"
+       data-user-id="<%= current_user.id %>">
   </div>
-</div>
+<% end %>
 
-    <% end %>
-  <% end %>
-</ul>
+</div>
+</div>

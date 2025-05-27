@@ -154,7 +154,7 @@ function postComment() {
   const messageContent = inputField.value;
   const file = fileInput.files[0];
 
-  if (messageContent.trim() === "") {
+  if (messageContent.trim() === "" && !file) {
     alert("Lūdzu ievadiet ziņu.");
     return;
   }
@@ -1181,6 +1181,7 @@ window.toggleFollow = toggleFollow;
 
 // OBLIGATI
 
+// limit username, and email length
 // Delete confirmation
 // Kad registrejas username un gmail nevar but parak gari
 // gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
@@ -1199,6 +1200,7 @@ window.toggleFollow = toggleFollow;
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
 // default profile pic ir offcentered
 // profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
+// kad raksta tekstu input fielda, vinam vajadzetu palikt lielakam ja ir daudz teksts
 
 // EXTRA
 

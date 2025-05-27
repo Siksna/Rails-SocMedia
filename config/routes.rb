@@ -37,21 +37,25 @@ get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'lo
   
 
 
-  resources :messages do
-    resources :replies, only: [:create, :edit, :update, :destroy] do
-      post 'toggle_like', on: :member, controller: 'replies'
-      collection do
+ resources :messages do
+  resources :replies, only: [:create, :edit, :update, :destroy] do
+    post 'toggle_like', on: :member, controller: 'replies'
+    collection do
       get 'load_more'
     end
-    end
-     resource :bookmark, only: [:create, :destroy]
-    post 'toggle_like', on: :member
   end
+  resource :bookmark, only: [:create, :destroy]
+  post 'toggle_like', on: :member
+end
 
-  get '/bookmarks', to: 'bookmarks#index', as: 'bookmarked_messages'
-  post   '/replies/:id/bookmark',   to: 'bookmarks#create',  as: :reply_bookmark
-  delete '/replies/:id/bookmark',   to: 'bookmarks#destroy', as: :delete_reply_bookmark
+resources :bookmarks, only: [:index] do
+  collection do
+    get 'load_more'
+  end
+end
 
+post   '/replies/:id/bookmark',   to: 'bookmarks#create',  as: :reply_bookmark
+delete '/replies/:id/bookmark',   to: 'bookmarks#destroy', as: :delete_reply_bookmark
   
   resources :profiles, only: [:show] do
     member do

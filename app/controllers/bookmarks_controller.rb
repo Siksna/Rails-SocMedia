@@ -1,11 +1,34 @@
 class BookmarksController < ApplicationController
   before_action :authenticate_user!
 
-def index
-  @bookmarked_items = current_user.bookmarks.includes(:bookmarkable).order(created_at: :desc)
+ def index
+    @bookmarked_items = current_user.bookmarks
+      .includes(:bookmarkable)
+      .order(created_at: :desc)
+      .limit(10)
 
-  render 'home/bookmarks'
+     respond_to do |format|
+      format.html { render 'home/bookmarks' }
+    end
+  end
+
+def load_more
+  raw_bookmarks = current_user.bookmarks
+    .includes(bookmarkable: [:user, :likes, :replies, { file_attachment: :blob }])
+    .order(created_at: :desc)
+
+  if params[:after].present?
+    raw_bookmarks = raw_bookmarks.where("bookmarks.id < ?", params[:after])
+  end
+
+  valid_bookmarks = raw_bookmarks.select { |b| b.bookmarkable.present? }
+
+  @bookmarks = valid_bookmarks.first(10)
+
+  render partial: 'home/bookmark', collection: @bookmarks, as: :bookmark, layout: false
 end
+
+
 
 def create
   bookmarkable = find_bookmarkable
