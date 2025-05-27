@@ -190,6 +190,25 @@ window.postComment = postComment;
 
   
 
+
+
+  const toggleButton = document.getElementById('toggleInputField');
+  const inputWrapper = document.getElementById('inputWrapper');
+
+  toggleButton.addEventListener('click', function (event) {
+    event.stopPropagation();
+    inputWrapper.classList.add('show');
+  });
+
+  document.addEventListener('click', function (event) {
+    const isClickInside = inputWrapper.contains(event.target) || toggleButton.contains(event.target);
+    if (!isClickInside) {
+      inputWrapper.classList.remove('show');
+    }
+  });
+
+
+
 let currentParentReplyId = null;
 
 function postReply(event) {
@@ -386,76 +405,64 @@ document.addEventListener("DOMContentLoaded", function () {
   
   /* profila bildes pirmskats */
   document.addEventListener('DOMContentLoaded', function () {
-    let cropper;
-    const imageInput = document.getElementById('profile_picture_input');
-    const previewImage = document.getElementById('preview-image');
-    const form = document.querySelector('form');
-  
-    if (previewImage.src && !previewImage.src.includes('default_profile.png')) {
-      cropper = new Cropper(previewImage, {
-        aspectRatio: 1,
-        viewMode: 1,
-        autoCropArea: 1,
-        minCropBoxWidth: 100,
-        minCropBoxHeight: 100,
-        cropBoxResizable: true,
-        movable: true,
-        rotatable: false,
-        scalable: true
-      });
-    }
-  
-    imageInput.addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const newImageSrc = e.target.result + '?' + new Date().getTime();
-  
-          previewImage.src = newImageSrc; 
-          previewImage.style.display = 'block';
-  
+  let cropper;
+  const imageInput = document.getElementById('profile_picture_input');
+  const modalImage = document.getElementById('modal-crop-image');
+  const previewImage = document.getElementById('preview-image');
+  const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+  const cropAndSaveBtn = document.getElementById('cropAndSaveBtn');
+  const form = document.querySelector('form');
+
+  imageInput.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        modalImage.src = e.target.result;
+        cropModal.show();
+
+        modalImage.onload = function() {
           if (cropper) {
-            cropper.destroy(); 
+            cropper.destroy();
           }
-  
-          cropper = new Cropper(previewImage, {
+          cropper = new Cropper(modalImage, {
             aspectRatio: 1,
             viewMode: 1,
-            autoCropArea: 1,
-            minCropBoxWidth: 100,
-            minCropBoxHeight: 100,
-            cropBoxResizable: true,
-            movable: true,
-            rotatable: false,
-            scalable: true
+            autoCropArea: 1
           });
         };
-        reader.readAsDataURL(file);
-      }
-    });
-  
-  
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      if (cropper) {
-        const croppedImageDataURL = cropper.getCroppedCanvas({
-          width: 200,
-          height: 200
-        }).toDataURL(); 
-  
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'user[profile_picture]';
-        hiddenInput.value = croppedImageDataURL;
-  
-        form.appendChild(hiddenInput);
-      }
-  
-      form.submit(); 
-    });
+      };
+      reader.readAsDataURL(file);
+    }
   });
-  
+
+  cropAndSaveBtn.addEventListener('click', function () {
+  if (cropper) {
+    const canvas = cropper.getCroppedCanvas({
+      width: 200,
+      height: 200
+    });
+
+    canvas.toBlob(function(blob) {
+      const file = new File([blob], "cropped.png", { type: "image/png" });
+
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      imageInput.files = dataTransfer.files;
+
+      previewImage.src = URL.createObjectURL(file);
+      cropModal.hide();
+    }, 'image/png');
+  }
+});
+
+
+
+  form.addEventListener('submit', function(e) {
+    
+  });
+});
+
   /* chats */
   let atBottomTimer = null;
 
@@ -1190,10 +1197,12 @@ window.toggleFollow = toggleFollow;
 // admini var noņemt lietotaja profila bildi
 // Biogrāfija priekš useriem profile lapā
 // suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
-// lietotaja profilā kad nospiez like neatnak notification
+// back poga, chatā, un kad aiziet back lapai nevajadzetu no jauna ladet
+// ja addo profila bildi un neievada paroli izmet erroru
 
 //VIZUALI OBLIGATI
 
+// kad hovero virs notification, tas skaits paiet uz leju
 // paslept/ paradit input field prieks postiem
 // tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots
 // Reply page problemas ar display image

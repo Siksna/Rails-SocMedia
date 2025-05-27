@@ -8,6 +8,8 @@
 </head>
 <body>
 
+
+
 <% if user_signed_in? && current_user.deleted? %>
   <div class="alert alert-warning">
    Your account has been blocked since <%= current_user.deleted_at.strftime("%Y-%m-%d %H:%M:%S") %>.
@@ -33,24 +35,24 @@
 
 
 
-<div class="bg-dark text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
+<div id="inputWrapper" class="MainInputField text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center slide-down">
   <div id="fileInfo" class="file-info"></div>
-
-  
   <div id="filePreview" class="file-preview"></div>
 
   <div class="input-container d-flex">
-
-    <input id="inputField" type="text" class="form form-control" placeholder="Enter your message here..." autocomplete="off", maxlength: 255>
+    <input id="inputField" type="text" class="form form-control" placeholder="Enter your message here..." autocomplete="off" maxlength="255">
 
     <label class="file-upload">
       <i class="fas fa-paperclip"></i>
       <input type="file" id="fileInput">
     </label>
 
-    <button id="postButton" onclick="postComment()" class="mainbtn"><i class="fas fa-paper-plane"></i></button>
+    <button id="postButton" onclick="postComment()" class="mainbtn">
+      <i class="fas fa-paper-plane"></i>
+    </button>
   </div>
 </div>
+
 
 <% end %>
 

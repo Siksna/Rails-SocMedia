@@ -47,6 +47,59 @@ console.log("Pagination controller connected");
     
   }
 
+
+    loadMoreUp() {
+    console.log("Loading");
+    const trigger = document.getElementById("load-more-trigger");
+    if (!trigger || !this.scrollContainer || this.loading) {
+      console.log("Scroll container missing");
+      return;
+    }
+
+    this.loading = true;
+    this.observer.unobserve(trigger);
+    const messageId = trigger.dataset.messageId;
+    const previousScrollHeight = this.scrollContainer.scrollHeight;
+
+
+    fetch(`/chats/${this.conversationIdValue}/load_more?before=${messageId}`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+      .then(response => response.text())
+      .then(html => {
+        trigger.remove();
+        this.messagesTarget.insertAdjacentHTML("afterbegin", html);
+
+    
+        requestAnimationFrame(() => {
+
+           this.messagesTarget.querySelectorAll(".date-divider").forEach(divider => divider.remove());
+        const allMessages = Array.from(this.messagesTarget.querySelectorAll(".chat-message"));
+        insertDateLinesBetweenMessages(allMessages);
+
+          const newScrollHeight = this.scrollContainer.scrollHeight;
+          const scrollDiff = newScrollHeight - previousScrollHeight;
+          if (this.scrollContainer.scrollTop <= 0) {
+            this.scrollContainer.scrollTop += scrollDiff;
+          }
+
+          const newTrigger = document.getElementById("load-more-trigger");
+          if (newTrigger) {
+            this.observer.observe(newTrigger);
+          } else {
+            console.warn("No new trigger found");
+          }
+          formatMessageTimestamps();
+
+          this.loading = false;
+        });
+      })
+      .catch(err => {
+        console.error("Pagination load error", err);
+        this.loading = false;
+      });
+  }
+
   loadMoreDown() {
 
   const trigger = document.getElementById("load-more-trigger");
