@@ -27,7 +27,7 @@ RELEVANCE_WEIGHTS = {
 
        if request.path != root_path && request.path != destroy_user_session_path
       redirect_to root_path
-      flash[:alert] = "Jūsu konts tika bloķēts. Lūdzu ziņot mums."
+      flash[:alert] = "Your account is blocked."
     end
       end
 end

@@ -161,7 +161,6 @@ function postComment() {
 
   const formData = new FormData();
   formData.append('message[content]', messageContent);
-
   if (file) {
     formData.append('message[file]', file);
   }
@@ -175,37 +174,68 @@ function postComment() {
   })
   .then(response => {
     if (response.ok) {
-      location.reload();
-    } else {
+      return response.text();
+    } else if (response.status === 401) {
       window.location.href = '/users/sign_in';
-      alert("Neizdevās ievietot ziņu.");
+    } else {
+      throw new Error("Coulf not create message.");
+    }
+  })
+  .then(html => {
+    if (html) {
+      const postContainer = document.getElementById('post-container');
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html.trim();
+      const newPost = tempDiv.firstElementChild;
+      postContainer.prepend(newPost);
+
+      inputField.value = '';
+      fileInput.value = '';
+      document.getElementById('fileInfo').innerHTML = '';
+      document.getElementById('filePreview').innerHTML = '';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   })
   .catch(error => {
-    console.error('Kļūda:', error);
+    console.error('Error:', error);
   });
 }
 
 window.postComment = postComment;
 
-  
+
+  document.addEventListener("turbo:frame-load", function(event) {
+  if (event.target.id === "feedContainer") {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+});
 
 
-
-  const toggleButton = document.getElementById('toggleInputField');
+document.addEventListener('DOMContentLoaded', function () {
+  const toggleButtons = document.querySelectorAll('#toggleInputField');
   const inputWrapper = document.getElementById('inputWrapper');
 
-  toggleButton.addEventListener('click', function (event) {
-    event.stopPropagation();
-    inputWrapper.classList.add('show');
+  toggleButtons.forEach((button) => {
+    button.addEventListener('click', function (event) {
+      event.stopPropagation();
+      if (inputWrapper) {
+        inputWrapper.classList.add('show');
+      }
+    });
   });
 
   document.addEventListener('click', function (event) {
-    const isClickInside = inputWrapper.contains(event.target) || toggleButton.contains(event.target);
-    if (!isClickInside) {
+    if (
+      inputWrapper &&
+      !inputWrapper.contains(event.target) &&
+      ![...toggleButtons].some(btn => btn.contains(event.target))
+    ) {
       inputWrapper.classList.remove('show');
     }
   });
+});
+
 
 
 
@@ -406,61 +436,65 @@ document.addEventListener("DOMContentLoaded", function () {
   /* profila bildes pirmskats */
   document.addEventListener('DOMContentLoaded', function () {
   let cropper;
-  const imageInput = document.getElementById('profile_picture_input');
-  const modalImage = document.getElementById('modal-crop-image');
-  const previewImage = document.getElementById('preview-image');
-  const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
-  const cropAndSaveBtn = document.getElementById('cropAndSaveBtn');
-  const form = document.querySelector('form');
+const imageInput = document.getElementById('profile_picture_input');
+const modalImage = document.getElementById('modal-crop-image');
+const cropModalEl = document.getElementById('cropModal');
+const cropModal = new bootstrap.Modal(cropModalEl);
+const cropAndSaveBtn = document.getElementById('cropAndSaveBtn');
 
-  imageInput.addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        modalImage.src = e.target.result;
-        cropModal.show();
+imageInput.addEventListener('change', function (event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      modalImage.src = e.target.result;
+      cropModal.show();
+    };
+    reader.readAsDataURL(file);
+  }
+});
 
-        modalImage.onload = function() {
-          if (cropper) {
-            cropper.destroy();
-          }
-          cropper = new Cropper(modalImage, {
-            aspectRatio: 1,
-            viewMode: 1,
-            autoCropArea: 1
-          });
-        };
-      };
-      reader.readAsDataURL(file);
-    }
+cropModalEl.addEventListener('shown.bs.modal', function () {
+  if (cropper) {
+    cropper.destroy();
+  }
+
+  cropper = new Cropper(modalImage, {
+    aspectRatio: 1,
+    viewMode: 1,
+    autoCropArea: 1,
+    dragMode: 'move',
   });
+});
 
-  cropAndSaveBtn.addEventListener('click', function () {
+cropModalEl.addEventListener('hidden.bs.modal', function () {
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+});
+
+cropAndSaveBtn.addEventListener('click', function () {
   if (cropper) {
     const canvas = cropper.getCroppedCanvas({
       width: 200,
-      height: 200
+      height: 200,
     });
 
-    canvas.toBlob(function(blob) {
-      const file = new File([blob], "cropped.png", { type: "image/png" });
+    canvas.toBlob(function (blob) {
+      const file = new File([blob], 'cropped.png', { type: 'image/png' });
 
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(file);
       imageInput.files = dataTransfer.files;
 
+      const previewImage = document.getElementById('preview-image');
       previewImage.src = URL.createObjectURL(file);
       cropModal.hide();
     }, 'image/png');
   }
 });
 
-
-
-  form.addEventListener('submit', function(e) {
-    
-  });
 });
 
   /* chats */
@@ -991,41 +1025,50 @@ function markSingleNotificationAsRead(notificationId, element) {
 
   /* Friend search bars */
 document.addEventListener("DOMContentLoaded", function () {
-  const toggleBtn = document.getElementById("toggle-search-button");
-  const slideContainer = document.querySelector(".search-slide-container");
-  const wrapper = document.querySelector(".search-slide-wrapper");
-  const searchInput = document.getElementById("user-search-input");
-  const form = document.getElementById("user-search-form");
-  const suggestionsDropdown = document.getElementById("suggestions-dropdown");
+  const toggleButtons = document.querySelectorAll("#toggle-search-button");
+  const slideContainers = document.querySelectorAll(".search-slide-container");
+  const wrappers = document.querySelectorAll(".search-slide-wrapper");
 
-  let isSearchActive = false;
+  toggleButtons.forEach((toggleBtn, index) => {
+    const slideContainer = slideContainers[index];
+    const wrapper = wrappers[index];
+    const searchInput = wrapper.querySelector("#user-search-input");
+    const suggestionsDropdown = wrapper.querySelector("#suggestions-dropdown");
 
-  toggleBtn.addEventListener("click", function () {
-    slideContainer.classList.add("slide-left");
-    isSearchActive = true;
+    let isSearchActive = false;
 
-    setTimeout(() => {
-      wrapper.style.overflow = "visible";
-      searchInput.focus();
-    }, 400);
-  });
+    toggleBtn.addEventListener("click", function () {
+      if (slideContainer) {
+        slideContainer.classList.add("slide-left");
+        isSearchActive = true;
 
-  document.addEventListener("click", function (event) {
-    if (
-      isSearchActive &&
-      !wrapper.contains(event.target) &&
-      !suggestionsDropdown.contains(event.target)
-    ) {
-      slideContainer.classList.remove("slide-left");
-      isSearchActive = false;
+        setTimeout(() => {
+          wrapper.style.overflow = "visible";
+          if (searchInput) searchInput.focus();
+        }, 400);
+      }
+    });
 
-      setTimeout(() => {
-  wrapper.style.overflow = "hidden";
-}, 400); 
+    document.addEventListener("click", function (event) {
+      if (
+        isSearchActive &&
+        wrapper &&
+        !wrapper.contains(event.target) &&
+        !(suggestionsDropdown && suggestionsDropdown.contains(event.target))
+      ) {
+        if (slideContainer) {
+          slideContainer.classList.remove("slide-left");
+        }
+        isSearchActive = false;
 
-    }
+        setTimeout(() => {
+          wrapper.style.overflow = "hidden";
+        }, 400);
+      }
+    });
   });
 });
+
 
 
 
@@ -1181,17 +1224,52 @@ function toggleFollow(userId, button) {
 
 window.toggleFollow = toggleFollow;
 
+/* color switcher */
+document.addEventListener("DOMContentLoaded", function () {
+  const toggle = document.getElementById("theme-toggle");
+  const body = document.body;
+
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "light") {
+    body.classList.add("light-mode");
+    toggle.checked = false;
+  } else if (savedTheme === "dark") {
+    body.classList.add("dark-mode");
+    toggle.checked = true;
+  }
+
+  toggle.addEventListener("change", function () {
+    if (toggle.checked) {
+      body.classList.remove("light-mode");
+      body.classList.add("dark-mode");
+      localStorage.setItem("theme", "dark");
+    } else {
+      body.classList.remove("dark-mode");
+      body.classList.add("light-mode");
+      localStorage.setItem("theme", "light");
+    }
+  });
+});
 
 // EXTRA OBLIGATI
 
 // Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
+
+// pagination jasalabo profila lapa main messagiem
+// Atskiriba kurā lapā headerī rādās lapas nosaukums
+// notifikacijas profile pic
+// notifikacijas count paiet uz leju kad hovero over jau reloaded notificationiem
+// register paga register nevar spamot
+// settingos var savot images un username bez paroles repeat
+// login paga limits uz characteriem
+// confirmationi "Are you srue?" prieks lietam
+// reply lapa image display nesmuks
 
 // OBLIGATI
 
 // limit username, and email length
 // Delete confirmation
 // Kad registrejas username un gmail nevar but parak gari
-// gavenaja lapa jautziaisa lai bez parlades var nosutit ziņu
 // janonem aizmirsi paroli funkciju
 // admin history vajag uztaisit lai var sortot pec target
 // admini var noņemt lietotaja profila bildi
@@ -1203,8 +1281,6 @@ window.toggleFollow = toggleFollow;
 //VIZUALI OBLIGATI
 
 // kad hovero virs notification, tas skaits paiet uz leju
-// paslept/ paradit input field prieks postiem
-// tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots
 // Reply page problemas ar display image
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
 // default profile pic ir offcentered
@@ -1213,6 +1289,7 @@ window.toggleFollow = toggleFollow;
 
 // EXTRA
 
+// kad veic kadu izmaiņu augšā parādas popups ka veiksmigi izveidots
 // izmantot SLUGS hash lai neraditu url ids
 // Search bars kas atrod ziņas kuriem ir saistiti vardi, piemeram lietotajvards vai content vards un parada tas zinas uz ekran
 // display images var pievienot vairakus images un nospiest x uz jebkuru image
@@ -1220,3 +1297,4 @@ window.toggleFollow = toggleFollow;
 // Var čatot ar jebkuru personu
 // file poga visas lapas divains borders kad mouse hovero over
 // PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā, notifikacijas saraksta un save posts ari
+// tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots

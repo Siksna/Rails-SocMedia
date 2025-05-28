@@ -1,99 +1,163 @@
-<h2>User editing</h2>
+<h2>Settings</h2>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, multipart: true }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, multipart: true, class: "profile-settings-form" }) do |f| %>
+<div>
+  <div class="field form-group" style="display: flex; align-items: center; justify-content: space-around;">
+    <%= f.file_field :profile_picture, accept: "image/*", id: "profile_picture_input", style: "display: none;" %>
+    <div id="preview-container"
+         class="mt-2 position-relative"
+         style="width: 200px; height: 200px; overflow: hidden; border-radius: 50%; border: 2px solid #ddd; cursor: pointer;"
+         onmouseenter="document.getElementById('preview-buttons').style.display = 'flex';"
+         onmouseleave="document.getElementById('preview-buttons').style.display = 'none';">
 
-  
+      <img id="preview-image"
+           src="<%= resource.profile_picture.present? ? url_for(resource.profile_picture) : asset_path('default_profile.png') %>"
+           alt="Profile picture"
+           style="width: 100%; height: 100%; object-fit: cover;" />
 
-  <div class="field form-group">
-    <%= f.label :profile_picture, "Profile picture" %><br />
-    <%= f.file_field :profile_picture, accept: "image/*", id: "profile_picture_input" %>
-   <div id="preview-container" class="mt-2" style="width: 200px; height: 200px; overflow: hidden; border-radius: 50%; border: 2px solid #ddd; position: relative;">
-  <img id="preview-image" 
-       src="<%= resource.profile_picture.present? ? url_for(resource.profile_picture) : asset_path('default_profile.png') %>"
-       alt="Profile picture"
-       style="width: 100%; height: 100%; object-fit: cover;" />
+      <div id="preview-buttons"
+           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; flex-direction: column; border-radius: 50%;">
+
+        <button type="button" onclick="document.getElementById('profile_picture_input').click();"
+                class="btn btn-sm btn-light mb-2 rounded-pill px-3">
+          Change
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <label class="theme-switch">
+    <p style="text-align:center;">Change Theme</p>
+  <input type="checkbox" id="theme-toggle">
+  <span class="slider"></span>
+</label>
+
 </div>
 
+    <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cropModalLabel">Crop Your Profile Picture</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+         <div class="modal-body text-center p-3">
+  <div style="width: 100%; max-height: 400px;">
+    <img id="modal-crop-image"
+         style="display: block; max-width: 100%; max-height: 400px; margin: 0 auto;" />
+  </div>
+</div>
 
-<div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title" id="cropModalLabel">Crop Your Profile Picture</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body text-center">
-        <div style="max-width: 100%; max-height: 400px;">
-          <img id="modal-crop-image" style="max-width: 100%; max-height: 400px;" />
+          <div class="modal-footer">
+            <button type="button" id="cropAndSaveBtn" class="btn btn-primary">Crop & Save</button>
+          </div>
         </div>
       </div>
+    </div>
+    <canvas id="canvas" style="display: none;"></canvas>
+  </div>
 
-      <div class="modal-footer">
-        <button type="button" id="cropAndSaveBtn" class="btn btn-primary">Crop & Save</button>
+  <div class="field form-group">
+    <%= f.label :username %>
+    <%= f.text_field :username, value: resource.username, autocomplete: "username", class: "form-control", required:true%>
+  </div>
+
+  <div class="field form-group">
+    <%= f.label :email %>
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class:"form-control" %>
+  </div>
+
+  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+    <div>Currently awaiting approval for: <%= resource.unconfirmed_email %></div>
+  <% end %>
+
+  <div class="field form-group">
+    <%= f.label :password %>
+    <%= f.password_field :password, autocomplete: "new-password", class:"form-control", placeholder:"Leave empty if you dont want to change it" %>
+    <% if @minimum_password_length %>
+      <em><%= @minimum_password_length %> characters minimum</em>
+    <% end %>
+  </div>
+
+  <div class="field form-group">
+    <%= f.label :password_confirmation %>
+    <%= f.password_field :password_confirmation, autocomplete: "new-password",class:"form-control" %>
+  </div>
+
+
+ <div class="modal fade" id="passwordConfirmModal" tabindex="-1" aria-labelledby="passwordConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="passwordConfirmModalLabel">Enter your password</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body">
+        <div id="password-error" class="alert alert-danger d-none"></div>
+        <div class="mb-3">
+  <%= f.label :current_password, "Current password", class: "form-label" %>
+  <%= f.password_field :current_password, id: "current-password", autocomplete: "current-password", class: "form-control", placeholder: "Enter your current password", required: true %>
+</div>
 
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="modal-cancel-btn" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+         <%= f.submit "Save changes", id: "real-save-btn", class: "btn btn-primary" %>
+      </div>
     </div>
   </div>
 </div>
 
-
-<canvas id="canvas" style="display: none;"></canvas>
-
-  </div>
-
-
-  <div class="field form-group">
-  <%= f.label :username %><br />
-  <%= f.text_field :username, value: resource.username, autocomplete: "username", class: "form-control", required:true%>
-</div>
-
-
-<div class="field form-group">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", class:"form-control" %>
-  </div>
-
-
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-  <div>Currently awaiting approval for: <%= resource.unconfirmed_email %></div>
-<% end %>
-
-<div class="field form-group">
-  <%= f.label :password %><br />
-  <%= f.password_field :password, autocomplete: "new-password", class:"form-control", placeholder:"(atstājiet tukšu, ja nevēlaties to mainīt)" %>
-  <% if @minimum_password_length %>
-    <em><%= @minimum_password_length %> character minimum</em>
-  <% end %>
-</div>
-
-<div class="field form-group">
-  <%= f.label :password_confirmation %><br />
-  <%= f.password_field :password_confirmation, autocomplete: "new-password",class:"form-control" %>
-</div>
-
-<div class="field form-group">
-  <%= f.label :current_password %><br />
-  <%= f.password_field :current_password, autocomplete: "current-password" , class:"form-control", placeholder:"(mums ir nepieciešama jūsu pašreizējā parole, lai apstiprinātu izmaiņas)"%>
-</div>
-
   <div class="actions">
-    <%= f.submit "Save", class:"btn btn-success border-0 rounded-pill shadow p-2 m-2" %>
-  
+
+  <button type="button" id="confirm-changes-btn" class="btn" data-bs-toggle="modal" data-bs-target="#passwordConfirmModal">
+  Save
+</button>
+
+
+    <%= link_to "Back", :back, class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
+
+  </div>
 <% end %>
 
-  <%= link_to "Back", :back, class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
-</div>
+
 <div class="card">
   <h5 class="card-header">Delete my account</h5>
   <div class="card-body">
     <h5 class="card-title">Dissatisfied?</h5>
-     <%= button_to "Delete my account", registration_path(resource_name), data: { confirm: "Pārliecināti?", turbo_confirm: "Vai tiešām parliecināti?" }, method: :delete, class:"btn btn-danger border-0 rounded-pill shadow p-2 m-2" %></div> 
+    <button type="button" class="btn btn-danger border-0 rounded-pill shadow p-2 m-2" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+      Delete my account
+    </button>
+
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <p>Are you sure you want to delete your account?<p style="color: orange;"> This action cannot be undone.</p></p>
+
+            <%= form_tag registration_path(resource_name), method: :delete, id: "delete_account_form" do %>
+              <div class="mb-3">
+                <label for="current_password_for_delete" class="form-label"><b>Password confirmation</b></label>
+                <input type="password" name="user[current_password]" id="current_password_for_delete" class="form-control" placeholder= "Please enter your current password to confirm" required>
+              </div>
+              <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <%= submit_tag "Yes, Delete my account", class: "btn btn-danger" %>
+              </div>
+            <% end %>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </div>
-
- 
 </div>
-
-

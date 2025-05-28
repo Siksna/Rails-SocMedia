@@ -20,13 +20,15 @@ class MessagesController < ApplicationController
   end
 
   def create
-    @message = current_user.messages.new(message_params)
-    if @message.save
-      render json: @message, status: :created
-    else
-      render json: @message.errors, status: :unprocessable_entity
-    end
+  @message = current_user.messages.build(message_params)
+
+  if @message.save
+    render partial: 'home/message', locals: { message: @message }
+  else
+    render json: { error: 'Could not create the message.' }, status: :unprocessable_entity
   end
+end
+
   
 
   def edit

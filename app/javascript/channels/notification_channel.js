@@ -1,5 +1,7 @@
 import consumer from "./consumer";
 
+const currentUserId = parseInt(document.querySelector('meta[name="current-user-id"]')?.content, 10);
+
 
 const NotificationChannel = consumer.subscriptions.create("NotificationChannel", {
   connected() {
@@ -13,6 +15,11 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
   
 
   received(data) {
+
+    if (data.sender_id === currentUserId) {
+  return;
+}
+
     console.log("New notification received:", data);
 
     
@@ -102,38 +109,67 @@ function addGeneralNotification(data) {
   if (noNotifMessage) noNotifMessage.remove();
 
   const li = document.createElement("li");
-  li.className = "dropdown-item";
+  li.className = "dropdown-item d-flex align-items-start gap-2";
 
   const dot = document.createElement("span");
-  dot.className = "blue-dot";
+  dot.className = "blue-dot mt-1";
+
+  const profileImg = document.createElement("img");
+  profileImg.src = data.sender_avatar_url || "/default-avatar.png"; 
+  profileImg.alt = "Avatar";
+  profileImg.className = "rounded-circle";
+  profileImg.style.width = "32px";
+  profileImg.style.height = "32px";
+  profileImg.style.objectFit = "cover";
 
   const usernameLink = document.createElement("a");
   usernameLink.href = `/profiles/${data.sender_id}`;
   usernameLink.textContent = data.sender_username;
   usernameLink.className = "username-link";
   usernameLink.style.fontWeight = "bold";
-  usernameLink.style.textDecoration = "underline";
+  usernameLink.style.textDecoration = "none";
   usernameLink.style.color = "#007bff";
 
   const messageLink = document.createElement("a");
   messageLink.href = data.url || "#";
-  messageLink.textContent = ` ${data.message_text} ${timeAgo(new Date(data.created_at * 1000))}`;
+  messageLink.textContent = ` ${data.message_text}`;
   messageLink.className = "notification-link";
   messageLink.style.textDecoration = "none";
   messageLink.style.color = "inherit";
+  messageLink.style.display = "block";
 
-  const wrapper = document.createElement("span");
-  wrapper.appendChild(usernameLink);
-  wrapper.appendChild(messageLink);
+  const timeText = document.createElement("small");
+  timeText.textContent = timeAgo(new Date(data.created_at * 1000));
+  timeText.style.fontSize = "0.75rem";
+  timeText.style.color = "#888";
+  timeText.style.display = "block";
+
+  const textWrapper = document.createElement("div");
+  textWrapper.appendChild(usernameLink);
+  textWrapper.appendChild(messageLink);
+  textWrapper.appendChild(timeText);
+
+  const mediaWrapper = document.createElement("div");
+  mediaWrapper.className = "d-flex gap-2";
+  mediaWrapper.appendChild(profileImg);
+  mediaWrapper.appendChild(textWrapper);
 
   li.appendChild(dot);
-  li.appendChild(wrapper);
+  li.appendChild(mediaWrapper);
 
   li.classList.add("clickable-notification");
   li.dataset.url = data.url || "#";
 
   li.addEventListener("mouseenter", () => {
     markSingleNotificationAsRead(data.notification_id, dot);
+
+    if (dot.style.display !== "none") {
+      dot.style.display = "none";
+      let count = parseInt(notificationCount.textContent, 10) || 0;
+      count = Math.max(count - 1, 0);
+      notificationCount.textContent = count;
+      notificationCount.style.display = count > 0 ? "inline-block" : "none";
+    }
   });
 
   notificationDropdown.prepend(li);
@@ -150,6 +186,7 @@ function addGeneralNotification(data) {
   notificationCount.textContent = count;
   notificationCount.style.display = "inline-block";
 }
+
 
 
 

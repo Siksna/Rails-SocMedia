@@ -1,5 +1,9 @@
 <div id="friends-grid" class="grid grid-cols-3 gap-4" data-controller="pagination" data-pagination-url-value="/load_more_conversations" data-pagination-mode-value="friends" data-pagination-direction-value="down" data-pagination-target="messages">
  <div class="chat-card">
+ <% if @sorted_conversations.any? %>
 <%= render 'chats/index_conversation', index_conversations: @sorted_conversations %>
+<% else %>
+<p>No conversations found.</p>
+<% end %>
 </div>
 </div>

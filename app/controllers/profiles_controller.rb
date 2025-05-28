@@ -6,8 +6,8 @@ class ProfilesController < ApplicationController
 if params[:liked] == 'true'
   @activities = @user.likes.includes(:likeable).order(created_at: :desc).limit(10).map(&:likeable).compact
 else
-  messages = @user.messages.order(created_at: :desc).limit(10)
-  replies = @user.replies.order(created_at: :desc).limit(10)
+  messages = @user.messages.order(created_at: :desc).limit(1)
+  replies = @user.replies.order(created_at: :desc).limit(1)
   @activities = (messages + replies).sort_by(&:created_at).reverse
 end
 
@@ -53,9 +53,9 @@ end
         end
       end
 
-      messages = messages_query.limit(10)
-      replies = replies_query.limit(10)
-      @activities = (messages + replies).sort_by(&:created_at).reverse.take(10)
+      messages = messages_query
+      replies = replies_query
+      @activities = (messages + replies).sort_by(&:created_at).reverse.take(1)
     end
 
     render partial: 'activity', collection: @activities, as: :activity, layout: false
