@@ -2,11 +2,19 @@ class ProfilesController < ApplicationController
   before_action :authenticate_user!
   before_action :find_user, only: [:show, :followers, :following, :load_more_activities]
 
- def show
-  if params[:liked] == 'true'
-    @activities = @user.likes.includes(:likeable).order(created_at: :desc).limit(10).map(&:likeable).compact
-  else
-    @activities = @user.activities.includes(:actionable).order(created_at: :desc).limit(10)
+def show
+  @user = User.find(params[:id])
+
+ if params[:liked] == 'true'
+  @activities = @user.likes
+                     .includes(:likeable)
+                     .order(created_at: :desc)
+                     .limit(10)
+else
+    @activities = @user.activities
+                       .includes(:actionable)
+                       .order(id: :desc)
+                       .limit(10)
   end
 
   respond_to do |format|
@@ -18,41 +26,26 @@ end
 
 def load_more_activities
   @user = User.find(params[:id])
-  last_activity_id = params[:last_activity_id]
+  last_id = params[:last_activity_id]
 
-  if params[:liked] == 'true'
-    liked_activities_query = @user.likes.includes(:likeable).order(created_at: :desc)
-
-    if last_activity_id.present?
-      last_liked_item = Message.find_by(id: last_activity_id) || Reply.find_by(id: last_activity_id)
-      if last_liked_item
-        last_like_record = @user.likes.find_by(likeable: last_liked_item)
-        if last_like_record
-          liked_activities_query = liked_activities_query.where("likes.created_at < ?", last_like_record.created_at)
-                                                         .or(liked_activities_query.where("likes.created_at = ? AND likes.id < ?", last_like_record.created_at, last_like_record.id))
-        end
-      end
-
-    end
-
-    @activities = liked_activities_query.limit(10).map(&:likeable).compact
-
-  else
-    activities_query = @user.activities.includes(:actionable).order(created_at: :desc)
-
-    if last_activity_id.present?
-      last_activity = Activity.find_by(id: last_activity_id)
-      if last_activity
-        activities_query = activities_query.where("created_at < ?", last_activity.created_at)
-                                           .or(activities_query.where("created_at = ? AND id < ?", last_activity.created_at, last_activity.id))
-      end
-    end
-
-    @activities = activities_query.limit(10)
+if params[:liked] == 'true'
+  likes = @user.likes.includes(:likeable).order(created_at: :desc)
+  likes = likes.where('likes.id < ?', last_id) if last_id.present?
+  @activities = likes.limit(10)
+else
+    activities = @user.activities.includes(:actionable).order(id: :desc)
+    activities = activities.where('activities.id < ?', last_id) if last_id.present?
+    @activities = activities.limit(10)
   end
 
-  render partial: 'activity', collection: @activities, as: :activity, layout: false
+  render partial: 'profiles/activity',
+         collection: @activities,
+         as:         :activity,
+         layout:     false
 end
+
+
+
 
 
 

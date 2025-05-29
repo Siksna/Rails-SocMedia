@@ -18,8 +18,8 @@
 
     <div class="user-details">
       <p>
-        <%= link_to "#{@user.followers.count} Sekotāji", followers_profile_path(@user), class: "follower" %> |
-        <%= link_to "#{@user.following.count} Seko", following_profile_path(@user), class: "following" %>
+        <%= link_to "#{@user.followers.count} Followers", followers_profile_path(@user), class: "follower" %> |
+        <%= link_to "#{@user.following.count} Following", following_profile_path(@user), class: "following" %>
       </p>
 
       <% if current_user %>
@@ -70,31 +70,29 @@
      data-pagination-direction-value="down">
 
   <div data-pagination-target="messages">
-    <% if @user.deleted? %>
-      <p>Users profile is blocked</p>
-    <% else %>
-      <% if @activities.any? %>
-<% @activities.each do |activity_record| %>
-  <% activity = activity_record.respond_to?(:actionable) ? activity_record.actionable : activity_record %>
-  <%= render partial: 'activity', locals: { activity: activity } %>
-<% end %>
+  <% if @user.deleted? %>
+    <p>This profile is blocked.</p>
+  <% elsif @activities.empty? %>
+    <p>No <%= params[:liked] == 'true' ? 'liked messages' : 'activity' %> here.</p>
+  <% else %>
+    <%= render partial: 'profiles/activity',
+               collection: @activities,
+               as:         :activity %>
 
-<% else %>
-  <p>No activity here</p>
-<% end %>
-<% end %>
-
-<% if @activities.present? %>
-  <% last_item = @activities.last.respond_to?(:actionable) ? @activities.last.actionable : @activities.last %>
+   <% if @activities.present? %>
+  <% last_activity = @activities.last %>
   <div id="load-more-trigger"
-       data-message-id="<%= last_item.id %>"
-       data-activity-type="<%= last_item.class.name.underscore %>"
+       data-message-id="<%= last_activity.id %>"
+       data-activity-type="<%= params[:liked] == 'true' ? 'message' : last_activity.actionable_type.underscore %>"
        data-user-id="<%= @user.id %>"
        data-liked-mode="<%= params[:liked] == 'true' %>">
   </div>
 <% end %>
 
 
-  </div>
+
+  <% end %>
+</div>
+
 
 </div>

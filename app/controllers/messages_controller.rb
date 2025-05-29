@@ -1,7 +1,6 @@
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy, :toggle_like]
   before_action :authenticate_user!
-  after_create :log_activity
 
   def show
     @message = Message.find(params[:id])
@@ -168,7 +167,4 @@ avatar_url =
 
   end
 
-   def log_activity
-    Activity.create!(user: user, actionable: self, created_at: self.created_at)
-  end
 end

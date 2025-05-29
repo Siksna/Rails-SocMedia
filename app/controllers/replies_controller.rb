@@ -2,7 +2,6 @@ class RepliesController < ApplicationController
   before_action :set_message, only: [:create, :edit, :update, :destroy, :toggle_like]
   before_action :set_reply, only: [:edit, :update, :destroy, :toggle_like]
   before_action :authorize_user!, only: [:edit, :update, :destroy]
-  after_create :log_activity
  
 
 def create
@@ -231,10 +230,6 @@ avatar_url =
       format.html { redirect_to request.referer } 
     end 
     end
-
-     def log_activity
-    Activity.create!(user: user, actionable: self, created_at: self.created_at)
-  end
 
   private
 

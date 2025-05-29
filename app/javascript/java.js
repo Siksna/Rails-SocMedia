@@ -1270,11 +1270,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
 
-// pagination jasalabo profila lapa main messagiem
 // Atskiriba kurā lapā headerī rādās lapas nosaukums
-// notifikacijas profile pic
 // register paga register nevar spamot
-// login paga limits uz characteriem
+// login un register page limits uz characteriem
 // confirmationi "Are you srue?" prieks lietam
 // reply lapa image display nesmuks
 

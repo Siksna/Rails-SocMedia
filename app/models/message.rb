@@ -1,6 +1,8 @@
 class Message < ApplicationRecord
     attr_accessor :relevance_score
 
+      after_create :log_activity
+
     has_many :replies, dependent: :destroy
     has_one_attached :file
     has_many :likes, as: :likeable
@@ -23,7 +25,11 @@ class Message < ApplicationRecord
       end
     end
     
-
+def log_activity
+  Activity.create!(user: self.user, actionable: self, created_at: self.created_at)
+rescue => e
+  Rails.logger.error "Failed to log activity: #{e.message}"
+end
 
   def comment_count
     replies.where(parent_id: nil).count + replies.joins(:children).count

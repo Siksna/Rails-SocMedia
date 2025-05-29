@@ -99,23 +99,23 @@ console.log("Pagination controller connected");
         this.loading = false;
       });
   }
-
-  loadMoreDown() {
-
+loadMoreDown() {
   const trigger = document.getElementById("load-more-trigger");
   if (!trigger) {
-    console.log("No trigger element found");
+    console.log("🚫 No trigger element found.");
   }
   if (!this.scrollContainer) {
-    console.log("Scroll container is missing");
+    console.log("🚫 Scroll container is missing.");
   }
 
   if (!trigger || !this.scrollContainer || this.loading) {
+    console.log("⏳ Exiting early: Missing trigger/scrollContainer or already loading.");
     return;
   }
 
-  this.loading = true;
+  console.log("🚀 Starting loadMoreDown...");
 
+  this.loading = true;
   this.observer.unobserve(trigger);
 
   const userId = trigger.dataset.userId;
@@ -123,8 +123,12 @@ console.log("Pagination controller connected");
   const lastScore = trigger.dataset.messageScore;
   const afterIdForReplies = trigger.dataset.afterId;
 
+  console.log(`📌 Mode: ${this.modeValue}`);
+  if (lastScore) console.log(`⭐ lastScore: ${lastScore}`);
+  if (userId) console.log(`👤 userId: ${userId}`);
 
   function rebindReplyEvents(container) {
+    console.log("🔁 Rebinding reply events...");
     container.querySelectorAll('.clickable-reply').forEach(replyElement => {
       bindClickableReplyEvent(replyElement);
     });
@@ -171,17 +175,20 @@ console.log("Pagination controller connected");
       return;
   }
 
+  console.log("🌐 Fetching URL:", url);
 
   fetch(url, {
     headers: { "X-Requested-With": "XMLHttpRequest" }
   })
     .then(response => {
+      console.log("✅ Response received");
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
       return response.text();
     })
     .then(html => {
+      console.log("📦 HTML content loaded");
       trigger.remove();
 
       this.messagesTarget.insertAdjacentHTML("beforeend", html);
@@ -192,8 +199,8 @@ console.log("Pagination controller connected");
       if (this.modeValue === "replies") {
         const parentReplies = Array.from(this.messagesTarget.querySelectorAll("[data-message-id]")).filter(el => !el.dataset.parentId || el.dataset.parentId === "");
         lastLoadedMessageElement = parentReplies[parentReplies.length - 1];
-      } else if (this.modeValue === "bookmarks"){
-      const allBookmarks = this.messagesTarget.querySelectorAll("[data-bookmark-id]");
+      } else if (this.modeValue === "bookmarks") {
+        const allBookmarks = this.messagesTarget.querySelectorAll("[data-bookmark-id]");
         lastLoadedMessageElement = allBookmarks[allBookmarks.length - 1];
       } else {
         const allMessages = this.messagesTarget.querySelectorAll("[data-message-id]");
@@ -201,13 +208,15 @@ console.log("Pagination controller connected");
       }
 
       if (!lastLoadedMessageElement) {
-        console.log("No new messages loaded");
+        console.log("⚠️ No new messages loaded.");
         this.loading = false;
         return;
       }
 
+      const newLastId = lastLoadedMessageElement.dataset.messageId || lastLoadedMessageElement.dataset.bookmarkId;
+      console.log("🆕 Last loaded message ID:", newLastId);
 
-      if (lastLoadedMessageElement.dataset.messageId === lastId || lastLoadedMessageElement.dataset.bookmarkId === lastId) {
+      if (newLastId === lastId) {
         console.log("🔁 Last message ID is the same as previous – nothing new loaded.");
         this.loading = false;
         return;
@@ -226,21 +235,21 @@ console.log("Pagination controller connected");
         newTrigger.dataset.userId = userId;
         newTrigger.dataset.likedMode = trigger.dataset.likedMode;
       } else if (this.modeValue === "bookmarks") {
-      newTrigger.dataset.messageId = lastLoadedMessageElement.dataset.bookmarkId;
+        newTrigger.dataset.messageId = lastLoadedMessageElement.dataset.bookmarkId;
       }
 
       this.messagesTarget.appendChild(newTrigger);
       this.observer.observe(newTrigger);
 
-
-      
+      console.log("✅ New trigger added and observed.");
       this.loading = false;
     })
     .catch(err => {
-      console.error("Pagination load error", err);
+      console.error("❌ Pagination load error:", err);
       this.loading = false;
     });
 }
+
 
 
 }

@@ -171,7 +171,7 @@ a {
   margin-bottom: 10px;
   border-radius: 5px;
   max-width:50rem;
-   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 body{
@@ -190,9 +190,11 @@ body.light-mode {
 }
 
 body.light-mode .post,
-body.light-mode .original-message {
-  background-color: #f9f9f9 !important;
+body.light-mode .original-message,
+body.light-mode .parent-reply {
+  background-color: #f3f3f3 !important;
   color: black !important;
+  border: 1px solid rgb(90, 90, 90) !important;
 }
 
 body.light-mode .card-container {
@@ -1270,7 +1272,7 @@ a.btn {
 }
 
 .activity-item {
-  border: 1px solid #ddd;
+  border: 1px solid #000000;
   padding: 10px;
   margin-bottom: 10px;
   cursor: pointer;
@@ -1324,16 +1326,18 @@ a.btn {
 
 .attached-file {
   margin-top: 10px;
+  display: flex;
+    justify-content: center;
 }
 
 .attached-image {
-  max-width: 100%;
+  max-width: 60%;
   height: auto;
   border-radius: 10px;
 }
 
 .attached-video {
-  width: 100%;
+  max-width: 60%;
   height: auto;
 }
 

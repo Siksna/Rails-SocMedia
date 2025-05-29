@@ -2,6 +2,8 @@ class Reply < ApplicationRecord
   belongs_to :message
   has_one_attached :file
   has_many :likes, as: :likeable
+  after_create :log_activity
+
 
   scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
   belongs_to :user
@@ -20,5 +22,11 @@ class Reply < ApplicationRecord
       errors.add(:base, 'Nevar publicēt ja nav pievienots teksts vai fails')
     end
   end
+
+  def log_activity
+  Activity.create!(user: self.user, actionable: self, created_at: self.created_at)
+rescue => e
+  Rails.logger.error "Failed to log activity: #{e.message}"
+end
 end
 
