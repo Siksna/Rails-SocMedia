@@ -155,7 +155,7 @@ function postComment() {
   const file = fileInput.files[0];
 
   if (messageContent.trim() === "" && !file) {
-    alert("Lūdzu ievadiet ziņu.");
+    alert("Please enter a message");
     return;
   }
 
@@ -178,7 +178,7 @@ function postComment() {
     } else if (response.status === 401) {
       window.location.href = '/users/sign_in';
     } else {
-      throw new Error("Coulf not create message.");
+      throw new Error("Could not create message.");
     }
   })
   .then(html => {
@@ -259,7 +259,7 @@ function postReply(event) {
   const parentIdInput = document.getElementById('dynamic-reply-parent-id');
   const submitButton = document.getElementById('replySubmitButton');
   if (!replyText && !file) {
-    alert('Lūdzu, ievadiet ziņu vai pievienojiet failu, lai atbildētu.');
+    alert('Please enter a message or a file to post it.');
     return;
   }
 
@@ -1275,9 +1275,11 @@ document.addEventListener("DOMContentLoaded", function () {
 // login un register page limits uz characteriem
 // confirmationi "Are you srue?" prieks lietam
 // reply lapa image display nesmuks
+// comments dropdown poga nenokrasojas balta kad nomain font uz melnu
 
 // OBLIGATI
 
+// search dropdown multiple id lai javascripta
 // Delete confirmation
 // Kad registrejas username un gmail nevar but parak gari
 // janonem aizmirsi paroli funkciju
@@ -1308,3 +1310,4 @@ document.addEventListener("DOMContentLoaded", function () {
 // file poga visas lapas divains borders kad mouse hovero over
 // PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā, notifikacijas saraksta un save posts ari
 // tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots
+// Trigram search

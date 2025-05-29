@@ -23,17 +23,22 @@ else
   end
 end
 
-
 def load_more_activities
   @user = User.find(params[:id])
   last_id = params[:last_activity_id]
 
-if params[:liked] == 'true'
-  likes = @user.likes.includes(:likeable).order(created_at: :desc)
-  likes = likes.where('likes.id < ?', last_id) if last_id.present?
-  @activities = likes.limit(10)
-else
-    activities = @user.activities.includes(:actionable).order(id: :desc)
+  if params[:liked] == 'true'
+    likes = @user
+            .likes
+            .includes(:likeable)
+            .order(created_at: :desc)
+    likes = likes.where('likes.id < ?', last_id) if last_id.present?
+
+    @activities = likes.to_a.select { |l| l.likeable.present? }.first(10)
+  else
+    activities = @user.activities
+                      .includes(:actionable)
+                      .order(id: :desc)
     activities = activities.where('activities.id < ?', last_id) if last_id.present?
     @activities = activities.limit(10)
   end
@@ -43,6 +48,7 @@ else
          as:         :activity,
          layout:     false
 end
+
 
 
 

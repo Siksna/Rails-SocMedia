@@ -1,53 +1,42 @@
 <%# app/views/profiles/_activity.html.erb %>
-<%# Determine the object and its associated message %>
+
 <% if activity.is_a?(Like) %>
   <% actionable = nil %>
-  <% target     = activity.likeable %>            <%# Message or Reply %>
-  <% actor      = activity.user %>                <%# who liked %>
-  <% timestamp  = activity.created_at %>
-  <% kind       = 'message' %>
-<% elsif activity.respond_to?(:actionable) %>
+  <% target     = activity.likeable %>
+  <% actor      = target.user %>
+  <% timestamp  = target.created_at %>
+  <% kind       = target.is_a?(Reply) ? 'reply' : 'message' %>
+<% else %>
   <% actionable = activity.actionable %>
   <% target     = actionable.is_a?(Message) ? actionable : actionable.message %>
   <% actor      = activity.user %>
   <% timestamp  = activity.created_at %>
   <% kind       = activity.actionable_type.underscore %>
-<% else %>
-  <% actionable = nil %>
-  <% target     = activity %>                     <%# raw Message from @activities %>
-  <% actor      = activity.user %>
-  <% timestamp  = activity.created_at %>
-  <% kind       = 'message' %>
 <% end %>
 
-<%# Always link to the parent message for replies %>
 <% message_for_link = target.is_a?(Reply) ? target.message : target %>
+<% link_url = message_for_link.present? ? message_path(message_for_link) : '#' %>
 
-<div
-  class="activity-item"
-  onclick="window.location='<%= message_path(message_for_link) %>'"
-  data-message-id="<%= target.id %>"
-  data-activity-type="<%= kind %>"
->
+<div class="activity-item" onclick="window.location='<%= link_url %>'" data-message-id="<%= activity.id %>" data-activity-type="<%= kind %>">
 
   <div class="activity-header d-flex align-items-center">
     <%= link_to profile_path(actor) do %>
-      <div class="default-profile-picture me-2" style="background-color: <%= actor.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block; object-fit: cover;">
+      <div class="default-profile-picture me-2" style="background-color: <%= actor.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
         <% if actor.profile_picture.attached? %>
-          <%= image_tag url_for(actor.profile_picture), alt: actor.username, class: 'rounded-circle', style: ' object-fit: cover; height: 100%;' %>
+          <%= image_tag actor.profile_picture, alt: actor.username, class: 'rounded-circle', style: 'object-fit: cover; height: 100%;' %>
         <% else %>
-          <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-picture', style: 'object-fit: cover;' %>
+          <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'rounded-circle', style: 'object-fit: cover; height: 100%;' %>
         <% end %>
       </div>
     <% end %>
     <%= link_to actor.username, profile_path(actor), class: 'activity-username' %>
     <small class="activity-time"><%= time_ago_in_words(timestamp) %> ago</small>
 
-    <% if actor == current_user || (current_user && current_user.admin?) %>
-      <div class="nav-item dropdown" onclick="event.stopPropagation();" style="margin-left: auto !important;">
+    <% if actor == current_user || (current_user&.admin?) %>
+      <div class="nav-item dropdown ms-auto" onclick="event.stopPropagation();">
         <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"></a>
         <ul class="dropdown-menu">
-          <% if actionable && actionable.is_a?(Reply) %>
+          <% if actionable&.is_a?(Reply) %>
             <li><%= link_to 'Edit', edit_message_reply_path(target, actionable), class: 'dropdown-item' %></li>
             <li><hr class="dropdown-divider"></li>
             <li><%= button_to 'Delete', message_reply_path(target, actionable), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item text-danger' %></li>
@@ -62,70 +51,149 @@
   </div>
 
   <div class="activity-body">
-    <% if actionable&.respond_to?(:content) %>
-  <p><%= actionable.content %></p>
-<% elsif target.respond_to?(:content) %>
-  <p><%= target.content %></p>
-<% else %>
-  <p>[No content available]</p>
-<% end %>
+    <% content = actionable&.try(:content) || target.try(:content) %>
+    <p><%= content.presence || "" %></p>
 
+    <% file_obj = actionable&.is_a?(Reply) && actionable.file.attached? ? actionable.file : target.try(:file) if target.try(:file)&.attached? %>
+    <% if file_obj %>
+      <div class="attached-file mt-2">
+        <% if file_obj.content_type.start_with?('image/') %>
+          <%= image_tag file_obj, class: 'attached-image', style: 'max-width: 100%; height: auto;' %>
+        <% elsif file_obj.content_type.start_with?('video/') %>
+          <video class="attached-video" controls>
+            <source src="<%= url_for(file_obj) %>" type="<%= file_obj.content_type %>">
+          </video>
+        <% else %>
+          <%= link_to 'Download File', rails_blob_path(file_obj, disposition: 'attachment') %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% if target.is_a?(Reply) %>
+  <div class="reply-context ps-3 mt-2">
 
-    <%# Attachments %>
-<% file_obj = nil %>
+    <% if target.parent.present? %>
+      <div class="parent-reply mb-2">
+        <div class="activity-header d-flex align-items-center">
+          <%= link_to profile_path(target.parent.user) do %>
+            <div class="default-profile-picture me-2"
+                 style="background-color: <%= target.parent.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
+              <% if target.parent.user.profile_picture.attached? %>
+                <%= image_tag target.parent.user.profile_picture,
+                              alt: target.parent.user.username,
+                              class: 'rounded-circle',
+                              style: 'object-fit: cover; height: 100%;' %>
+              <% else %>
+                <%= image_tag 'default_profile.png',
+                              alt: 'Default Profile Picture',
+                              class: 'rounded-circle',
+                              style: 'object-fit: cover; height: 100%;' %>
+              <% end %>
+            </div>
+          <% end %>
+          <%= link_to target.parent.user.username,
+                      profile_path(target.parent.user),
+                      class: 'activity-username' %>
+          <small class="activity-time">
+            <%= time_ago_in_words(target.parent.created_at) %> ago
+          </small>
+        </div>
+        <p><%= target.parent.content.truncate(100) %></p>
 
-<% if actionable&.is_a?(Reply) && actionable.file.attached? %>
-  <% file_obj = actionable.file %>
-<% elsif target.respond_to?(:file) && target.file.attached? %>
-  <% file_obj = target.file %>
-<% end %>
+        <% if target.parent.file.attached? %>
+          <div class="attached-file mt-2">
+            <% if target.parent.file.content_type.start_with?('image/') %>
+              <%= image_tag target.parent.file, class: 'attached-image', style: 'max-width: 50%; height: auto;' %>
+            <% elsif target.parent.file.content_type.start_with?('video/') %>
+              <video class="attached-video" controls style="max-width: 50%;">
+                <source src="<%= url_for(target.parent.file) %>" type="<%= target.parent.file.content_type %>">
+              </video>
+            <% else %>
+              <%= link_to 'Download File',
+                          rails_blob_path(target.parent.file, disposition: 'attachment') %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
 
-<% if file_obj %>
-  <div class="attached-file">
-    <% if file_obj.content_type.start_with?('image/') %>
-      <%= image_tag file_obj, class: 'attached-image' %>
-    <% elsif file_obj.content_type.start_with?('video/') %>
-      <video class="attached-video" controls>
-        <source src="<%= url_for(file_obj) %>" type="<%= file_obj.content_type %>">
-      </video>
     <% else %>
-      <%= link_to 'Download File', rails_blob_path(file_obj, disposition: 'attachment') %>
+      <div class="original-message ps-3 mt-2">
+        <div class="activity-header d-flex align-items-center">
+          <%= link_to profile_path(target.message.user) do %>
+            <div class="default-profile-picture me-2"
+                 style="background-color: <%= target.message.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
+              <% if target.message.user.profile_picture.attached? %>
+                <%= image_tag target.message.user.profile_picture,
+                              alt: target.message.user.username,
+                              class: 'rounded-circle',
+                              style: 'object-fit: cover; height: 100%;' %>
+              <% else %>
+                <%= image_tag 'default_profile.png',
+                              alt: 'Default Profile Picture',
+                              class: 'rounded-circle',
+                              style: 'object-fit: cover; height: 100%;' %>
+              <% end %>
+            </div>
+          <% end %>
+          <%= link_to target.message.user.username,
+                      profile_path(target.message.user),
+                      class: 'activity-username' %>
+          <small class="activity-time">
+            <%= time_ago_in_words(target.message.created_at) %> ago
+          </small>
+        </div>
+        <p><%= target.message.content.truncate(100) %></p>
+
+        <% if target.message.file.attached? %>
+          <div class="attached-file mt-2">
+            <% if target.message.file.content_type.start_with?('image/') %>
+              <%= image_tag target.message.file, class: 'attached-image', style: 'max-width: 50%; height: auto;' %>
+            <% elsif target.message.file.content_type.start_with?('video/') %>
+              <video class="attached-video" controls style="max-width: 50%;">
+                <source src="<%= url_for(target.message.file) %>" type="<%= target.message.file.content_type %>">
+              </video>
+            <% else %>
+              <%= link_to 'Download File',
+                          rails_blob_path(target.message.file, disposition: 'attachment') %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
     <% end %>
   </div>
 <% end %>
 
-  </div>
+
 
   <% if actionable&.is_a?(Reply) && actionable.parent.nil? %>
-    <div class="original-message border-start ps-3 mt-2">
+    <div class="original-message ps-3 mt-2">
       <div class="activity-header d-flex align-items-center">
         <%= link_to profile_path(target.user) do %>
-          <div class="default-profile-picture me-2" style="background-color: <%= target.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block; object-fit: cover;">
+          <div class="default-profile-picture me-2" style="background-color: <%= target.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
             <% if target.user.profile_picture.attached? %>
-              <%= image_tag url_for(target.user.profile_picture), alt: target.user.username, class: 'rounded-circle', style: ' object-fit: cover; height: 100%;' %>
+              <%= image_tag target.user.profile_picture, alt: target.user.username, class: 'rounded-circle', style: 'object-fit: cover; height: 100%;' %>
             <% else %>
-              <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-picture', style: ' object-fit: cover;' %>
+              <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'rounded-circle', style: 'object-fit: cover; height: 100%;' %>
             <% end %>
           </div>
         <% end %>
         <%= link_to target.user.username, profile_path(target.user), class: 'activity-username' %>
         <small class="activity-time"><%= time_ago_in_words(target.created_at) %> ago</small>
       </div>
-    <p><%= target.content.truncate(100) %></p>
-
-    <% if target.file.attached? %>
-      <div class="attached-file mt-2">
-    <% if target.file.content_type.start_with?('image/') %>
-      <%= image_tag target.file, class: 'attached-image', style: '; height: auto;' %>
-    <% elsif target.file.content_type.start_with?('video/') %>
-      <video class="attached-video" controls>
-        <source src="<%= url_for(target.file) %>" type="<%= target.file.content_type %>">
-      </video>
-      <% else %>
-      <%= link_to 'Download File', rails_blob_path(target.file, disposition: 'attachment') %>
-    <% end %>
-      </div>
-    <% end %>
+      <p><%= target.content.truncate(100) %></p>
+      <% if target.file.attached? %>
+        <div class="attached-file mt-2">
+          <% if target.file.content_type.start_with?('image/') %>
+            <%= image_tag target.file, class: 'attached-image' %>
+          <% elsif target.file.content_type.start_with?('video/') %>
+            <video class="attached-video" controls>
+              <source src="<%= url_for(target.file) %>" type="<%= target.file.content_type %>">
+            </video>
+          <% else %>
+            <%= link_to 'Download File', rails_blob_path(target.file, disposition: 'attachment') %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   <% end %>
 
@@ -133,66 +201,54 @@
     <div class="parent-reply border-start ps-3 mt-2">
       <div class="activity-header d-flex align-items-center">
         <%= link_to profile_path(actionable.parent.user) do %>
-          <div class="default-profile-picture me-2" style="background-color: <%= actionable.parent.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block; object-fit: cover;">
+          <div class="default-profile-picture me-2" style="background-color: <%= actionable.parent.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
             <% if actionable.parent.user.profile_picture.attached? %>
-              <%= image_tag url_for(actionable.parent.user.profile_picture), alt: actionable.parent.user.username, class: 'rounded-circle', style: ' object-fit: cover; height: 100%;' %>
+              <%= image_tag actionable.parent.user.profile_picture, alt: actionable.parent.user.username, class: 'rounded-circle', style: 'object-fit: cover; height: 100%;' %>
             <% else %>
-              <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-picture', style: ' object-fit: cover;' %>
+              <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'rounded-circle', style: 'object-fit: cover; height: 100%;' %>
             <% end %>
           </div>
         <% end %>
         <%= link_to actionable.parent.user.username, profile_path(actionable.parent.user), class: 'activity-username' %>
         <small class="activity-time"><%= time_ago_in_words(actionable.parent.created_at) %> ago</small>
       </div>
-      <p><%= target.content.truncate(100) %></p>
-
-      <% if target.file.attached? %>
-      <div class="attached-file mt-2">
-    <% if target.file.content_type.start_with?('image/') %>
-      <%= image_tag target.file, class: 'attached-image', style: 'max-width: 50%; height: auto;' %>
-    <% elsif target.file.content_type.start_with?('video/') %>
-      <video class="attached-video" controls style="max-width: 50%;">
-        <source src="<%= url_for(target.file) %>" type="<%= target.file.content_type %>">
-      </video>
-    <% else %>
-      <%= link_to 'Download File', rails_blob_path(target.file, disposition: 'attachment') %>
-    <% end %>
-  </div>
-<% end %>
+      <p><%= actionable.parent.content.truncate(100) %></p>
+      <% if actionable.parent.file.attached? %>
+        <div class="attached-file mt-2">
+          <% if actionable.parent.file.content_type.start_with?('image/') %>
+            <%= image_tag actionable.parent.file, class: 'attached-image', style: 'max-width: 50%; height: auto;' %>
+          <% elsif actionable.parent.file.content_type.start_with?('video/') %>
+            <video class="attached-video" controls style="max-width: 50%;">
+              <source src="<%= url_for(actionable.parent.file) %>" type="<%= actionable.parent.file.content_type %>">
+            </video>
+          <% else %>
+            <%= link_to 'Download File', rails_blob_path(actionable.parent.file, disposition: 'attachment') %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   <% end %>
 
-  <div class="d-flex justify-content-between" style="padding: 0 5rem;">
-      <div class="reply-counts">
-  <i class="fa-regular fa-message"></i>
-  <%= target.is_a?(Message) ? target.replies.count : target.is_a?(Reply) ? target.children.count : 0 %>
-</div>
+  <div class="d-flex justify-content-between px-5 mt-2">
+    <div class="reply-counts">
+      <i class="fa-regular fa-message"></i>
+      <%= target.is_a?(Message) ? target.replies.count : target.is_a?(Reply) ? target.children.count : 0 %>
+    </div>
 
     <div class="like-section d-flex align-items-center">
       <% if current_user %>
         <button class="heart me-2" onclick="event.stopPropagation(); toggleLike(<%= target.id %>, this, '<%= kind %>')">
-          <% if current_user.liked?(target) %>
-            <i class="fa-solid fa-heart"></i>
-          <% else %>
-            <i class="fa-regular fa-heart"></i>
-          <% end %>
+          <i class="<%= current_user.liked?(target) ? 'fa-solid' : 'fa-regular' %> fa-heart"></i>
         </button>
       <% else %>
         <i class="fa-regular fa-heart me-2"></i>
       <% end %>
-      <span>
-  <%= (target.is_a?(Message) || target.is_a?(Reply)) ? target.likes.count : 0 %>
-</span>
-
+      <span><%= target.likes.count %></span>
     </div>
 
-    <% if target.is_a?(Message) || target.is_a?(Reply) %>
-      <button class="btn btn-sm bookmark-button" onclick="event.stopPropagation(); toggleBookmark(<%= target.id %>, this, 'message')" data-bookmarked="<%= current_user&.bookmarked_messages&.exists?(target.id) %>">
-        <% if current_user&.bookmarked_messages&.exists?(target.id) %>
-          <i class="fa-solid fa-bookmark text-warning"></i>
-        <% else %>
-          <i class="fa-regular fa-bookmark text-warning"></i>
-        <% end %>
+    <% if current_user %>
+      <button class="btn btn-sm bookmark-button" onclick="event.stopPropagation(); toggleBookmark(<%= target.id %>, this, 'message')" data-bookmarked="<%= current_user.bookmarked_messages.exists?(target.id) %>">
+        <i class="<%= current_user.bookmarked_messages.exists?(target.id) ? 'fa-solid' : 'fa-regular' %> fa-bookmark text-warning"></i>
       </button>
     <% end %>
   </div>

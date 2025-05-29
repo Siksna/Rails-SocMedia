@@ -46,7 +46,9 @@
         <video src="<%= message.file_url %>" controls style="width: 100%;" class="mainFaili"></video>
       </div>
     <% else %>
-      <a href="<%= message.file_url %>">Nolādēt failu</a>
+      <div class="attached-file mt-2">
+      <a href="<%= message.file_url %>" style='color: blue;'">Download file</a>
+      </div>
     <% end %>
   <% end %>
 
