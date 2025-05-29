@@ -2,6 +2,14 @@ class ChatConversationsController < ApplicationController
   before_action :authenticate_user!
 
   
+ avatar_url =
+  if current_user.profile_picture.attached?
+    rails_blob_path(current_user.profile_picture, only_path: true)
+  else
+    ActionController::Base.helpers.asset_path("default_profile.png")
+  end
+
+  avatar_color = current_user.profile_color
 
   def create
     @conversation = Conversation.find(params[:chat_id])
@@ -31,7 +39,9 @@ class ChatConversationsController < ApplicationController
       conversation_id: @conversation.id,
       unread_count: Notification.where(user: @chat_conversation.receiver, read: false).count,
       unread_notifications: unread_notifications,
-      content: @chat_conversation.content
+      content: @chat_conversation.content,
+      sender_avatar_url: avatar_url,
+      sender_avatar_color: avatar_color 
       )
 
 

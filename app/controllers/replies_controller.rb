@@ -2,8 +2,20 @@ class RepliesController < ApplicationController
   before_action :set_message, only: [:create, :edit, :update, :destroy, :toggle_like]
   before_action :set_reply, only: [:edit, :update, :destroy, :toggle_like]
   before_action :authorize_user!, only: [:edit, :update, :destroy]
+  after_create :log_activity
+ 
 
 def create
+
+avatar_url =
+  if current_user.profile_picture.attached?
+    rails_blob_path(current_user.profile_picture, only_path: true)
+  else
+    ActionController::Base.helpers.asset_path("default_profile.png")
+  end
+
+  avatar_color = current_user.profile_color
+
   @message = Message.find(params[:message_id])
   @reply = @message.replies.build(reply_params)
   @reply.user = current_user  
@@ -28,7 +40,9 @@ def create
         notification_type: notification.notification_type,
         sender_username: current_user.username,
         created_at: notification.created_at.strftime("%b %d, %H:%M"),
-        url: message_path(@message) 
+        url: message_path(@message),
+        sender_avatar_url: avatar_url,
+        sender_avatar_color: avatar_color 
       )
     end
 
@@ -51,8 +65,9 @@ def create
         notification_type: notification.notification_type,
         sender_username: current_user.username,
         created_at: notification.created_at.strftime("%b %d, %H:%M"),
-        url: message_path(@message)
-
+        url: message_path(@message),
+        sender_avatar_url: avatar_url,
+        sender_avatar_color: avatar_color 
       )
     end
 
@@ -81,7 +96,9 @@ def create
           notification_type: notification.notification_type,
           sender_username: current_user.username,
           created_at: notification.created_at.strftime("%b %d, %H:%M"),
-          url: message_path(@message)
+          url: message_path(@message),
+          sender_avatar_url: avatar_url,
+          sender_avatar_color: avatar_color 
         )
       end
     end
@@ -167,6 +184,16 @@ end
 
 
   def toggle_like
+
+avatar_url =
+  if current_user.profile_picture.attached?
+    rails_blob_path(current_user.profile_picture, only_path: true)
+  else
+    ActionController::Base.helpers.asset_path("default_profile.png")
+  end
+
+  avatar_color = current_user.profile_color
+
     @reply = Reply.find(params[:id])
     if current_user.liked?(@reply)
       current_user.unlike(@reply)
@@ -183,6 +210,7 @@ end
           notification_type: "like",
           read: false
         )
+
   
         NotificationChannel.broadcast_to(
           @reply.user,
@@ -192,8 +220,9 @@ end
           notification_type: notification.notification_type,
           sender_username: current_user.username,
           created_at: notification.created_at.strftime("%b %d, %H:%M"),
-          url: message_path(@message)
-
+          url: message_path(@message),
+          sender_avatar_url: avatar_url,
+          sender_avatar_color: avatar_color 
         )
       end
     end
@@ -202,6 +231,10 @@ end
       format.html { redirect_to request.referer } 
     end 
     end
+
+     def log_activity
+    Activity.create!(user: user, actionable: self, created_at: self.created_at)
+  end
 
   private
 

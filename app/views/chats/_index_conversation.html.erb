@@ -4,13 +4,13 @@
   <div class="chat-card-users" data-convo-id="<%= conversation.id %>" data-last-message-at="<%= last_message_time %>">
     <%= link_to chat_path(conversation), data: { turbo: false }, class: 'chat-link-to' do %>
       <div class="username-pfp">
+              <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>;">
       <% if friend.profile_picture.attached? %>
       <%= image_tag friend.profile_picture, class: 'chat-profile-picture' %>
       <% else %>
-        <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>;">
           <%= image_tag 'default_profile.png', class: 'w-20 h-20 rounded-full object-cover mb-2' %>
-        </div>
       <% end %>
+              </div>
         <p class="chat-username"><%= friend.username %></p>
       </div>
       <% other_user = conversation.sender == current_user ? conversation.receiver : conversation.sender %>

@@ -2,13 +2,13 @@
   <% if activity.is_a?(Message) %>
     <div class="activity-header d-flex align-items-center">
       <%= link_to do %>
+                  <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
         <% if activity.user.profile_picture.attached? %>
           <%= image_tag activity.user.profile_picture, alt: activity.user.username, class: 'profile-pic-activity' %>
         <% else %>
-          <div class="default-profile-picture" style="background-color: <%= activity.user.profile_color || '#ccc' %>; width:50px; height:50px; border-radius:50%;">
             <%= image_tag 'default_profile.png', alt: 'Default Profile Picture', class: 'profile-pic-activity' %>
-          </div>
         <% end %>
+                  </div>
       <% end %>
       <%= link_to activity.user.username, profile_path(activity.user), class: 'activity-username' %>
       <small class="activity-time"><%= time_ago_in_words(activity.created_at) %> ago</small>

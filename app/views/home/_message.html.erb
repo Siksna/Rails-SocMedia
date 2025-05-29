@@ -2,13 +2,13 @@
   <div class="user-info d-flex align-items-center">
     <% if message.user %>
       <a href="<%= profile_path(message.user) %>" class="d-flex align-items-center">
-        <% if message.user.profile_picture.attached? %>
+          <div class="default-profile-picture me-2" style="background-color: <%= message.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block; object-fit: cover;">
+      <% if message.user.profile_picture.attached? %>
           <%= image_tag url_for(message.user.profile_picture), alt: message.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit: cover;' %>
         <% else %>
-          <div class="default-profile-picture me-2" style="background-color: <%= message.user.profile_color %>; width: 50px; height: 50px; border-radius: 50%; display: inline-block; object-fit: cover;">
             <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
-          </div>
         <% end %>
+                  </div>
         <span class="fw-bold"><%= message.user.username %></span>
       </a>
       <p><small class="activity-time"><%= time_ago_in_words(message.created_at)  %> ago</small></p>

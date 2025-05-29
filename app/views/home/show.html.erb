@@ -1,16 +1,20 @@
-    <%= link_to "Back", :back, class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
 
 
 <div class="card-container">
+    <%= link_to :back, class: "backBtn" do %>
+  <i class="fa-solid fa-arrow-left"></i>
+<% end %>
+
+
   <div class="message-header d-flex align-items-center mb-3">
     <%= link_to profile_path(@message.user) do %>
+              <div class="default-profile-picture" style="background-color: <%= @message.user.profile_color %>; width: 50px !important; height: 50px; !important">
      <% if @message.user.profile_picture.attached? %>
         <%= image_tag url_for(@message.user.profile_picture), alt: @message.user.username, class: 'rounded-circle me-2', style: 'width: 50px; height: 50px; object-fit:cover;' %>
       <% else %>
-        <div class="default-profile-picture" style="background-color: <%= @message.user.profile_color %>;">
           <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
-        </div>
       <% end %>
+              </div>
     <% end %>
     <%= link_to @message.user&.username || 'Anonīms', profile_path(@message.user), class: 'Profile-username fw-bold' %>
     <small class="activity-time"><%= time_ago_in_words(@message.created_at) %> ago</small>
@@ -103,7 +107,7 @@
 </div>
 
 
-<div id="dynamic-reply-form-wrapper" class="bg-dark text-center p-2 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center z-index-1000">
+<div id="dynamic-reply-form-wrapper" class="text-center p-2 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center z-index-1000">
     <div id="replyFilePreview" class="file-preview"></div>
 
   <div id="replying-to-label" class="text-white mb-2">

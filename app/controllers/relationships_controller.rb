@@ -3,6 +3,16 @@ class RelationshipsController < ApplicationController
   before_action :find_user
 
   def create
+
+avatar_url =
+  if current_user.profile_picture.attached?
+    rails_blob_path(current_user.profile_picture, only_path: true)
+  else
+    ActionController::Base.helpers.asset_path("default_profile.png")
+  end
+
+  avatar_color = current_user.profile_color
+
     unless current_user.following?(@user)
       current_user.follow(@user)
 
@@ -28,7 +38,9 @@ class RelationshipsController < ApplicationController
           notification_type: @notification.notification_type,
           sender_username: current_user.username,
           created_at: @notification.created_at.to_i,
-          url: profile_path(current_user)
+          url: profile_path(current_user),
+          sender_avatar_url: avatar_url,
+        sender_avatar_color: avatar_color 
         )
       end
     end

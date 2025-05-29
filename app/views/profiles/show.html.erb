@@ -2,13 +2,13 @@
   <div class="profile-info">
     <div class="profile-picture">
       <%= link_to profile_path(@user) do %>
+                  <div class="default-profile-picture" style="background-color: <%= @user.profile_color %>; width:100px; height:auto;">
         <% if @user.profile_picture.attached? %>
           <%= image_tag @user.profile_picture, alt: "#{@user.username}", class: "profile-picture", style: "height:100px; width:100px; object-fit:cover;" %>
         <% else %>
-          <div class="default-profile-picture" style="background-color: <%= @user.profile_color %>; width:100px; height:auto;">
             <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
-          </div>
         <% end %>
+                  </div>
       <% end %>
     </div>
 
@@ -74,18 +74,26 @@
       <p>Users profile is blocked</p>
     <% else %>
       <% if @activities.any? %>
-<% @activities.each do |activity| %>
+<% @activities.each do |activity_record| %>
+  <% activity = activity_record.respond_to?(:actionable) ? activity_record.actionable : activity_record %>
   <%= render partial: 'activity', locals: { activity: activity } %>
 <% end %>
+
 <% else %>
   <p>No activity here</p>
 <% end %>
 <% end %>
 
 <% if @activities.present? %>
-  <div id="load-more-trigger" data-message-id="<%= @activities.last.id %>" data-activity-type="<%= @activities.last.class.name.underscore %>" data-user-id="<%= @user.id %>" data-liked-mode="<%= params[:liked] == 'true' %>">
+  <% last_item = @activities.last.respond_to?(:actionable) ? @activities.last.actionable : @activities.last %>
+  <div id="load-more-trigger"
+       data-message-id="<%= last_item.id %>"
+       data-activity-type="<%= last_item.class.name.underscore %>"
+       data-user-id="<%= @user.id %>"
+       data-liked-mode="<%= params[:liked] == 'true' %>">
   </div>
 <% end %>
+
 
   </div>
 

@@ -28,6 +28,14 @@
     background-color: rgb(40, 40, 40);
     color: white;
   }
+
+  .unseen-divider::before {
+    background-color: rgb(15, 15, 15);
+  }
+
+  .reply-block:hover{
+    background-color:#000;
+  }
 }
 
 @media (prefers-color-scheme: light) {
@@ -45,6 +53,14 @@
   }
   .original-message{
     background-color: #f9f9f9;
+  }
+
+  .unseen-divider::before {
+    background-color: white;
+  }
+
+  .reply-block:hover{
+      background-color:rgb(202, 202, 202);
   }
 }
 
@@ -104,6 +120,7 @@ a {
   transition: transform 0.3s ease-in-out;
   transform: translateY(100%);
   background-color: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
   z-index: 1040;
 }
 
@@ -182,6 +199,13 @@ body.light-mode .card-container {
   background-color: #f9f9f9 !important;
 }
 
+body.light-mode .unseen-divider::before {
+    background-color: white;
+  }
+
+ body.light-mode .reply-block:hover{
+      background-color:rgb(202, 202, 202);
+  }
 /* Dark mode */
 body.dark-mode {
   background-color: rgb(15, 15, 15) !important;
@@ -198,6 +222,12 @@ body.dark-mode .original-message {
   color: white !important;
 }
 
+body.dark-mode .unseen-divider::before {
+    background-color: rgb(15, 15, 15);
+  }
+body.dark-mode .reply-block:hover{
+      background-color:rgb(0, 0, 0);
+  }
 
 /* Theme switch */
 .theme-switch {
@@ -337,8 +367,8 @@ input:checked + .slider:before {
   color: #f9fafb;
   cursor: pointer;
   transition: color 0.3s ease, background-color 0.3s ease;
-  padding: 0.25rem;
   border-radius: 50%;
+  margin: 0 1rem;
 }
 #notification-bell i {
   padding:0.2rem;
@@ -372,14 +402,21 @@ input:checked + .slider:before {
 }
 
 #notifications-dropdown {
-  min-width: 280px;
-  background-color: #111;
-  border:1px solid white;
-  border-radius: 6px;
-  border: none;
+  position: absolute !important;
+  top: 100% !important;
+  right: 0;
+  z-index: 1050;
+  min-width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
   box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+  border:1px solid white;
+  background-color: #111;
   padding: 0.5rem 0;
+  border-radius: 6px;
+
 }
+
 
 #message-notification-count, #notification-count {
   display: none;
@@ -418,7 +455,7 @@ input:checked + .slider:before {
    height:100%;
 }
 
-@media (max-width: 990px) {
+@media (max-width: 991px) {
   .sidebar, .adminPanel {
     display: none !important;
   }
@@ -501,7 +538,7 @@ input:checked + .slider:before {
 .content {
   margin-left: 25%;
   margin-right: 25%;
-  padding: 20px;
+  padding: 20px 0;
   flex-grow: 1;
 }
 
@@ -580,8 +617,7 @@ input:checked + .slider:before {
 .card-container {
   max-width: 70%;
   margin: 20px auto;
-  padding: 20px;
-  border-radius: 10px;
+  padding: 0 20px 20px 20px;  border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #ddd;
   position: relative;
@@ -590,8 +626,7 @@ input:checked + .slider:before {
 .card-container h1 {
   text-align: center;
   font-size: 24px;
-  color: #333;
-  margin-bottom: 20px;
+  margin: 20px;
 }
 
 
@@ -700,6 +735,8 @@ hr {
   max-height: 150px;
   opacity: 1;
   z-index: 2;
+  background-color:black !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 
@@ -708,6 +745,7 @@ hr {
   box-shadow: 1px 2px 5px rgba(0,0,0,0.1);
   cursor: pointer;
   border-radius: 10px;
+  border-left:1px solid #ddd;
 }
 
 .file-upload {
@@ -790,6 +828,42 @@ hr {
 .comment:hover{
   transition: all 0.3s ease ;
   border-bottom: 1px solid black;
+}
+
+
+
+.back-button {
+  background-color: #343a40;
+  color: white;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #23272b;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.backBtn {
+  background-color: #212529;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  color: white;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  margin: 0.5rem 0;
+}
+
+.backBtn:hover {
+  background-color: #343a40;
+  color: #fff;
+  transform: scale(1.05);
+  text-decoration: none;
 }
 
 
@@ -1112,6 +1186,17 @@ a.btn {
 
 .profile-settings-form a.btn:hover {
   text-decoration: none;
+}
+
+.password-wrapper{
+  border: 1px solid white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: black;
+}
+
+#confirm-changes-btn.btn:disabled {
+  cursor: not-allowed;
 }
 
 
@@ -1545,7 +1630,7 @@ a.btn {
   padding: 8px 12px;
   border-radius: 20px 20px 0 20px;
   margin-bottom: 10px;
-  max-width: 50%;
+  max-width: 70%;
   word-wrap: break-word;
 }
 
@@ -1587,7 +1672,6 @@ a.btn {
 
 .unseen-divider::before {
   content: "New";
-  background: white;
   position: absolute;
   top: -0.7em;
   left: 50%;
@@ -1735,6 +1819,7 @@ a.btn {
 
 .ChatInputField{
   background-color: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .last-message-snippet {

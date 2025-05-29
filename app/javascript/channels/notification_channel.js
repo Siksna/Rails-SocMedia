@@ -15,7 +15,7 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
   
 
   received(data) {
-
+    console.log("Received data:", data);
     if (data.sender_id === currentUserId) {
   return;
 }
@@ -115,7 +115,9 @@ function addGeneralNotification(data) {
   dot.className = "blue-dot mt-1";
 
   const profileImg = document.createElement("img");
-  profileImg.src = data.sender_avatar_url || "/default-avatar.png"; 
+  profileImg.src = data.sender_avatar_url;
+  profileImg.style.backgroundColor = data.sender_avatar_color;
+
   profileImg.alt = "Avatar";
   profileImg.className = "rounded-circle";
   profileImg.style.width = "32px";
@@ -128,7 +130,7 @@ function addGeneralNotification(data) {
   usernameLink.className = "username-link";
   usernameLink.style.fontWeight = "bold";
   usernameLink.style.textDecoration = "none";
-  usernameLink.style.color = "#007bff";
+  usernameLink.style.color = "white";
 
   const messageLink = document.createElement("a");
   messageLink.href = data.url || "#";

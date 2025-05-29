@@ -6,13 +6,13 @@
       <div class="user-profile-box">
         <%= link_to profile_path(user), class: "user-profile-link" do %>
           <div class="profile-picture-container">
+                        <div class="default-profile-picture-search" style="background-color: <%= user.profile_color %>;">
             <% if user.profile_picture.attached? %>
               <%= image_tag user.profile_picture, alt: "#{user.username}", class: "profile-picture-search" %>
             <% else %>
-              <div class="default-profile-picture-search" style="background-color: <%= user.profile_color %>;">
                 <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-search" %>
-              </div>
             <% end %>
+           </div>
           </div>
           <div class="profile-info">
             <span class="username"><%= user.username %></span>

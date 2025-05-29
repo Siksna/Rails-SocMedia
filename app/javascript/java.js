@@ -497,6 +497,36 @@ cropAndSaveBtn.addEventListener('click', function () {
 
 });
 
+/* settingi */
+document.addEventListener("DOMContentLoaded", () => {
+  const saveBtn = document.getElementById("confirm-changes-btn");
+
+  const setupValidator = (fieldId, feedbackId, toggleSave = false) => {
+    const field = document.getElementById(fieldId);
+    const feedback = document.getElementById(feedbackId);
+
+    field.addEventListener("input", () => {
+      const len = field.value.length;
+
+      if (len > 0 && len < 6) {
+        field.classList.add("is-invalid");
+        feedback.style.display = "block";
+      } else {
+        field.classList.remove("is-invalid");
+        feedback.style.display = "none";
+      }
+
+      if (toggleSave) {
+        saveBtn.disabled = (len > 0 && len < 6);
+      }
+    });
+  };
+
+  setupValidator("password-field", "password-feedback", true);
+  setupValidator("password-confirmation-field", "password-confirmation-feedback");
+});
+
+
   /* chats */
   let atBottomTimer = null;
 
@@ -773,31 +803,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-
-function markSingleNotificationAsRead(notificationId, element) {
-  fetch(`/notifications/mark_as_read_notification/${notificationId}`, {
-    method: "POST",
-    headers: {
-      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
-      "Content-Type": "application/json"
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      if (element) element.style.display = "none";
-
-    } else {
-      console.error("Failed to mark notification as read:", data.error);
-    }
-  })
-  .catch(error => console.error("Error marking notification as read:", error));
-}
-
-
-
- /* Notifications */
- document.addEventListener("DOMContentLoaded", function () {
+/* Notifications */ 
+ 
     const messageNotificationCount = document.getElementById("message-notification-count");
     const generalNotificationCount = document.getElementById("notification-count");
     const notificationDropdown = document.getElementById("notifications-dropdown");
@@ -861,47 +868,75 @@ function markSingleNotificationAsRead(notificationId, element) {
 
                         if (filteredNotifications.length > 0) {
                             filteredNotifications
-                                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                                .slice(0, 10)
-                                .forEach(notification => {
-                                    const li = document.createElement("li");
-                                    li.className = "dropdown-item clickable-notification";
-                                    li.dataset.url = notification.url || "#";
-                                    const dot = document.createElement("span");
-                                    dot.className = "blue-dot";
+  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  .slice(0, 10)
+  .forEach(notification => {
+    const li = document.createElement("li");
+    li.className = "dropdown-item d-flex align-items-start gap-2 clickable-notification";
+    li.dataset.url = notification.url || "#";
 
-                                    const usernameLink = document.createElement("a");
-                                    usernameLink.href = `/profiles/${notification.sender_id}`;
-                                    usernameLink.textContent = notification.sender_username;
-                                    usernameLink.className = "username-link";
-                                    usernameLink.style.fontWeight = "bold";
-                                    usernameLink.style.textDecoration = "underline";
-                                    usernameLink.style.color = "#007bff";
-                                    usernameLink.style.marginRight = "5px";
+    const dot = document.createElement("span");
+    dot.className = "blue-dot mt-1";
 
-                                    const messageLink = document.createElement("a");
-                                    messageLink.href = `/profiles/${notification.sender_id}` || "#";
-                                    const createdDate = (typeof notification.created_at === "number")
-                                        ? new Date(notification.created_at * 1000)
-                                        : new Date(notification.created_at);
-                                    messageLink.textContent = `${notification.message_text} ${timeAgo(createdDate)}`;
-                                    messageLink.className = "notification-link";
-                                    messageLink.style.textDecoration = "none";
-                                    messageLink.style.color = "inherit";
+    const profileImg = document.createElement("img");
+    profileImg.src = notification.sender_avatar_url;
+    profileImg.alt = "Avatar";
+    profileImg.className = "rounded-circle mt-1";
+    profileImg.style.width  = "32px";
+    profileImg.style.height = "32px";
+    profileImg.style.objectFit       = "cover";
+    profileImg.style.backgroundColor = notification.sender_avatar_color;
 
-                                    const wrapper = document.createElement("span");
-                                    wrapper.appendChild(usernameLink);
-                                    wrapper.appendChild(messageLink);
+    const textWrapper = document.createElement("div");
+    textWrapper.className = "d-flex flex-column justify-content-center";
 
-                                    li.appendChild(dot);
-                                    li.appendChild(wrapper);
+    const usernameLink = document.createElement("a");
+    usernameLink.href = `/profiles/${notification.sender_id}`;
+    usernameLink.textContent = notification.sender_username;
+    usernameLink.className = "username-link";
+    usernameLink.style.fontWeight    = "bold";
+    usernameLink.style.textDecoration= "none";
+    usernameLink.style.color         = "white";
 
-                                    li.addEventListener("mouseenter", () => {
-                                        markSingleNotificationAsRead(notification.id, dot);
-                                    });
+    const messageLink = document.createElement("a");
+    messageLink.href = notification.url || "#";
+    messageLink.textContent = `${notification.message_text}`;
+    messageLink.className = "notification-link";
+    messageLink.style.textDecoration = "none";
+    messageLink.style.color          = "inherit";
 
-                                    notificationDropdown.appendChild(li);
-                                });
+const createdDate = typeof notification.created_at === "number"
+  ? new Date(notification.created_at * 1000)
+  : new Date(notification.created_at);
+
+    const timeText = document.createElement("small");
+    timeText.textContent = timeAgo(createdDate);
+    timeText.style.fontSize   = "0.75rem";
+    timeText.style.color      = "#888";
+    timeText.style.display    = "block";
+
+    textWrapper.appendChild(usernameLink);
+    textWrapper.appendChild(messageLink);
+    textWrapper.appendChild(timeText);
+
+    const mediaWrapper = document.createElement("div");
+    mediaWrapper.className = "d-flex gap-2";
+    mediaWrapper.appendChild(profileImg);
+    mediaWrapper.appendChild(textWrapper);
+
+    li.appendChild(dot);
+    li.appendChild(mediaWrapper);
+
+    li.addEventListener("mouseenter", () => {
+      if (!li.dataset.markedRead) {
+        markSingleNotificationAsRead(notification.id, dot);
+        li.dataset.markedRead = "true";
+      }
+    });
+
+    notificationDropdown.appendChild(li);
+  });
+
                         } else {
                              const li = document.createElement("li");
                              li.className = "dropdown-item text-muted";
@@ -950,46 +985,12 @@ function markSingleNotificationAsRead(notificationId, element) {
    
     updateUnreadMessages();
 
-       document.querySelectorAll(".notification-item").forEach((item) => {
-        item.addEventListener("click", function () {
-            const url = item.getAttribute("data-url");
-            if (url) {
-                window.location.href = url;
-            }
-        });
-
-        item.addEventListener("mouseenter", function () {
-            const alreadyRead = item.getAttribute("data-read") === "true";
-            if (alreadyRead) return;
-
-            const id = item.getAttribute("data-id");
-
-            fetch(`/notifications/mark_as_read_notification/${id}`, {
-                method: "POST",
-                headers: {
-                    "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                    "Content-Type": "application/json"
-                },
-                credentials: "same-origin"
-            })
-                .then(response => {
-                    if (response.ok) {
-                        item.classList.remove("bg-light");
-                        item.setAttribute("data-read", "true");
-                    }
-                })
-                .catch(error => console.error("Error marking notification as read:", error));
-        });
-    });    
-    updateUnreadMessages();
-
-});
-    
-  
+      
 
 
 
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
+
   document.querySelectorAll(".notification-item").forEach((item) => {
     item.addEventListener("click", function () {
       const url = item.getAttribute("data-url");
@@ -998,30 +999,44 @@ function markSingleNotificationAsRead(notificationId, element) {
       }
     });
 
-    item.addEventListener("mouseenter", function () {
-      const alreadyRead = item.getAttribute("data-read") === "true";
-      if (alreadyRead) return;
-
-      const id = item.getAttribute("data-id");
-
-      fetch(`/notifications/mark_as_read_notification/${id}`, {
-        method: "POST",
-        headers: {
-          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-          "Content-Type": "application/json"
-        },
-        credentials: "same-origin"
-      })
-        .then(response => {
-          if (response.ok) {
-            item.classList.remove("bg-light");
-            item.setAttribute("data-read", "true");
-          }
-        });
-    });
+  
   });
 });
 
+function markSingleNotificationAsRead(notificationId, element) {
+  fetch(`/notifications/mark_as_read_notification/${notificationId}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+  if (element) element.style.display = "none";
+
+  const countElement = document.getElementById("notification-count");
+  let currentCount = parseInt(countElement.textContent || "0", 10);
+
+  if (currentCount > 0) {
+    currentCount -= 1;
+    countElement.textContent = currentCount;
+
+    if (currentCount === 0) {
+      countElement.style.display = "none";
+    }
+  }
+
+  const storedGeneral = parseInt(localStorage.getItem("unreadGeneralCount") || "0", 10);
+  localStorage.setItem("unreadGeneralCount", Math.max(storedGeneral - 1, 0));
+}
+ else {
+      console.error("Failed to mark notification as read:", data.error);
+    }
+  })
+  .catch(error => console.error("Error marking notification as read:", error));
+}
 
   /* Friend search bars */
 document.addEventListener("DOMContentLoaded", function () {
@@ -1258,16 +1273,13 @@ document.addEventListener("DOMContentLoaded", function () {
 // pagination jasalabo profila lapa main messagiem
 // Atskiriba kurā lapā headerī rādās lapas nosaukums
 // notifikacijas profile pic
-// notifikacijas count paiet uz leju kad hovero over jau reloaded notificationiem
 // register paga register nevar spamot
-// settingos var savot images un username bez paroles repeat
 // login paga limits uz characteriem
 // confirmationi "Are you srue?" prieks lietam
 // reply lapa image display nesmuks
 
 // OBLIGATI
 
-// limit username, and email length
 // Delete confirmation
 // Kad registrejas username un gmail nevar but parak gari
 // janonem aizmirsi paroli funkciju

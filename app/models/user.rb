@@ -11,6 +11,8 @@ has_many :bookmarks, dependent: :destroy
 has_many :bookmarked_messages, -> { where(bookmarks: { bookmarkable_type: 'Message' }) }, through: :bookmarks, source: :bookmarkable, source_type: 'Message'
 has_many :bookmarked_replies, -> { where(bookmarks: { bookmarkable_type: 'Reply' }) }, through: :bookmarks, source: :bookmarkable, source_type: 'Reply'
 
+has_many :activities, class_name: "Activity", dependent: :destroy
+
 def bookmarked?(message)
   bookmarked_messages.exists?(message.id)
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_24_100659) do
+ActiveRecord::Schema[7.2].define(version: 2025_05_29_135510) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,16 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_24_100659) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "activities", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "actionable_type", null: false
+    t.integer "actionable_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["actionable_type", "actionable_id"], name: "index_activities_on_actionable"
+    t.index ["user_id", "created_at"], name: "index_activities_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_activities_on_user_id"
   end
 
   create_table "admin_activities", force: :cascade do |t|
@@ -229,6 +239,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_24_100659) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activities", "users"
   add_foreign_key "bookmarks", "users"
   add_foreign_key "chat_conversations", "active_storage_attachments", column: "file_id"
   add_foreign_key "chat_conversations", "users", column: "receiver_id"

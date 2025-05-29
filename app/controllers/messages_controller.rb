@@ -1,7 +1,7 @@
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy, :toggle_like]
   before_action :authenticate_user!
-  
+  after_create :log_activity
 
   def show
     @message = Message.find(params[:id])
@@ -87,6 +87,16 @@ end
 
 
   def toggle_like
+
+avatar_url =
+  if current_user.profile_picture.attached?
+    rails_blob_path(current_user.profile_picture, only_path: true)
+  else
+    ActionController::Base.helpers.asset_path("default_profile.png")
+  end
+
+  avatar_color = current_user.profile_color
+
     @message = Message.find(params[:id])
     if current_user.liked?(@message)
       current_user.unlike(@message)
@@ -113,7 +123,9 @@ end
           notification_type: notification.notification_type,
           sender_username: current_user.username,
           created_at: notification.created_at.strftime("%b %d, %H:%M"),
-          url: message_path(@message)
+          url: message_path(@message),
+          sender_avatar_url: avatar_url,
+        sender_avatar_color: avatar_color 
         )
       end
     end
@@ -154,5 +166,9 @@ end
   created_at: message.created_at.iso8601
 }
 
+  end
+
+   def log_activity
+    Activity.create!(user: user, actionable: self, created_at: self.created_at)
   end
 end

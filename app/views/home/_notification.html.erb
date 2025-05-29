@@ -3,13 +3,13 @@
   <% sender = notification.sender %>
   <div class="ms-2 d-flex align-items-center">
     <%= link_to profile_path(sender || current_user) do %>
+              <div class="default-profile-picture me-2" style="background-color: <%= sender&.profile_color || '#ccc' %>; width:70px; height:70px; border-radius:50%;">
       <% if sender&.profile_picture&.attached? %>
         <%= image_tag sender.profile_picture, class: 'chat-profile-picture me-2' %>
       <% else %>
-        <div class="default-profile-picture me-2" style="background-color: <%= sender&.profile_color || '#ccc' %>; width:70px; height:70px; border-radius:50%;">
           <%= image_tag 'default_profile.png', class: 'w-10 h-10 rounded-circle object-cover' %>
-        </div>
       <% end %>
+              </div>
     <% end %>
 
     <div>

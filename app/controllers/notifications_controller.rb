@@ -26,7 +26,11 @@ class NotificationsController < ApplicationController
       created_at: notification.created_at,
       sender_id: notification.sender_id,
       sender_username: notification.sender&.username,
-      url: notification.url
+      url: notification.url,
+       sender_avatar_url: notification.sender.profile_picture.attached? ?
+                            Rails.application.routes.url_helpers.rails_blob_path(notification.sender.profile_picture, only_path: true) :
+                            ActionController::Base.helpers.asset_path("default_profile.png"),
+      sender_avatar_color: notification.sender.profile_color
     }
   end,
   unread_notifications: unread_notifications

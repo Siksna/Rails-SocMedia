@@ -1,7 +1,13 @@
 <h2>Settings</h2>
 
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, multipart: true, class: "profile-settings-form" }) do |f| %>
-<div>
+
+  <div style="display:flex; justify-content: flex-end;">
+  <label class="theme-switch">
+  <input type="checkbox" id="theme-toggle">
+  <span class="slider"></span>
+</label>
+</div>
   <div class="field form-group" style="display: flex; align-items: center; justify-content: space-around;">
     <%= f.file_field :profile_picture, accept: "image/*", id: "profile_picture_input", style: "display: none;" %>
     <div id="preview-container"
@@ -13,7 +19,7 @@
       <img id="preview-image"
            src="<%= resource.profile_picture.present? ? url_for(resource.profile_picture) : asset_path('default_profile.png') %>"
            alt="Profile picture"
-           style="width: 100%; height: 100%; object-fit: cover;" />
+           style="width: 100%; height: 100%; object-fit: cover; background-color: <%= current_user.profile_color %>;" />
 
       <div id="preview-buttons"
            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; flex-direction: column; border-radius: 50%;">
@@ -28,13 +34,6 @@
     </div>
 
 
-    <label class="theme-switch">
-    <p style="text-align:center;">Change Theme</p>
-  <input type="checkbox" id="theme-toggle">
-  <span class="slider"></span>
-</label>
-
-</div>
 
     <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -61,30 +60,47 @@
 
   <div class="field form-group">
     <%= f.label :username %>
-    <%= f.text_field :username, value: resource.username, autocomplete: "username", class: "form-control", required:true%>
+    <%= f.text_field :username, value: resource.username, autocomplete: "username", class: "form-control", required:true,  maxlength: 25 %>
   </div>
 
   <div class="field form-group">
     <%= f.label :email %>
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", class:"form-control" %>
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class:"form-control", maxlength: 60 %>
   </div>
 
   <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
     <div>Currently awaiting approval for: <%= resource.unconfirmed_email %></div>
   <% end %>
 
+
+  <div class="password-wrapper">
   <div class="field form-group">
     <%= f.label :password %>
-    <%= f.password_field :password, autocomplete: "new-password", class:"form-control", placeholder:"Leave empty if you dont want to change it" %>
-    <% if @minimum_password_length %>
-      <em><%= @minimum_password_length %> characters minimum</em>
-    <% end %>
+    <%= f.password_field :password,
+          autocomplete: "new-password",
+          class: "form-control",
+          placeholder: "Leave empty if you don’t want to change it",
+          maxlength: 50,
+          id: "password-field" %>
+
+    <div class="invalid-feedback text-danger" id="password-feedback" style="display: none;">
+      6 characters minimum
+    </div>
   </div>
 
   <div class="field form-group">
     <%= f.label :password_confirmation %>
-    <%= f.password_field :password_confirmation, autocomplete: "new-password",class:"form-control" %>
+    <%= f.password_field :password_confirmation,
+          autocomplete: "new-password",
+          class: "form-control",
+          maxlength: 50,
+          id: "password-confirmation-field" %>
+
+    <div class="invalid-feedback text-danger" id="password-confirmation-feedback" style="display: none;">
+      <em>6 characters minimum</em>
+    </div>
   </div>
+</div>
 
 
  <div class="modal fade" id="passwordConfirmModal" tabindex="-1" aria-labelledby="passwordConfirmModalLabel" aria-hidden="true">
@@ -97,7 +113,7 @@
       <div class="modal-body">
         <div id="password-error" class="alert alert-danger d-none"></div>
         <div class="mb-3">
-  <%= f.label :current_password, "Current password", class: "form-label" %>
+  <%= f.label :current_password, "Enter your current password to save changes", class: "form-label" %>
   <%= f.password_field :current_password, id: "current-password", autocomplete: "current-password", class: "form-control", placeholder: "Enter your current password", required: true %>
 </div>
 

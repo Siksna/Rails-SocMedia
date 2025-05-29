@@ -19,9 +19,7 @@
 
 <div id="post-container" data-controller="pagination" data-pagination-direction-value="down" data-pagination-mode-value="messages" data-pagination-target="messages">
   <% if @messages.present? %>
-<turbo-frame id="feedContainer">
   <%= render partial: "home/message", collection: @messages %>
-</turbo-frame>
      <% if @messages.any? %>
       <div id="load-more-trigger"
            data-message-id="<%= @messages.last.id %>"
