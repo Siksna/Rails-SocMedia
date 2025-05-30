@@ -1,6 +1,7 @@
 <% if @admin_activities.any? %>
   <% @admin_activities.each do |activity| %>
-    <tr data-message-id="<%= activity.id %>">
+    <% is_current_user = activity.admin_id == current_user.id %>
+    <tr data-message-id="<%= activity.id %>" class="<%= 'table-active' if is_current_user %>">
       <td class="text-center"><%= activity.admin&.username %></td>
       <td class="text-center"><%= activity.action %></td>
       <td class="text-center"><%= activity.description %></td>

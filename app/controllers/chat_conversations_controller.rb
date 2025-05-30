@@ -2,6 +2,8 @@ class ChatConversationsController < ApplicationController
   before_action :authenticate_user!
 
   
+
+  def create
  avatar_url =
   if current_user.profile_picture.attached?
     rails_blob_path(current_user.profile_picture, only_path: true)
@@ -11,7 +13,6 @@ class ChatConversationsController < ApplicationController
 
   avatar_color = current_user.profile_color
 
-  def create
     @conversation = Conversation.find(params[:chat_id])
     @chat_conversation = @conversation.chat_conversations.build(chat_message_params)
     @chat_conversation.sender = current_user

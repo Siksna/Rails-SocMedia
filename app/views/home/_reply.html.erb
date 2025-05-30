@@ -1,5 +1,6 @@
 <li id="reply-<%= reply.id %>" data-message-id="<%= reply.id if reply.parent_id.nil? %>" data-parent-id="<%= reply.parent_id %>" class="reply-block clickable-reply" data-reply-username="<%= reply.user.username %>" data-reply-id="<%= reply.id %>" style="padding:0.5rem;">
-  <div class="reply-header d-flex align-items-center mb-2">
+  <div class="reply-header user-info d-flex align-items-center mb-2">
+  <div style="gap:1rem;display: flex;align-items: center;">
         <div class="default-profile-picture d-flex align-items-center justify-content-center" style="background-color: <%= reply.user.profile_color %>; width: 50px; height: 50px;">
     <% if reply.user.profile_picture.attached? %>
       <%= image_tag reply.user.profile_picture, alt: "#{reply.user.username}", class: "profile-picture", style: "width: 50px; height: 50px; object-fit: cover;" %>
@@ -11,6 +12,7 @@
       <span class="fw-bold">
         <%= link_to reply.user&.username || 'Anonīms', profile_path(reply.user) %>
       </span>
+      </div>
       <small class="activity-time d-block"><%= time_ago_in_words(reply.created_at) %> ago</small>
 
     <% if current_user && (reply.user == current_user || current_user.admin?) %>
@@ -32,10 +34,13 @@
   </div>
 
  <% if reply.content.present? %>
-  <%= simple_format(reply.content.gsub(/@(\w+)/) do |mention|
-    user = User.find_by(username: $1)
-    user ? link_to(mention, profile_path(user), class: "text-info fw-bold") : mention
-  end.html_safe) %>
+  <%= simple_format(
+      reply.content.gsub(/@(\w+)/) do |mention|
+        user = User.find_by(username: $1)
+        user ? link_to(mention, profile_path(user), class: "text-info fw-bold") : mention
+      end.html_safe,
+      { class: "messagetext" }
+    ) %>
 <% end %>
 
 
@@ -56,9 +61,9 @@
 
  
 
-  <div class="ComAndLike d-flex justify-content-between align-items-center mt-2" id="ReplyReplyLikes">
-   <% if reply.parent_id.nil? %>
-      <button class="comment btn btn-sm btn-link text-decoration-none text-dark" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
+  <div class="ComAndLike d-flex align-items-center mt-2" id="ReplyReplyLikes" style="justify-content: start;padding: 0 2rem;gap: 4rem;">
+  <% if reply.parent_id.nil? %>
+      <button class="comment btn btn-sm btn-link text-decoration-none" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
   <i class="fa-regular fa-message"></i>
   <span id="comment-count-<%= reply.id %>">
     <%= pluralize(reply.children.count, 'comment', 'comments') %>
@@ -68,7 +73,7 @@
   <div class="like-section d-flex align-items-center">
   <% if current_user %>
 <% parent_message_id = @message&.id || reply.message&.id %>
-<%= button_tag type: 'button', class: 'heart me-2 border-0 bg-transparent p-0', onclick: "toggleReplyLike(#{reply.id}, this, #{parent_message_id}); event.stopPropagation();" do %>
+<%= button_tag type: 'button', class: 'heart border-0 bg-transparent p-0', onclick: "toggleReplyLike(#{reply.id}, this, #{parent_message_id}); event.stopPropagation();" do %>
   <% if current_user.liked?(reply) %>
     <i class="fa-solid fa-heart"></i>
   <% else %>
@@ -77,7 +82,7 @@
 <% end %>
 
   <% else %>
-    <i class="fa-regular fa-heart me-2"></i>
+    <i class="fa-regular fa-heart"></i>
   <% end %>
   <span id="like-reply-count-<%= reply.id %>"><%= reply.likes.count %></span>
 </div>

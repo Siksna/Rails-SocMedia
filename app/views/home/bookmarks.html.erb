@@ -1,8 +1,7 @@
-<h2>Your Bookmarks</h2>
 
 <div data-controller="pagination" 
      data-pagination-mode-value="bookmarks" 
-     data-pagination-direction-value="down">
+     data-pagination-direction-value="down" style="min-width:80%;">
   <div data-pagination-target="messages">
  
         <%= render partial: 'home/bookmark', collection: @bookmarked_items, as: :bookmark %>

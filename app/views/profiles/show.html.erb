@@ -1,4 +1,4 @@
-<div style="display:flex;flex-direction: column-reverse;">
+<div style="display:flex;flex-direction: column-reverse; min-width:80%;">
   <div class="profile-info">
     <div class="profile-picture">
       <%= link_to profile_path(@user) do %>
@@ -17,10 +17,18 @@
     </h1>
 
     <div class="user-details">
-      <p>
-        <%= link_to "#{@user.followers.count} Followers", followers_profile_path(@user), class: "follower" %> |
-        <%= link_to "#{@user.following.count} Following", following_profile_path(@user), class: "following" %>
-      </p>
+      <p class="follow-links">
+  <%= link_to followers_profile_path(@user), class: "follow-link follower" do %>
+    <span class="follow-count"><%= @user.followers.count %></span>
+    <span class="follow-label">Followers</span>
+  <% end %>
+  
+  <%= link_to following_profile_path(@user), class: "follow-link following" do %>
+    <span class="follow-count"><%= @user.following.count %></span>
+    <span class="follow-label">Following</span>
+  <% end %>
+</p>
+
 
       <% if current_user %>
         <% if current_user != @user %>
@@ -52,7 +60,7 @@
 </div>
 <hr>
 
-<div class="profile-buttons">
+<div class="profile-buttons" style="min-width:80%;">
   <%= link_to profile_path(@user), class: "btn #{params[:liked].nil? ? 'active' : ''}" do %>
     <i class="<%= params[:liked].nil? ? 'fa-solid fa-message' : 'fa-regular fa-message'%>"></i>
   <% end %>
@@ -67,7 +75,7 @@
 <div class="user-activity"
      data-controller="pagination"
      data-pagination-mode-value="<%= params[:liked] == 'true' ? 'profile_liked_activities' : 'profile_activities' %>"
-     data-pagination-direction-value="down">
+     data-pagination-direction-value="down" style="min-width:80%;">
 
   <div data-pagination-target="messages">
   <% if @user.deleted? %>

@@ -1,12 +1,10 @@
 
 
 <div class="card-container">
-    <%= link_to :back, class: "backBtn" do %>
-  <i class="fa-solid fa-arrow-left"></i>
-<% end %>
+  
 
-
-  <div class="message-header d-flex align-items-center mb-3">
+  <div class="user-info message-header d-flex align-items-center mb-3" style="padding-top: 1rem;">
+  <div style="gap:1rem;display: flex;align-items: center;">
     <%= link_to profile_path(@message.user) do %>
               <div class="default-profile-picture" style="background-color: <%= @message.user.profile_color %>; width: 50px !important; height: 50px; !important">
      <% if @message.user.profile_picture.attached? %>
@@ -17,6 +15,7 @@
               </div>
     <% end %>
     <%= link_to @message.user&.username || 'Anonīms', profile_path(@message.user), class: 'Profile-username fw-bold' %>
+    </div>
     <small class="activity-time"><%= time_ago_in_words(@message.created_at) %> ago</small>
 
 <% if current_user && (@message.user == current_user || current_user.admin?) %>
@@ -31,10 +30,10 @@
     <% end %>
   </div>
 
-  <p class="message-content"><%= @message.content %></p>
+  <p class="message-content messagetext"><%= @message.content %></p>
 
   <% if @message.file.attached? %>
-    <div class="message-media">
+    <div class="message-media" style="text-align:center;">
       <% if @message.file.content_type.start_with?('image/') %>
         <%= image_tag @message.file, alt: 'Pievienota bilde' %>
       <% elsif @message.file.content_type.start_with?('video/') %>
@@ -49,9 +48,9 @@
   <% end %>
 
 
-  <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
+  <div class="d-flex" style="justify-content: start;padding: 0 2rem;gap: 4rem;">
   <div class="comment-section d-flex align-items-center">
-  <i class="fa-regular fa-message me-2"></i>
+  <i class="fa-regular fa-message" style="margin:0.3rem;"></i>
   <span id="comment-count-<%= @message.id %>"><%= @comment_count %></span>
 </div>
 
@@ -60,7 +59,7 @@
   <!-- Like funkcija -->
   <div class="like-section d-flex align-items-center">
   <% if current_user %>
-    <button class="heart me-2 border-0 bg-transparent p-0"
+    <button class="heart border-0 bg-transparent p-0"
             onclick="toggleLike(<%= @message.id %>, this); event.stopPropagation();"
             id="like-button-<%= @message.id %>">
       <% if current_user.liked?(@message) %>
@@ -70,14 +69,14 @@
       <% end %>
     </button>
   <% else %>
-    <i class="fa-regular fa-heart me-2"></i>
+    <i class="fa-regular fa-heart"></i>
   <% end %>
   <span id="like-count-<%= @message.id %>"><%= @message.likes.count %></span>
 </div>
 
 
 <% bookmarked = current_user.bookmarked?(@message) %>
-<button class="btn btn-sm bookmark-button"
+<button class="btn bookmark-button"
         onclick="event.stopPropagation(); toggleBookmark(<%= @message.id %>, this, 'message')"
         data-bookmarked="<%= bookmarked %>">
   <% if bookmarked %>
@@ -107,18 +106,19 @@
 </div>
 
 
-<div id="dynamic-reply-form-wrapper" class="text-center p-2 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center z-index-1000">
-    <div id="replyFilePreview" class="file-preview"></div>
+<div id="replyInputWrapper" class="MainInputField text-center p-4 position-fixed bottom-0 start-0 end-0 flex-column justify-content-center z-index-1000 slide-down" style="position: relative;">
 
-  <div id="replying-to-label" class="text-white mb-2">
-  Replying to <span id="replying-to-username" class="fw-bold"></span>
-  <button class="btn btn-sm btn-light ms-2" onclick="clearReplyTarget(); return false;">Cancel</button>
+  <div id="replyFilePreview" class="file-preview"></div>
+
+  <div id="replying-to-label" class="text-white mb-2" style="display: none;">
+    Replying to <span id="replying-to-username" class="fw-bold"></span>
+    <button class="btn btn-sm btn-light ms-2" onclick="clearReplyTarget(); return false;">Cancel</button>
   </div>
 
-<%= form_with model: [@message, @message.replies.build], local: false, html: { id: 'dynamic-reply-form', onsubmit: 'postReply(event); return false;' } do |form| %>
-<%= form.hidden_field :parent_id, id: 'dynamic-reply-parent-id' %>
-<%= form.hidden_field :mentioned_username, id: 'dynamic-reply-mentioned-username' %>
-<input type="hidden" id="replying-to-should-mention" value="0">
+  <%= form_with model: [@message, @message.replies.build], local: false, html: { id: 'dynamic-reply-form', onsubmit: 'postReply(event); return false;' } do |form| %>
+    <%= form.hidden_field :parent_id, id: 'dynamic-reply-parent-id' %>
+    <%= form.hidden_field :mentioned_username, id: 'dynamic-reply-mentioned-username' %>
+    <input type="hidden" id="replying-to-should-mention" value="0">
     <input type="hidden" id="message-id-hidden" value="<%= @message.id %>">
 
     <div class="input-container d-flex">
@@ -129,12 +129,11 @@
         <%= form.file_field :file, id: "replyFileInput", onchange: "displayReplyFileName()" %>
       </label>
 
-<button class="mainbtn" id="replySubmitButton"><i class="fas fa-paper-plane"></i></button>
+      <button class="mainbtn" id="replySubmitButton"><i class="fas fa-paper-plane"></i></button>
     </div>
   <% end %>
+</div>
 
-
-  </div>
 
 
 

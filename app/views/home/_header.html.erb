@@ -27,27 +27,107 @@
           
            <% if user_signed_in? && (current_user.admin? || current_user.head_admin?) %>
         <li class="adminPanel nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Admin panel
-          </a>
-          <ul class="dropdown-menu">
-            <li><%= link_to "User data", admin_personas_path, class: "dropdown-item" %></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><%= link_to "History", admin_history_path, class: "dropdown-item" %></li>
-            </ul>
-        </li>
+  <a class="nav-link dropdown-toggle fw-bold text-white px-3 py-2 rounded-pill bg-dark-hover" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-shield-lock me-1"></i> Admin Panel
+  </a>
+  <ul class="dropdown-menu shadow">
+    <li><%= link_to "User Data", admin_personas_path, class: "dropdown-item" %></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><%= link_to "History", admin_history_path, class: "dropdown-item" %></li>
+  </ul>
+</li>
+
         <% end %>
       </ul>
 </div>
-
-<% if user_signed_in? && request.path == root_path %>
   <div class="feed-toggle-wrapper">
-    <%= link_to "All", root_path(feed: "all"), class: "feed-toggle-btn #{params[:feed] != 'following' ? 'active' : ''}", data: { turbo_frame: "feedContainer" } %>
-    <%= link_to "Following", root_path(feed: "following"), class: "feed-toggle-btn #{params[:feed] == 'following' ? 'active' : ''}", data: { turbo_frame: "feedContainer" } %>
+<% if user_signed_in? && request.path == root_path %>
+    <%= link_to "All", root_path(feed: "all"),
+                class: "feed-toggle-btn #{params[:feed] != 'following' ? 'active' : ''}",
+                data: { turbo_frame: "feedContainer" } %>
+    <%= link_to "Following", root_path(feed: "following"),
+                class: "feed-toggle-btn #{params[:feed] == 'following' ? 'active' : ''}",
+                data: { turbo_frame: "feedContainer" } %>
+
+<% elsif request.path == "/chats" %>
+  <div class="MainTitle">Friends List</div>
+
+<% elsif request.path.match?(/\A\/profiles\/\d+\/following\z/) %>
+  <div class="MainTitle">Following</div>
+
+<% elsif request.path.match?(/\A\/profiles\/\d+\/followers\z/) %>
+  <div class="MainTitle">Followers</div>
+
+
+<% elsif request.path.match?(/\A\/messages\/\d+\/replies\/\d+\/edit\z/) %>
+  <div class="MainTitle">Editing Reply</div>
+
+<% elsif request.path.match?(/\A\/chats\/\d+\z/) %>
+  <% conv = @conversation || Conversation.find(params[:id]) %>
+  <% other = (conv.sender == current_user) ? conv.receiver : conv.sender %>
+  <div class="MainTitle d-flex align-items-center gap-2">
+    <% if other.profile_picture.attached? %>
+     <div class="default-profile-picture-icon me-2"
+           style="background-color: <%= other.profile_color %>; width:40px; height:40px; border-radius:50%;">
+      <%= image_tag url_for(other.profile_picture),
+                    alt: other.username,
+                    class: "rounded-circle me-2",
+                    style: "width:40px; height:40px; object-fit:cover;" %>
+                     </div>
+    <% else %>
+      <div class="default-profile-picture-icon me-2"
+           style="background-color: <%= other.profile_color %>; width:40px; height:40px; border-radius:50%;">
+        <%= image_tag "default_profile.png",
+                      alt: "Default Profile",
+                      class: "rounded-circle",
+                      style: "width:40px; height:40px; object-fit:cover;" %>
+      </div>
+    <% end %>
+   <strong><%= other.username %></strong>
   </div>
+
+<% elsif request.path == "/bookmarks" %>
+  <div class="MainTitle">Your Bookmarks</div>
+
+<% elsif request.path.start_with?("/search_users") %>
+  <div class="MainTitle">Profiles</div>
+
+<% elsif request.path == "/home/notifications" %>
+  <div class="MainTitle">Your Notifications</div>
+
+<% elsif request.path == "/users/edit" %>
+  <div class="MainTitle">Settings</div>
+
+<% elsif request.path.match?(/\A\/profiles\/\d+\z/) %>
+  <%# viewing someone’s profile %>
+  <div class="MainTitle">Profile</div>
+
+<% elsif request.path.match?(/\A\/messages\/\d+\/edit\z/) %>
+  <div class="MainTitle">Editing Message</div>
+
+<% elsif request.path.match?(/\A\/messages\/\d+\z/) %>
+  <div class="MainTitle">Replies Section</div>
+
+<% elsif request.path.start_with?("/messages") %>
+  <div class="MainTitle">Messages Inbox</div>
+
+<% elsif request.path.start_with?("/admin/personas") %>
+  <div class="MainTitle">User Data</div>
+
+<% elsif request.path.start_with?("/admin/history") %>
+  <div class="MainTitle">Admin History</div>
+
+<% elsif request.path.match?(/\A\/admin\/\d+\/edit\z/) %>
+  <div class="MainTitle">Editing User <%= params[:id] %></div>
+
+<% elsif request.path.match?(/\A\/admin\/\d+\z/) %>
+  <div class="MainTitle">Viewing User Data</div>
+
+<% else %>
+  <div class="MainTitle"><%= controller.controller_name.humanize %></div>
 <% end %>
 
-
+  </div>
 
 
 
@@ -57,19 +137,18 @@
   <i class="fas fa-bars"></i>
 </button>
 
-<ul class="navbar-nav me-auto mb-lg-0">
+<ul class="navbar-nav me-auto mb-lg-0" id="notification-item">
   <li class="nav-item dropdown">
   <button class="nav-link d-flex align-items-center dropdown-toggle" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="fa-solid fa-bell me-2" style="font-size: 1.3rem;"></i>
+    <i class="bellIcon fa-solid fa-bell me-2" style="font-size: 1.3rem;"></i>
     <span id="notification-count" class="badge bg-danger ms-2">0</span>
   </button>
 <ul id="notifications-dropdown" class="dropdown-menu dropdown-menu-end">
   </ul>
+  <div id="notification-overlay" class="notification-overlay d-none"></div>
+
 </li>
 </ul>
-
-
-      
         </div>
 
     </div>
@@ -83,14 +162,15 @@
       <li class="nav-item dropdown" id="mainProfile">
         <a class="nav-link d-flex align-items-center dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
           <% if user_signed_in? %>
+                        <div class="default-profile-picture-icon me-2" style="background-color: <%= current_user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
+
             <% if current_user.profile_picture.attached? %>
               <%= image_tag current_user.profile_picture, alt: "#{current_user.username}", class: "profile-picture-icon me-2", style: "width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" %>
             <% else %>
-              <div class="default-profile-picture-icon me-2" style="background-color: <%= current_user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
                 <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
-              </div>
             <% end %>
-            <strong><%= current_user.username %></strong>
+            </div>
+            <strong style="padding-left: 1rem;"><%= current_user.username %></strong>
           <% else %>
             <i class="fa-sharp fa-solid fa-right-to-bracket me-2"></i>
             <span>Login</span>
@@ -109,14 +189,22 @@
       </li>
     </ul>
 
-    <ul class="navbar-nav mb-2">
-      <li class="nav-item">
-        <%= link_to chats_path, class: "nav-link d-flex align-items-center" do %>
-          <i class="fa-solid fa-comments me-2"></i> Chat
-          <span id="message-notification-count" class="badge bg-danger ms-2">0</span>
-        <% end %>
-      </li>
-    </ul>
+   <% if user_signed_in? && (current_user.admin? || current_user.head_admin?) %>
+  <ul class="navbar-nav mb-2">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Admin panel
+      </a>
+      <ul class="dropdown-menu">
+        <li><%= link_to "User data", admin_personas_path, class: "dropdown-item" %></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><%= link_to "History", admin_history_path, class: "dropdown-item" %></li>
+      </ul>
+    </li>
+  </ul>
+<% end %>
+
+
 
     <ul class="navbar-nav mb-2">
       <li class="nav-item">
@@ -134,166 +222,137 @@
       </li>
     </ul>
 
+
+  
        <ul class="navbar-nav mb-2">
-      <li class="nav-item w-100 position-relative" style="height: 40px;">
-        <div class="search-slide-wrapper" style="width: 100%; height: 120%; overflow: hidden; position: relative;">
-          <div class="search-slide-container d-flex position-absolute top-0 start-0" style="width: 200%; transition: transform 0.4s ease;">
-            <div class="search-slide-item w-50 pe-2 d-flex align-items-center">
-              <button class="nav-link d-flex align-items-center w-100" id="toggle-search-button" type="button">
-                <i class="fa-solid fa-magnifying-glass me-2"></i> Search Users
-              </button>
-            </div>
-            <div class="search-slide-item w-50 ps-2">
-              <div class="position-relative w-100">
-                <form class="d-flex" action="<%= search_users_path %>" method="get" role="search" id="user-search-form">
-                  <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" id="user-search-input" autocomplete="off">
-                  <button class="mainbtn btn-outline-success" type="submit">Search</button>
-                </form>
-                <ul id="suggestions-dropdown" class="dropdown-menu position-absolute w-100" style="display: none; z-index: 1000;"></ul>
-              </div>
-            </div>
+      <li class="nav-item w-100 position-relative" style="height: 50px;">
+       <div class="search-slide-wrapper" style="width: 100%; height: 150%; overflow: hidden; position: relative;">
+  <div class="search-slide-container d-flex position-absolute top-0 start-0" style="align-items: center;width: 200%; transition: transform 0.4s ease;">
+    <div class="search-slide-item w-50 d-flex align-items-center">
+      <button class="nav-link toggle-search-button d-flex align-items-center w-100" type="button">
+        <i class="fa-solid fa-magnifying-glass me-2"></i> Search Users
+      </button>
+    </div>
+           <div class="search-slide-item w-50 ps-2">
+      <div class="position-relative w-100">
+        <form class="d-flex" action="<%= search_users_path %>" method="get" role="search">
+          <input class="form-control me-2 user-search-input" type="search" name="query" placeholder="Search" aria-label="Search" autocomplete="off">
+          <button class="mainbtn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        <ul class="suggestions-dropdown dropdown-menu position-absolute w-100" style="display: none; z-index: 1000;"
+        ></ul>
+      </div>
+    </div>
+  </div>
+
+
+</div>
           </div>
         </div>
       </li>
 </ul>
 
-
-    <% if user_signed_in? && (current_user.admin? || current_user.head_admin?) %>
-  <ul class="navbar-nav mb-2">
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Admin panel
-      </a>
-      <ul class="dropdown-menu">
-        <li><%= link_to "User data", admin_personas_path, class: "dropdown-item" %></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><%= link_to "History", admin_history_path, class: "dropdown-item" %></li>
-      </ul>
-    </li>
-  </ul>
-<% end %>
-
-
-    </ul>
-
- 
-
-    <% if user_signed_in? && request.path == root_path %>
-      <button id="toggleInputField" class="sidebar-publish-btn w-100 mt-3">
-        POST
-      </button>
-    <% end %>
+<div class="mobile-footer d-lg-none fixed-bottom bg-light border-top">
+  <div class="mobile-bottom container-fluid d-flex justify-content-around align-items-center p-2" id="mobile-footer-content">
   </div>
+</div>
+
 </div>
 
 
 
 <div class="sidebar">
- <div class="sidebar-content">
-  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-    <li class="nav-item dropdown" id="mainProfile">
-      <a class="nav-link d-flex align-items-center dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-  <% if user_signed_in? %>
-        <div class="default-profile-picture-icon me-2" style="background-color: <%= current_user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
-    <% if current_user.profile_picture.attached? %>
-      <%= image_tag current_user.profile_picture, alt: "#{current_user.username}", class: "profile-picture-icon me-2", style: "width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" %>
-    <% else %>
-        <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
-    <% end %>
-          </div>
-    <strong><%= current_user.username %></strong>
-  <% else %>
-    <i class="fa-sharp fa-solid fa-right-to-bracket me-2"></i>
-    <span>Login</span>
-  <% end %>
-</a>
+ <div class="sidebar">
+  <div class="sidebar-content">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap:1rem;">
+      <li class="nav-item dropdown" id="mainProfile">
+        <a class="nav-link d-flex align-items-center dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <% if user_signed_in? %>
+            <div class="default-profile-picture-icon me-2" style="background-color: <%= current_user.profile_color %>; width: 50px; height: 50px; border-radius: 50%;">
+              <% if current_user.profile_picture.attached? %>
+                <%= image_tag current_user.profile_picture, alt: "#{current_user.username}", class: "profile-picture-icon me-2", style: "width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" %>
+              <% else %>
+                <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture-icon" %>
+              <% end %>
+            </div>
+            <strong style="padding-left: 1rem;"><%= current_user.username %></strong>
+          <% else %>
+            <i class="fa-sharp fa-solid fa-right-to-bracket me-2"></i>
+            <span>Login</span>
+          <% end %>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <% if user_signed_in? %>
+            <li><%= link_to "My profile", profile_path(current_user), class: "dropdown-item" %></li>
+            <li><%= link_to "Settings", edit_user_registration_path, class: "dropdown-item" %></li>
+            <li><%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "dropdown-item" %></li>
+          <% else %>
+            <li><%= link_to "Register", new_user_registration_path, class: "dropdown-item" %></li>
+            <li><%= link_to "Login", new_user_session_path, class: "dropdown-item" %></li>
+          <% end %>
+        </ul>
+      </li>
 
-      <ul class="dropdown-menu dropdown-menu-end">
-        <% if user_signed_in? %>
-          <li>
-            <%= link_to "My profile", profile_path(current_user), class: "dropdown-item" %>
-          </li>
-          <li>
-            <%= link_to "Settings", edit_user_registration_path, class: "dropdown-item" %>
-          </li>
-          <li>
-            <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "dropdown-item" %>
-          </li>
-        <% else %>
-          <li>
-            <%= link_to "Register", new_user_registration_path, class: "dropdown-item" %>
-          </li>
-          <li>
-            <%= link_to "Login", new_user_session_path, class: "dropdown-item" %>
-          </li>
+      <li class="nav-item">
+        <%= link_to '/home/notifications', class: "nav-link d-flex align-items-center" do %>
+          <i class="fa-solid fa-bell me-2"></i> Notification tab
         <% end %>
-      </ul>
-    </li>
-  </ul>
+      </li>
 
+      <li class="nav-item">
+        <%= link_to bookmarks_path, class: "nav-link d-flex align-items-center" do %>
+          <i class="fa-solid fa-bookmark me-2"></i> Bookmarks
+        <% end %>
+      </li>
 
-
-
-
-
-<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-  <li class="nav-item">
-    <%= link_to chats_path, class: "nav-link d-flex align-items-center" do %>
-      <i class="fa-solid fa-comments me-2"></i> Chat
-          <span id="message-notification-count" class="badge bg-danger ms-2">0</span>
-    <% end %>
-  </li>
-</ul>
-
-
-<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-  <li class="nav-item">
-  <%= link_to '/home/notifications', class: "nav-link d-flex align-items-center" do %>
-    <i class="fa-solid fa-bell me-2"></i> Notification tab
-  <% end %>
-</li>
-</ul>
-
-
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-    <li class="nav-item">
-      <%= link_to bookmarks_path, class: "nav-link d-flex align-items-center" do %>
-      <i class="fa-solid fa-bookmark me-2"></i> Bookmarks
-    <% end %>
-    </li>
-    </ul>
-
-
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-  <li class="nav-item w-100 position-relative" style="height: 40px;">
-    <div class="search-slide-wrapper" style="width: 100%; height: 120%; overflow: hidden; position: relative;">
-      <div class="search-slide-container d-flex position-absolute top-0 start-0" style="width: 200%; transition: transform 0.4s ease;">
-        
-        <div class="search-slide-item w-50 pe-2 d-flex align-items-center">
-          <button class="nav-link d-flex align-items-center w-100" id="toggle-search-button" type="button">
-            <i class="fa-solid fa-magnifying-glass me-2"></i> Search Users
-          </button>
-        </div>
-
-        <div class="search-slide-item w-50 ps-2">
-          <div class="position-relative w-100">
-            <form class="d-flex" action="<%= search_users_path %>" method="get" role="search" id="user-search-form">
-              <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" id="user-search-input" autocomplete="off">
-              <button class="mainbtn btn-outline-success" type="submit">Search</button>
-            </form>
-            <ul id="suggestions-dropdown" class="dropdown-menu position-absolute w-100" style="display: none; z-index: 1000;"></ul>
+      <li class="nav-item w-100 position-relative" style="height: 50px;">
+        <div class="search-slide-wrapper" style="width: 100%; height: 130%; overflow: hidden; position: relative;">
+          <div class="search-slide-container d-flex position-absolute top-0 start-0" style="align-items: center; width: 200%; transition: transform 0.4s ease;">
+            <div class="search-slide-item w-50 d-flex align-items-center">
+              <button class="nav-link toggle-search-button d-flex align-items-center w-100" type="button">
+                <i class="fa-solid fa-magnifying-glass me-2"></i> Search Users
+              </button>
+            </div>
+            <div class="search-slide-item w-50 ps-2">
+              <div class="position-relative w-100">
+                <form class="d-flex" action="<%= search_users_path %>" method="get" role="search">
+                  <input class="form-control me-2 user-search-input" type="search" name="query" placeholder="Search" aria-label="Search" autocomplete="off">
+                  <button class="mainbtn btn-outline-success" type="submit">Search</button>
+                </form>
+                <ul class="suggestions-dropdown dropdown-menu position-absolute w-100" style="display: none; z-index: 1000;"></ul>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-  </li>
-</ul>
+      </li>
+
+      <li class="nav-item" id="chat-item">
+        <%= link_to chats_path, class: "nav-link d-flex align-items-center" do %>
+          <i class="fa-solid fa-comments me-2"></i>
+          <span class="chat-label">Chat</span>
+          <span id="message-notification-count" class="badge bg-danger ms-2">0</span>
+        <% end %>
+      </li>
+
+    </ul>
+  </div>
 </div>
 
-<% if user_signed_in? && request.path == root_path %>
+  </li>
+</ul>
+
+
+
+<% if user_signed_in? && (request.path == root_path || request.path.start_with?("/messages/")) %>
+<div id="post-button-wrapper" >
     <button id="toggleInputField" class="sidebar-publish-btn">
         POST
         </button>
+        </div>
         <% end %>
+</div>
+
 </div>
 </div>
 

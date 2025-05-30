@@ -1,7 +1,6 @@
-<h1 class="text-center">Admin History</h1>
 
-<div class="mb-4">
-    <button class="btn btn-outline-dark mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">Filtrs</button>
+<div class="mb-4" style="width:100%;">
+    <button class="btn btn-outline-dark mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse" style="width:100%;">Filtrs</button>
 
 
   <div class="collapse" id="filterCollapse">
@@ -62,9 +61,12 @@
   <tbody class="admin-history" data-controller="pagination" data-pagination-direction-value="down" data-pagination-url-value="/admin/history/load_more_history" data-pagination-mode-value="admin" data-pagination-target="messages">
   <%= render partial: "admin/history_data", locals: { admin_activities: @admin_activities } %>
 
+  <% if @admin_activities.any? %>
   <% last_id = @admin_activities.last.id %>
   <tr id="load-more-trigger" data-message-id="<%= last_id %>" data-after-id="<%= last_id %>"></tr>
-
+<% else %>
+<p>No history recorded</p>
+<% end %>
 
 </tbody>
 </table>

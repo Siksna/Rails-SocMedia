@@ -211,30 +211,71 @@ window.postComment = postComment;
   }
 });
 
-
 document.addEventListener('DOMContentLoaded', function () {
   const toggleButtons = document.querySelectorAll('#toggleInputField');
-  const inputWrapper = document.getElementById('inputWrapper');
+  const mainInputWrapper = document.getElementById('inputWrapper');
+  const replyInputWrapper = document.getElementById('replyInputWrapper');
+  const replyContent = document.getElementById('reply-content');
+  const replyParentId = document.getElementById('reply-parent-id');
 
   toggleButtons.forEach((button) => {
     button.addEventListener('click', function (event) {
       event.stopPropagation();
-      if (inputWrapper) {
-        inputWrapper.classList.add('show');
+      if (mainInputWrapper) mainInputWrapper.classList.add('show');
+      if (replyInputWrapper) replyInputWrapper.classList.add('show');
+    });
+  });
+
+  const replyBlocks = document.querySelectorAll('.clickable-reply');
+  replyBlocks.forEach((block) => {
+    block.addEventListener('click', function (event) {
+            if (event.target.closest('button, a, svg, path')) return;
+
+      event.stopPropagation();
+      if (mainInputWrapper) mainInputWrapper.classList.add('show');
+      if (replyInputWrapper) replyInputWrapper.classList.add('show');
+
+      const replyId = block.dataset.replyId;
+      const username = block.dataset.replyUsername;
+
+      if (replyParentId) {
+        replyParentId.value = replyId;
+      }
+
+      if (replyContent && !replyContent.value.includes(`@${username}`)) {
+        replyContent.value = `@${username} ` + replyContent.value;
+        replyContent.focus();
       }
     });
   });
 
   document.addEventListener('click', function (event) {
+  const clickedOnToggle = [...toggleButtons].some(btn =>
+    btn?.contains?.(event.target)
+  );
+
+
+  if (mainInputWrapper) {
     if (
-      inputWrapper &&
-      !inputWrapper.contains(event.target) &&
-      ![...toggleButtons].some(btn => btn.contains(event.target))
+      !mainInputWrapper.contains(event.target) &&
+      !clickedOnToggle
     ) {
-      inputWrapper.classList.remove('show');
+      mainInputWrapper.classList.remove('show');
     }
-  });
+  }
+
+  if (replyInputWrapper) {
+    if (
+      !replyInputWrapper.contains(event.target) &&
+      !clickedOnToggle
+    ) {
+      replyInputWrapper.classList.remove('show');
+    }
+  }
 });
+
+});
+
 
 
 
@@ -398,7 +439,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.addEventListener("click", function (e) {
     if (
-      !replyFormWrapper.contains(e.target) &&
       !e.target.closest(".clickable-reply")
     ) {
       clearReplyTarget();
@@ -805,7 +845,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* Notifications */ 
  
-    const messageNotificationCount = document.getElementById("message-notification-count");
+    const messageNotificationCount = document.getElementById("#message-notification-count");
     const generalNotificationCount = document.getElementById("notification-count");
     const notificationDropdown = document.getElementById("notifications-dropdown");
 
@@ -1039,94 +1079,74 @@ function markSingleNotificationAsRead(notificationId, element) {
 }
 
   /* Friend search bars */
-document.addEventListener("DOMContentLoaded", function () {
-  const toggleButtons = document.querySelectorAll("#toggle-search-button");
-  const slideContainers = document.querySelectorAll(".search-slide-container");
-  const wrappers = document.querySelectorAll(".search-slide-wrapper");
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleButtons = document.querySelectorAll(".toggle-search-button");
+  const wrappers      = document.querySelectorAll(".search-slide-wrapper");
 
-  toggleButtons.forEach((toggleBtn, index) => {
-    const slideContainer = slideContainers[index];
-    const wrapper = wrappers[index];
-    const searchInput = wrapper.querySelector("#user-search-input");
-    const suggestionsDropdown = wrapper.querySelector("#suggestions-dropdown");
+  wrappers.forEach((wrapper, idx) => {
+    const toggleBtn           = toggleButtons[idx];
+    const slideContainer      = wrapper.querySelector(".search-slide-container");
+    const searchInput         = wrapper.querySelector(".user-search-input");
+    const suggestionsDropdown = wrapper.querySelector(".suggestions-dropdown");
+    let   isSearchActive      = false;
 
-    let isSearchActive = false;
-
-    toggleBtn.addEventListener("click", function () {
-      if (slideContainer) {
-        slideContainer.classList.add("slide-left");
-        isSearchActive = true;
-
-        setTimeout(() => {
-          wrapper.style.overflow = "visible";
-          if (searchInput) searchInput.focus();
-        }, 400);
-      }
+    toggleBtn.addEventListener("click", () => {
+      slideContainer.classList.add("slide-left");
+      toggleBtn.classList.add("hidden"); 
+      isSearchActive = true;
+      setTimeout(() => {
+        wrapper.style.overflow = "visible";
+        searchInput.focus();
+      }, 400);
     });
 
-    document.addEventListener("click", function (event) {
+    document.addEventListener("click", (e) => {
       if (
         isSearchActive &&
-        wrapper &&
-        !wrapper.contains(event.target) &&
-        !(suggestionsDropdown && suggestionsDropdown.contains(event.target))
+        !wrapper.contains(e.target) &&
+        !suggestionsDropdown.contains(e.target)
       ) {
-        if (slideContainer) {
-          slideContainer.classList.remove("slide-left");
-        }
+        slideContainer.classList.remove("slide-left");
         isSearchActive = false;
-
         setTimeout(() => {
           wrapper.style.overflow = "hidden";
+          toggleBtn.classList.remove("hidden");
         }, 400);
       }
+    });
+
+    searchInput.addEventListener("input", function() {
+      const q = encodeURIComponent(this.value);
+      if (!q) {
+        suggestionsDropdown.style.display = "none";
+        return;
+      }
+
+      fetch(`/search_users.json?query=${q}`)
+        .then(r => r.json())
+        .then(users => {
+          suggestionsDropdown.innerHTML = "";
+          if (users.length) {
+            users.forEach(u => {
+              const li = document.createElement("li");
+              li.textContent = u;
+              li.classList.add("dropdown-item");
+              li.addEventListener("click", () => {
+                searchInput.value = u;
+                suggestionsDropdown.style.display = "none";
+              });
+              suggestionsDropdown.appendChild(li);
+            });
+            suggestionsDropdown.style.display = "block";
+          } else {
+            suggestionsDropdown.style.display = "none";
+          }
+        });
     });
   });
 });
 
 
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('user-search-input');
-  const suggestionsDropdown = document.getElementById('suggestions-dropdown');
-
-  searchInput.addEventListener('input', function() {
-    const query = this.value;
-
-    if (query.length > 0) {
-      fetch(`/search_users.json?query=${query}`)
-        .then(response => response.json())
-        .then(users => {
-          suggestionsDropdown.innerHTML = '';
-          if (users.length > 0) {
-            users.forEach(user => {
-              const listItem = document.createElement('li');
-              listItem.textContent = user;
-              listItem.classList.add('dropdown-item');
-              listItem.onclick = function() {
-                searchInput.value = user;
-                suggestionsDropdown.style.display = 'none';
-              };
-              suggestionsDropdown.appendChild(listItem);
-            });
-            suggestionsDropdown.style.display = 'block';
-          } else {
-            suggestionsDropdown.style.display = 'none';
-          }
-        });
-    } else {
-      suggestionsDropdown.style.display = 'none'; 
-    }
-  });
-
-  document.addEventListener('click', function(event) {
-    if (!searchInput.contains(event.target) && !suggestionsDropdown.contains(event.target)) {
-      suggestionsDropdown.style.display = 'none';
-    }
-  });
-});
 
 
 /* bookmarks */
@@ -1266,34 +1286,145 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+
+/* reposition */
+document.addEventListener("DOMContentLoaded", function () {
+  const notificationItem = document.getElementById("notification-item");
+  const chatItem = document.getElementById("chat-item");
+  const postButtonWrapper = document.getElementById("post-button-wrapper");
+
+  const originalNotificationParent = notificationItem?.parentElement;
+  const originalChatParent = chatItem?.parentElement;
+  const originalPostParent = postButtonWrapper?.parentElement;
+
+  const mobileFooter = document.getElementById("mobile-footer-content");
+
+  function moveElements() {
+    if (window.innerWidth <= 991) {
+      if (mobileFooter) {
+        mobileFooter.innerHTML = '';
+
+        if (notificationItem) {
+          mobileFooter.appendChild(notificationItem);
+          notificationItem.classList.add("mobile-no-margin", "mobile-icon-lg");
+        }
+
+        
+
+        if (postButtonWrapper) {
+          mobileFooter.appendChild(postButtonWrapper);
+          const postBtn = document.getElementById("toggleInputField");
+          if (postBtn) {
+            postBtn.classList.add("mobile-post-btn");
+            postBtn.innerHTML = '<i class="fa fa-plus" style="color:black;"></i>';
+          }
+        }
+
+        if (chatItem) {
+          mobileFooter.appendChild(chatItem);
+          chatItem.classList.add("mobile-no-margin", "mobile-icon-lg", "hide-chat-text");
+        }
+      }
+    } else {
+      if (notificationItem && originalNotificationParent && !originalNotificationParent.contains(notificationItem)) {
+        originalNotificationParent.appendChild(notificationItem);
+        notificationItem.classList.remove("mobile-no-margin", "mobile-icon-lg");
+      }
+
+      if (chatItem && originalChatParent && !originalChatParent.contains(chatItem)) {
+        originalChatParent.appendChild(chatItem);
+        chatItem.classList.remove("mobile-no-margin", "mobile-icon-lg", "hide-chat-text");
+      }
+
+      if (postButtonWrapper && originalPostParent && !originalPostParent.contains(postButtonWrapper)) {
+        originalPostParent.appendChild(postButtonWrapper);
+      }
+
+      const postBtn = document.getElementById("toggleInputField");
+      if (postBtn) {
+        postBtn.classList.remove("mobile-post-btn");
+        postBtn.innerHTML = 'POST';
+      }
+    }
+  }
+
+  moveElements();
+  window.addEventListener("resize", moveElements);
+});
+
+/* notification black screen */
+document.addEventListener("DOMContentLoaded", () => {
+  const dropdown = document.getElementById("notifications-dropdown");
+  const overlay = document.getElementById("notification-overlay");
+
+  document.getElementById("notification-toggle").addEventListener("click", () => {
+    const isOpen = dropdown.classList.toggle("show");
+
+    if (isOpen) {
+      overlay.classList.remove("d-none");
+    } else {
+      overlay.classList.add("d-none");
+    }
+  });
+
+  overlay.addEventListener("click", () => {
+    dropdown.classList.remove("show");
+    overlay.classList.add("d-none");
+  });
+});
+
+/* edit page mage change */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.ep-input-file').forEach(input => {
+    const previewId = input.id === 'ep-message-file-input'
+      ? 'ep-message-current-file-preview'
+      : 'ep-current-file-preview';
+    const preview = document.getElementById(previewId);
+    if (!preview) return;
+
+    input.addEventListener('change', () => {
+      const file = input.files[0];
+      if (!file) return;
+
+      preview.innerHTML = '<p class="ep-current-file-label">Selected file:</p>';
+      preview.style.display = 'block';
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.className = 'ep-current-image';
+        img.src = URL.createObjectURL(file);
+        img.onload = () => URL.revokeObjectURL(img.src);
+        preview.appendChild(img);
+      } else {
+        const link = document.createElement('a');
+        link.className = 'ep-current-download';
+        link.textContent = file.name;
+        link.href = '#';
+        preview.appendChild(link);
+      }
+    });
+  });
+});
+
+
 // EXTRA OBLIGATI
 
 // Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
 
-// Atskiriba kurā lapā headerī rādās lapas nosaukums
-// register paga register nevar spamot
+// register paga register nedrikst spamot
 // login un register page limits uz characteriem
 // confirmationi "Are you srue?" prieks lietam
 // reply lapa image display nesmuks
-// comments dropdown poga nenokrasojas balta kad nomain font uz melnu
 
 // OBLIGATI
 
-// search dropdown multiple id lai javascripta
-// Delete confirmation
-// Kad registrejas username un gmail nevar but parak gari
 // janonem aizmirsi paroli funkciju
 // admin history vajag uztaisit lai var sortot pec target
 // admini var noņemt lietotaja profila bildi
 // Biogrāfija priekš useriem profile lapā
 // suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
-// back poga, chatā, un kad aiziet back lapai nevajadzetu no jauna ladet
-// ja addo profila bildi un neievada paroli izmet erroru
 
 //VIZUALI OBLIGATI
 
-// kad hovero virs notification, tas skaits paiet uz leju
-// Reply page problemas ar display image
 // admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
 // default profile pic ir offcentered
 // profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa

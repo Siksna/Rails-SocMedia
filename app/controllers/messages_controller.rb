@@ -33,7 +33,7 @@ end
   def edit
     @message = Message.find(params[:id])
     if @message.user != current_user && !(current_user&.admin? || current_user&.moderator?)
-      redirect_to messages_path, alert: 'You are not authorized to edit this message.' and return
+      redirect_to root_path, alert: 'You are not authorized to edit this message.' and return
     end
     render 'home/edit'
   end

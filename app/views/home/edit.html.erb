@@ -1,32 +1,45 @@
-<h1>Edit message</h1>
+<div class="edit-page">
+  <div class="ep-card">
+    <h2 class="ep-heading">Edit Message</h2>
 
-<%= form_with model: @message, local: true do |form| %>
-  <div class="form-group">
-    <%= form.label :content, 'Message content' %>
-    <%= form.text_area :content, class: "form-control" %>
-  </div>
+    <%= form_with model: @message, local: true, html: { class: "ep-form" } do |f| %>
+      <div class="ep-field ep-field-content">
+        <%= f.label :content, 'Message content', class: 'ep-label-content' %>
+        <%= f.text_area :content, class: 'ep-textarea-content' %>
+      </div>
 
-  <div class="form-group">
-    <%= form.label :file, 'Add or change a file' %>
-    <%= form.file_field :file, class: "form-control" %>
-  </div>
+     <div class="ep-field ep-field-file">
+  <%= f.label :file, 'Add or change a file', class: 'ep-label-file' %>
+  <%= f.file_field :file, class: 'ep-input-file', id: 'ep-message-file-input' %>
+</div>
 
+<div
+  id="ep-message-current-file-preview"
+  class="ep-current-file-preview"
+  style="<%= @message.file.attached? ? '' : 'display:none;' %>"
+>
   <% if @message.file.attached? %>
-  <p>Current file:</p>
-  <% if @message.file.content_type.start_with?('image/') %>
-    <%= image_tag @message.file, alt: 'Current file', style: 'max-width: 100%; height: auto;' %>
-  <% else %>
-    <%= link_to 'Download current file', rails_blob_path(@message.file, disposition: 'attachment') %>
+    <p class="ep-current-file-label">Current file:</p>
+
+    <% if @message.file.content_type.start_with?('image/') %>
+      <%= image_tag @message.file, class: 'ep-current-image' %>
+    <% else %>
+      <%= link_to 'Download current file',
+                  rails_blob_path(@message.file, disposition: 'attachment'),
+                  class: 'ep-current-download' %>
+    <% end %>
   <% end %>
-  <div class="form-group">
-    <%= form.check_box :remove_file %>
-    <%= form.label :remove_file, 'Remove current file' %>
+</div>
+
+  <div class="ep-field ep-field-remove">
+    <%= f.check_box :remove_file, class: 'ep-checkbox-remove' %>
+    <%= f.label :remove_file, 'Remove current file', class: 'ep-label-remove' %>
   </div>
-<% end %>
 
-
-  <%= form.submit 'Save', class: "btn btn-primary" %>
-<% end %>
-
-<%= link_to 'Back', message_path(@message), class: "btn btn-secondary" %>
-
+      <div class="ep-actions">
+        <%= f.submit 'Save', class: 'ep-btn-save' %>
+        <%= link_to 'Back', message_path(@message), class: 'ep-btn-back' %>
+      </div>
+    <% end %>
+  </div>
+</div>

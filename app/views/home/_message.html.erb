@@ -34,7 +34,7 @@
     <% end %>
   </div>
 
-  <p><%= message.content || 'Nav datu' %></p>
+  <p class="messagetext"><%= message.content || 'Nav datu' %></p>
 
   <% if message.file_url %>
     <% if message.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) %>
@@ -43,7 +43,7 @@
       </div>
     <% elsif message.file_url.match(/\.(mp4|webm|ogg)$/i) %>
       <div class="mainFaili-wrapper">
-        <video src="<%= message.file_url %>" controls style="width: 100%;" class="mainFaili"></video>
+        <video src="<%= message.file_url %>" controls style="width: 80%;" class="mainFaili"></video>
       </div>
     <% else %>
       <div class="attached-file mt-2">
@@ -54,7 +54,7 @@
 
 
   
-  <div class="d-flex" style="justify-content: space-between; padding: 0 5rem;">
+  <div class="d-flex" style="justify-content: start;padding: 0 5.5rem;gap: 4rem;">
     <p style="margin:auto 0;"><i class="fa-regular fa-message"></i> <%= message.comment_count %></p>
     <div class="like-section d-flex align-items-center">
       <% if current_user %>
