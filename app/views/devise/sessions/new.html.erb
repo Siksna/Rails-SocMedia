@@ -30,7 +30,7 @@
     <div class="text-center">
       <%= f.submit "Login",
             class: "btn btn-dark border-0 rounded-pill shadow-sm px-4 py-2",
-            data: { disable_with: "Logging in..." } %>
+            onclick: "this.disabled=true; this.form.submit();" %>
     </div>
   <% end %>
 

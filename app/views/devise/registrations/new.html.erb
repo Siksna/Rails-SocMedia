@@ -37,8 +37,9 @@
 
     <div class="text-center">
       <%= f.submit "Register",
-            class: "btn btn-dark border-0 rounded-pill shadow-sm px-4 py-2",
-            data: { disable_with: "Registering..." } %>
+      class: "btn btn-dark border-0 rounded-pill shadow-sm px-4 py-2",
+      onclick: "this.disabled=true; this.form.submit();" %>
+
     </div>
   <% end %>
 

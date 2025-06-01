@@ -169,9 +169,28 @@ function displayFileName() {
   
   
   
+  /* Taustiņu aktivizācija */
+  let isPosting   = false;
+
+  document.addEventListener("DOMContentLoaded", function () {
+  const inputField = document.getElementById("inputField");
+  const fileInput  = document.getElementById("fileInput");
+
+  if (inputField) {
+    inputField.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        postComment();
+      }
+    });
+  }
+});
+  
   
   // Ziņu publicēšana
 function postComment() {
+  if (isPosting) return;
+    isPosting = true;
   const inputField = document.getElementById('inputField');
   const fileInput = document.getElementById('fileInput');
   const messageContent = inputField.value;
@@ -179,8 +198,11 @@ function postComment() {
 
   if (messageContent.trim() === "" && !file) {
     alert("Please enter a message");
+    isPosting = false;
     return;
   }
+  inputField.disabled = true;
+    fileInput.disabled  = true;
 
   const formData = new FormData();
   formData.append('message[content]', messageContent);
@@ -222,7 +244,12 @@ function postComment() {
   })
   .catch(error => {
     console.error('Error:', error);
-  });
+  })
+  .finally(() => {
+        isPosting = false;
+        inputField.disabled = false;
+        fileInput.disabled  = false;
+      });
 }
 
 window.postComment = postComment;
@@ -240,7 +267,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const replyInputWrapper   = document.getElementById('replyInputWrapper');
   const replyContent        = document.getElementById('reply-content');
   const replyParentId       = document.getElementById('reply-parent-id');
-
   toggleButtons.forEach((button) => {
     button.addEventListener('click', function (event) {
       event.stopPropagation();
@@ -298,10 +324,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
+let isReplying = false;
 let currentParentReplyId = null;
 
 function postReply(event) {
+  event.preventDefault();
+    if (isReplying) return;
+    isReplying = true;
   event.preventDefault();
 
   const replyInputField     = document.getElementById('replyInputField');
@@ -321,10 +350,13 @@ function postReply(event) {
 
   if (!replyText && !file) {
     alert('Please enter a message or a file to post it.');
+    isReplying = false;
     return;
   }
 
   submitButton.disabled = true;
+    replyInputField.disabled = true;
+    replyFileInput.disabled = true;
 
   const formData = new FormData();
   if (replyText) formData.append('reply[content]', replyText);
@@ -394,7 +426,10 @@ function postReply(event) {
       alert('Error, try again.');
     })
     .finally(() => {
-      submitButton.disabled = false;
+      isReplying = false;
+      submitButton.disabled       = false;
+      replyInputField.disabled    = false;
+      replyFileInput.disabled     = false;    
     });
 }
 
@@ -424,7 +459,7 @@ export function bindClickableReplyEvent(replyElement) {
       document.getElementById("replying-to-should-mention").value = "1";
     }
     document.getElementById("replying-to-username").textContent = "@" + username;
-    document.getElementById("replying-to-label").style.display = "block";
+    document.getElementById("replying-to-label").style.display = "flex";
     inputField.focus();
 
     e.stopPropagation();
@@ -469,26 +504,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
-
-
-
-  /* Taustiņu aktivizācija */
-  
-  document.addEventListener("DOMContentLoaded", function () {
-    const inputField = document.getElementById("inputField");
-  
-    if (!inputField) {
-      return;
-    }
-  
-    inputField.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        postComment();
-      }
-    });
-  });
-  
   
   
   
@@ -1538,6 +1553,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // confirmationi "Are you srue?" prieks lietam
 // notifikacijas settingos var disabel, bvai uzlikt ka tikai no liek vai tikai no reply nak
+// color switcherim identifikacija, sidebars prieks vairakam lietam
+
 // OBLIGATI
 
 // chata pievienot ka texts iesutas uzreiz bet ja chat channela nav ieladejies tad vnk gray preview pasam lietotajam 
