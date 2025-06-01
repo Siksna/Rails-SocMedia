@@ -8,44 +8,77 @@
     <% end %>
   <% end %>
 
+  <div class="mb-4" style="width:100%;">
+    <div class="card card-body bg-dark border-secondary mb-4">
+      <form id="filterForm" method="get" action="<%= admin_personas_path %>">
+        <div class="row mb-3">
+          <!-- Username Search -->
+          <div class="col-md-4">
+            <label for="username_search" class="form-label text-white">Username</label>
+            <input
+              type="text"
+              id="username_search"
+              name="username_search"
+              value="<%= params[:username_search] %>"
+              class="form-control bg-light border-secondary"
+              placeholder="Search by username">
+          </div>
 
-  <div class="mb-3">
-  <%= form_with url: admin_personas_path, method: :get, local: true do %>
-    <div class="input-group">
-      <%= label_tag :username_search, "Search by Username", class: "form-label" %>
-      <%= text_field_tag :username_search, params[:username_search], class: "form-control", placeholder: "Username" %>
-    </div>
-    <div class="input-group mt-2">
-      <%= label_tag :email_search, "Search by Email", class: "form-label" %>
-      <%= text_field_tag :email_search, params[:email_search], class: "form-control", placeholder: "Email" %>
-    </div>
-    <div class="input-group mt-2">
-      <%= label_tag :role_filter, "Filter by Role", class: "form-label" %>
-      <%= select_tag :role_filter, options_for_select([["Default", "default"], ["Admins", "admin"], ["Users", "user"]], params[:role_filter]), class: "form-control" %>
-    </div>
-    <div class="mt-3">
-      <%= submit_tag "Filter", class: "btn btn-primary" %>
-    </div>
-  <% end %>
-</div>
+          <div class="col-md-4">
+            <label for="email_search" class="form-label text-white">Email</label>
+            <input
+              type="text"
+              id="email_search"
+              name="email_search"
+              value="<%= params[:email_search] %>"
+              class="form-control bg-light border-secondary"
+              placeholder="Search by email">
+          </div>
 
-  <div class="personas-container" data-controller="pagination" data-pagination-url-value="/admin/personas/load_more_personas" data-pagination-mode-value="personas" data-pagination-direction-value="down" data-pagination-params-value="<%= request.query_parameters.to_query %>">
+          <div class="col-md-4">
+            <label for="role_filter" class="form-label text-white">Filter by Role</label>
+            <select
+              id="role_filter"
+              name="role_filter"
+              class="form-select bg-light border-secondary text-dark">
+              <option value="">All</option>
+              <option value="admin" <%= 'selected' if params[:role_filter] == 'admin' %>>Admins</option>
+              <option value="user"  <%= 'selected' if params[:role_filter] == 'user'  %>>Users</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary me-2">Filter</button>
+          <a href="<%= admin_personas_path %>" class="btn btn-outline-light">Clear</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="personas-container"
+       data-controller="pagination"
+       data-pagination-url-value="/admin/personas/load_more_personas"
+       data-pagination-mode-value="personas"
+       data-pagination-direction-value="down"
+       data-pagination-params-value="<%= request.query_parameters.to_query %>">
     <table class="table table-dark table-hover table-bordered border-secondary">
       <thead class="table-light">
         <tr>
           <th class="text-center fw-bold">Id</th>
-          <th class="text-center fw-bold">Lietotājvārds</th>
-          <th class="text-center fw-bold">Epasts</th>
-          <th class="text-center fw-bold">Funkcijas</th>
+          <th class="text-center fw-bold">Usernames</th>
+          <th class="text-center fw-bold">Emails</th>
+          <th class="text-center fw-bold">Functions</th>
         </tr>
       </thead>
-       <tbody data-pagination-target="messages" id="personas-list">
-      <%= render partial: 'admin/personas_data', locals: { users: @users } %>
+      <tbody data-pagination-target="messages" id="personas-list">
+        <%= render partial: 'admin/personas_data', locals: { users: @users } %>
 
-  <% last_user = @users.last %>
-  <tr id="load-more-trigger" data-message-id="<%= last_user.id %>"></tr>
-    </tbody>
-
+        <% if @users.any? %>
+          <% last_user = @users.last %>
+          <tr id="load-more-trigger" data-message-id="<%= last_user.id %>"></tr>
+        <% end %>
+      </tbody>
     </table>
   </div>
 <% end %>

@@ -7,30 +7,36 @@ function displayFileName() {
     previewContainer.innerHTML = ''; 
   
     if (file) {
-      const removeBtn = document.createElement('button');
-      removeBtn.textContent = 'X';
-      removeBtn.classList.add('remove-file-btn');
-      removeBtn.onclick = function() {
-        fileInput.value = ''; 
-        previewContainer.innerHTML = ''; 
-      };
-  
-      if (file.type.match('image.*')) {
-        const imgPreview = document.createElement('img');
-        imgPreview.src = URL.createObjectURL(file);
-        imgPreview.alt = 'Preview image';
-        imgPreview.classList.add('preview-img');
-        previewContainer.appendChild(imgPreview);
-      } else if (file.type.match('video.*')) {
-        const videoPreview = document.createElement('video');
-        videoPreview.src = URL.createObjectURL(file);
-        videoPreview.controls = true;
-        videoPreview.classList.add('preview-video');
-        previewContainer.appendChild(videoPreview);
-      }
-  
-      previewContainer.appendChild(removeBtn); 
-    }
+  const previewWrapper = document.createElement('div');
+  previewWrapper.classList.add('preview-wrapper');
+  previewWrapper.style.position = 'relative';
+
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = 'X';
+  removeBtn.classList.add('remove-file-btn');
+  removeBtn.onclick = function() {
+    fileInput.value = ''; 
+    previewContainer.innerHTML = ''; 
+  };
+
+  if (file.type.match('image.*')) {
+    const imgPreview = document.createElement('img');
+    imgPreview.src = URL.createObjectURL(file);
+    imgPreview.alt = 'Preview image';
+    imgPreview.classList.add('preview-img');
+    previewWrapper.appendChild(imgPreview);
+  } else if (file.type.match('video.*')) {
+    const videoPreview = document.createElement('video');
+    videoPreview.src = URL.createObjectURL(file);
+    videoPreview.controls = true;
+    videoPreview.classList.add('preview-video');
+    previewWrapper.appendChild(videoPreview);
+  }
+
+  previewWrapper.appendChild(removeBtn);
+  previewContainer.appendChild(previewWrapper);
+}
+
   }
   
 
@@ -84,37 +90,46 @@ function displayFileName() {
   
   
   /* Like pogas */
-  function toggleLike(messageId, button) {
-    fetch(`/messages/${messageId}/toggle_like`, {
-      method: 'POST',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        'Accept': 'application/json',
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      const likeCountSpan = button.nextElementSibling; 
-      if (data.liked) {
-        button.innerHTML = '<i class="fa-solid fa-heart"></i>'; 
-      } else {
-        button.innerHTML = '<i class="fa-regular fa-heart"></i>'; 
-      }
-      likeCountSpan.innerText = data.likes_count;
-    })
-    .catch(error => console.error('Error:', error));
-  }
+ function toggleLike(messageId, button) {
+  fetch(`/messages/${messageId}/toggle_like`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Accept': 'application/json',
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    const likeCountSpan = button.nextElementSibling;
+
+    if (data.liked) {
+      button.innerHTML = '<i class="fa-solid fa-heart"></i>';
+    } else {
+      button.innerHTML = '<i class="fa-regular fa-heart"></i>';
+    }
+
+    const icon = button.querySelector('i');
+    icon.classList.add('animate');
+    icon.addEventListener('animationend', () => {
+      icon.classList.remove('animate');
+    }, { once: true });
+
+    likeCountSpan.innerText = data.likes_count;
+  })
+  .catch(error => console.error('Error:', error));
+}
+
   
     window.toggleLike = toggleLike;
 
   
   
-  function toggleReplyLike(replyId, button, messageId) {
+ function toggleReplyLike(replyId, button, messageId) {
   fetch(`/messages/${messageId}/replies/${replyId}/toggle_like`, {
     method: 'POST',
     headers: {
@@ -130,11 +145,19 @@ function displayFileName() {
   })
   .then(data => {
     const likeCountSpan = document.getElementById(`like-reply-count-${replyId}`);
+
     if (data.liked) {
-      button.innerHTML = '<i class="fa-solid fa-heart"></i>'; 
+      button.innerHTML = '<i class="fa-solid fa-heart"></i>';
     } else {
-      button.innerHTML = '<i class="fa-regular fa-heart"></i>'; 
+      button.innerHTML = '<i class="fa-regular fa-heart"></i>';
     }
+
+    const icon = button.querySelector('i');
+    icon.classList.add('animate');
+    icon.addEventListener('animationend', () => {
+      icon.classList.remove('animate');
+    }, { once: true });
+
     likeCountSpan.innerText = data.likes_count;
   })
   .catch(error => console.error('Error:', error));
@@ -212,16 +235,16 @@ window.postComment = postComment;
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-  const toggleButtons = document.querySelectorAll('#toggleInputField');
-  const mainInputWrapper = document.getElementById('inputWrapper');
-  const replyInputWrapper = document.getElementById('replyInputWrapper');
-  const replyContent = document.getElementById('reply-content');
-  const replyParentId = document.getElementById('reply-parent-id');
+  const toggleButtons       = document.querySelectorAll('#toggleInputField');
+  const mainInputWrapper    = document.getElementById('inputWrapper');
+  const replyInputWrapper   = document.getElementById('replyInputWrapper');
+  const replyContent        = document.getElementById('reply-content');
+  const replyParentId       = document.getElementById('reply-parent-id');
 
   toggleButtons.forEach((button) => {
     button.addEventListener('click', function (event) {
       event.stopPropagation();
-      if (mainInputWrapper) mainInputWrapper.classList.add('show');
+      if (mainInputWrapper)  mainInputWrapper.classList.add('show');
       if (replyInputWrapper) replyInputWrapper.classList.add('show');
     });
   });
@@ -229,19 +252,21 @@ document.addEventListener('DOMContentLoaded', function () {
   const replyBlocks = document.querySelectorAll('.clickable-reply');
   replyBlocks.forEach((block) => {
     block.addEventListener('click', function (event) {
-            if (event.target.closest('button, a, svg, path')) return;
+      if (event.target.closest('button, a, svg, path')) return;
+
+      if (event.target.closest('#filePreview'))       return;
+      if (event.target.closest('#replyFilePreview'))  return;
+      if (event.target.closest('.remove-file-btn'))   return;
 
       event.stopPropagation();
-      if (mainInputWrapper) mainInputWrapper.classList.add('show');
+      if (mainInputWrapper)  mainInputWrapper.classList.add('show');
       if (replyInputWrapper) replyInputWrapper.classList.add('show');
 
-      const replyId = block.dataset.replyId;
-      const username = block.dataset.replyUsername;
-
+      const replyId   = block.dataset.replyId;
+      const username  = block.dataset.replyUsername;
       if (replyParentId) {
         replyParentId.value = replyId;
       }
-
       if (replyContent && !replyContent.value.includes(`@${username}`)) {
         replyContent.value = `@${username} ` + replyContent.value;
         replyContent.focus();
@@ -250,32 +275,26 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.addEventListener('click', function (event) {
-  const clickedOnToggle = [...toggleButtons].some(btn =>
-    btn?.contains?.(event.target)
-  );
+    const clickedOnToggle = [...toggleButtons].some(btn =>
+      btn.contains(event.target)
+    );
+    if (clickedOnToggle) {
+      return;
+    }
 
+    if (event.target.closest('#filePreview'))      return;
+    if (event.target.closest('#replyFilePreview')) return;
+    if (event.target.closest('.remove-file-btn'))  return;
 
-  if (mainInputWrapper) {
-    if (
-      !mainInputWrapper.contains(event.target) &&
-      !clickedOnToggle
-    ) {
+    if (mainInputWrapper && !mainInputWrapper.contains(event.target)) {
       mainInputWrapper.classList.remove('show');
     }
-  }
 
-  if (replyInputWrapper) {
-    if (
-      !replyInputWrapper.contains(event.target) &&
-      !clickedOnToggle
-    ) {
+    if (replyInputWrapper && !replyInputWrapper.contains(event.target)) {
       replyInputWrapper.classList.remove('show');
     }
-  }
+  });
 });
-
-});
-
 
 
 
@@ -285,20 +304,21 @@ let currentParentReplyId = null;
 function postReply(event) {
   event.preventDefault();
 
-  const replyInputField = document.getElementById('replyInputField');
-  const mentionedUsername = document.getElementById('dynamic-reply-mentioned-username').value.trim();
-  let replyText = replyInputField.value.trim();
-  const shouldMention = document.getElementById('replying-to-should-mention').value === "1";
+  const replyInputField     = document.getElementById('replyInputField');
+  const mentionedUsername   = document.getElementById('dynamic-reply-mentioned-username').value.trim();
+  let   replyText           = replyInputField.value.trim();
+  const shouldMention       = document.getElementById('replying-to-should-mention').value === "1";
 
-    if (mentionedUsername && currentParentReplyId && shouldMention) {
-  replyText = `@${mentionedUsername} ${replyText}`;
-    }
+  if (mentionedUsername && currentParentReplyId && shouldMention) {
+    replyText = `@${mentionedUsername} ${replyText}`;
+  }
 
-  const replyFileInput = document.getElementById('replyFileInput');
-  const file = replyFileInput.files[0];
-  const replyPreviewContainer = document.getElementById('replyFilePreview');
-  const parentIdInput = document.getElementById('dynamic-reply-parent-id');
-  const submitButton = document.getElementById('replySubmitButton');
+  const replyFileInput         = document.getElementById('replyFileInput');
+  const file                   = replyFileInput.files[0];
+  const replyPreviewContainer  = document.getElementById('replyFilePreview');
+  const parentIdInput          = document.getElementById('dynamic-reply-parent-id');
+  const submitButton           = document.getElementById('replySubmitButton');
+
   if (!replyText && !file) {
     alert('Please enter a message or a file to post it.');
     return;
@@ -308,7 +328,7 @@ function postReply(event) {
 
   const formData = new FormData();
   if (replyText) formData.append('reply[content]', replyText);
-  if (file) formData.append('reply[file]', file);
+  if (file)      formData.append('reply[file]', file);
   if (currentParentReplyId) formData.append('reply[parent_id]', currentParentReplyId);
 
   const messageId = document.getElementById('message-id-hidden').value;
@@ -332,7 +352,7 @@ function postReply(event) {
       Array.from(tempDiv.children).forEach(child => {
         const isChildReply = !!currentParentReplyId;
         if (isChildReply) {
-          const parentReplyElement = document.querySelector(`#reply-${currentParentReplyId}`);
+          const parentReplyElement    = document.querySelector(`#reply-${currentParentReplyId}`);
           const childRepliesContainer = parentReplyElement?.querySelector('.child-replies');
           if (childRepliesContainer) {
             childRepliesContainer.appendChild(child);
@@ -345,34 +365,29 @@ function postReply(event) {
         bindClickableReplyEvent(child);
       });
 
-      replyInputField.value = '';
-      replyFileInput.value = '';
-      replyPreviewContainer.innerHTML = '';
-      parentIdInput.value = '';
+      replyInputField.value            = '';
+      replyFileInput.value             = '';
+      replyPreviewContainer.innerHTML  = '';
+      parentIdInput.value              = '';
       document.getElementById('replying-to-label').style.display = 'none';
 
-     if (currentParentReplyId) {
-
+      if (currentParentReplyId) {
         const parentCommentCountSpan = document.getElementById(`comment-count-${currentParentReplyId}`);
-
         if (parentCommentCountSpan) {
-          const match = parentCommentCountSpan.innerText.match(/\d+/);
-          const currentCount = match ? parseInt(match[0], 10) : 0;
-          const newCount = currentCount + 1;
+          const match       = parentCommentCountSpan.innerText.match(/\d+/);
+          const currentCount= match ? parseInt(match[0], 10) : 0;
+          const newCount    = currentCount + 1;
           parentCommentCountSpan.innerText = `${newCount} comment${newCount !== 1 ? 's' : ''}`;
+        }
+      } else {
+        const commentCountSpan = document.getElementById(`comment-count-${messageId}`);
+        if (commentCountSpan) {
+          const currentCount = parseInt(commentCountSpan.innerText, 10);
+          commentCountSpan.innerText = currentCount + 1;
+        }
       }
-      }
-      else {
-       const commentCountSpan = document.getElementById(`comment-count-${messageId}`);
-      if (commentCountSpan) {
-        const currentCount = parseInt(commentCountSpan.innerText, 10);
-        commentCountSpan.innerText = currentCount + 1;
-      }
-    }
 
       currentParentReplyId = null;
-
-
     })
     .catch(error => {
       console.error('Error posting reply:', error);
@@ -391,25 +406,22 @@ export function bindClickableReplyEvent(replyElement) {
   replyElement.addEventListener("click", function (e) {
     if (e.target.closest("a") || e.target.closest("button") || e.target.closest("i")) return;
 
-    const clickedReply = e.currentTarget;
-    currentParentReplyId = clickedReply.dataset.parentId || clickedReply.dataset.messageId;
+    const clickedReply     = e.currentTarget;
+    currentParentReplyId  = clickedReply.dataset.parentId || clickedReply.dataset.messageId;
 
-    const isParentReply = !clickedReply.dataset.parentId; 
-    const username = clickedReply.dataset.replyUsername;
-    const replyId = clickedReply.dataset.replyId;
+    const isParentReply   = !clickedReply.dataset.parentId; 
+    const username         = clickedReply.dataset.replyUsername;
+    const replyId         = clickedReply.dataset.replyId;
 
-    document.getElementById("dynamic-reply-parent-id").value = replyId;
-
+    document.getElementById("dynamic-reply-parent-id").value         = replyId;
     document.getElementById("dynamic-reply-mentioned-username").value = username;
-    
 
     const inputField = document.getElementById("replyInputField");
 
-     if (isParentReply) {
+    if (isParentReply) {
       document.getElementById("replying-to-should-mention").value = "0";
     } else {
       document.getElementById("replying-to-should-mention").value = "1";
-      
     }
     document.getElementById("replying-to-username").textContent = "@" + username;
     document.getElementById("replying-to-label").style.display = "block";
@@ -419,32 +431,41 @@ export function bindClickableReplyEvent(replyElement) {
   });
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
-  const replyFormWrapper = document.getElementById("dynamic-reply-form-wrapper");
-  const parentIdInput = document.getElementById("dynamic-reply-parent-id");
-  const replyingToLabel = document.getElementById("replying-to-label");
-  const mentionedUsername = document.getElementById("dynamic-reply-mentioned-username");
+  const parentIdInput       = document.getElementById("dynamic-reply-parent-id");
+  const replyingToLabel     = document.getElementById("replying-to-label");
+  const mentionedUsername   = document.getElementById("dynamic-reply-mentioned-username");
 
   replyingToLabel.style.display = "none";
 
   document.querySelectorAll(".clickable-reply").forEach(bindClickableReplyEvent);
 
   window.clearReplyTarget = function () {
-    parentIdInput.value = "";
-    replyingToLabel.style.display = "none";
-    currentParentReplyId = null;
-    mentionedUsername.value = "";
+    parentIdInput.value              = "";
+    replyingToLabel.style.display    = "none";
+    currentParentReplyId             = null;
+    mentionedUsername.value          = "";
   };
 
-  document.addEventListener("click", function (e) {
-    if (
-      !e.target.closest(".clickable-reply")
-    ) {
-      clearReplyTarget();
+    document.addEventListener("click", function (e) {
+    if (e.target.closest(".clickable-reply")) {
+      return;
     }
+
+    if (
+      e.target.closest("#replyInputField")       ||
+      e.target.closest("#replySubmitButton")     ||
+      e.target.closest("#replyFileInput")        ||
+      e.target.closest("#replyFilePreview")      ||
+      e.target.closest(".remove-file-btn")
+    ) {
+      return;
+    }
+
+    clearReplyTarget();
   });
 });
+
 
 
 
@@ -569,12 +590,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* chats */
   let atBottomTimer = null;
+  let newMessageBtn = null;
+
 
   document.addEventListener("DOMContentLoaded", function () {
     const postButton = document.getElementById("postChat");
     const chatBox = document.querySelector(".chats-box");
-    const newMessageBtn = createNewMessageButton();
-    let shouldAutoScroll = true;
+
+      newMessageBtn = createNewMessageButton();
+      let shouldAutoScroll = true;
 
     if (postButton) {
       postButton.addEventListener("click", postChat);
@@ -588,8 +612,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    setTimeout(() => {
     scrollToBottom();
-  });
+  }, 0);
+});
 
   function postChat(event) {
     event.preventDefault();
@@ -624,6 +650,8 @@ inputField.placeholder = "Enter your message...";
     inputField.value = "";
     fileInput.value = "";
     previewContainer.innerHTML = "";
+    inputField.style.height = 'auto';
+
 
 
     const formData = new FormData();
@@ -706,22 +734,27 @@ function ensureUnseenDivider() {
 
 
 function createNewMessageButton() {
+  let existing = document.getElementById("newMessageBtn");
+  if (existing) return existing;
+
   const btn = document.createElement("button");
   btn.id = "newMessageBtn";
   btn.innerText = "New message";
   btn.style.cssText = `
     position: absolute;
     bottom: 90px;
-    right: 20px;
-    padding: 10px 14px;
+    right: 30%;
+    left: 30%;
     border: none;
-    background: #0d6efd;
-    color: white;
+    background: #db1717;
+    font-weight: bold;
+    font-family: initial;
+    color: rgb(255 255 255);
     border-radius: 20px;
     cursor: pointer;
     display: none;
     z-index: 1000;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 6px;
   `;
 
   btn.addEventListener("click", () => {
@@ -733,33 +766,37 @@ function createNewMessageButton() {
   return btn;
 }
 
+
 function handleScroll() {
   const chatBox = document.querySelector(".chats-box");
-  const chatId = document.querySelector(".chats-box").dataset.chatConversationId;
-
+  const chatId = chatBox?.dataset.chatConversationId;
   if (!chatBox) return;
 
   const isAtBottom = isNearBottom(chatBox);
+  const unseenMessages = document.querySelectorAll(".chat-message.unseen");
+
+  if (atBottomTimer) clearTimeout(atBottomTimer);
 
   if (isAtBottom) {
+    newMessageBtn.style.display = "none";
     debouncedMarkChatAsRead(chatId);
-    if (atBottomTimer) clearTimeout(atBottomTimer);
 
     atBottomTimer = setTimeout(() => {
       if (isNearBottom(chatBox)) {
         clearUnseen();
-      updateLastReadAt(chatId);
-      
+        updateLastReadAt(chatId);
       }
     }, 2000);
   } else {
-    if (atBottomTimer) clearTimeout(atBottomTimer);
-    const unseenMessages = document.querySelectorAll(".chat-message.unseen");
     if (unseenMessages.length > 0) {
       ensureUnseenDivider();
+      newMessageBtn.style.display = "block";
+    } else {
+      newMessageBtn.style.display = "none";
     }
   }
 }
+
 
 function scrollToFirstUnseenOrBottom() {
   const chatBox = document.querySelector(".chats-box");
@@ -778,27 +815,42 @@ function scrollToFirstUnseenOrBottom() {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
+
+ 
+function waitForStableChatAndScroll() {
+  let lastHeight = 0;
+  let sameHeightCount = 0;
   const chatBox = document.querySelector(".chats-box");
 
-  if (chatBox) {
-    chatBox.addEventListener("scroll", handleScroll);
+  function check() {
+    if (!chatBox) return;
+    const currentHeight = chatBox.scrollHeight;
 
-    const scrollBtn = document.getElementById("scrollToLatestBtn");
-    if (scrollBtn) {
-      scrollBtn.addEventListener("click", () => {
-        scrollToBottom();
-        clearUnseen();
-        scrollBtn.style.display = "none";
-      });
+    if (currentHeight === lastHeight) {
+      sameHeightCount++;
+    } else {
+      sameHeightCount = 0;
+      lastHeight = currentHeight;
     }
 
-    setTimeout(() => {
+    if (sameHeightCount >= 3) {
       scrollToFirstUnseenOrBottom();
-    }, 50);
+    } else {
+      requestAnimationFrame(check);
+    }
+  }
+
+  check();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const chatBox = document.querySelector(".chats-box");
+  if (chatBox) {
+    chatBox.addEventListener("scroll", handleScroll);
+    waitForStableChatAndScroll();
   }
 });
- 
+
 
   
 
@@ -843,9 +895,60 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+ document.addEventListener("DOMContentLoaded", () => {
+  document.body.addEventListener("ajax:success", function (event) {
+    const button = event.target;
+    if (button.classList.contains("close-chat-button")) {
+      const convoId = button.dataset.convo_id;
+      const card = document.querySelector(`.chat-card-users[data-convo-id='${convoId}']`);
+      if (card) {
+        card.remove();
+      }
+    }
+  });
+
+  document.body.addEventListener("ajax:error", function (event) {
+    console.error("Failed to hide chat:", event.detail);
+  });
+});
+
+
+
+document.addEventListener('input', function (event) {
+  if (event.target.classList.contains('auto-resize-input')) {
+    const el = event.target;
+
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px'; 
+
+    if (el.scrollHeight > 115) {
+      el.style.overflowY = 'auto';
+    } else {
+      el.style.overflowY = 'hidden';
+    }
+  }
+});
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const inputField = document.getElementById("inputField_chat");
+  const postButton = document.getElementById("postChat");
+
+  if (inputField) {
+    inputField.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        postButton.click();
+      }
+    });
+  }
+});
+
+
 /* Notifications */ 
  
-    const messageNotificationCount = document.getElementById("#message-notification-count");
+    const messageNotificationCount = document.getElementById("message-notification-count");
     const generalNotificationCount = document.getElementById("notification-count");
     const notificationDropdown = document.getElementById("notifications-dropdown");
 
@@ -909,7 +1012,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (filteredNotifications.length > 0) {
                             filteredNotifications
   .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-  .slice(0, 10)
   .forEach(notification => {
     const li = document.createElement("li");
     li.className = "dropdown-item d-flex align-items-start gap-2 clickable-notification";
@@ -918,14 +1020,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const dot = document.createElement("span");
     dot.className = "blue-dot mt-1";
 
-    const profileImg = document.createElement("img");
-    profileImg.src = notification.sender_avatar_url;
-    profileImg.alt = "Avatar";
-    profileImg.className = "rounded-circle mt-1";
-    profileImg.style.width  = "32px";
-    profileImg.style.height = "32px";
-    profileImg.style.objectFit       = "cover";
-    profileImg.style.backgroundColor = notification.sender_avatar_color;
+    const profileImgLink = document.createElement("a");
+profileImgLink.href = `/profiles/${notification.sender_id}`;
+
+const profileImg = document.createElement("img");
+profileImg.src = notification.sender_avatar_url;
+profileImg.alt = "Avatar";
+profileImg.className = "rounded-circle mt-1";
+profileImg.style.width  = "32px";
+profileImg.style.height = "32px";
+profileImg.style.objectFit       = "cover";
+profileImg.style.backgroundColor = notification.sender_avatar_color;
+
+profileImgLink.appendChild(profileImg);
+
 
     const textWrapper = document.createElement("div");
     textWrapper.className = "d-flex flex-column justify-content-center";
@@ -961,7 +1069,7 @@ const createdDate = typeof notification.created_at === "number"
 
     const mediaWrapper = document.createElement("div");
     mediaWrapper.className = "d-flex gap-2";
-    mediaWrapper.appendChild(profileImg);
+    mediaWrapper.appendChild(profileImgLink);
     mediaWrapper.appendChild(textWrapper);
 
     li.appendChild(dot);
@@ -1043,7 +1151,17 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-function markSingleNotificationAsRead(notificationId, element) {
+window.handleNotificationHover = function(notificationId, element) {
+  if (element.dataset.read === "true") return;
+  
+  element.dataset.read = "true";
+  element.classList.remove("bg-dark");
+  element.classList.add("notification-read");
+  
+  markSingleNotificationAsRead(notificationId);
+};
+
+function markSingleNotificationAsRead(notificationId) {
   fetch(`/notifications/mark_as_read_notification/${notificationId}`, {
     method: "POST",
     headers: {
@@ -1054,29 +1172,28 @@ function markSingleNotificationAsRead(notificationId, element) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-  if (element) element.style.display = "none";
 
-  const countElement = document.getElementById("notification-count");
-  let currentCount = parseInt(countElement.textContent || "0", 10);
+      const countElement = document.getElementById("notification-count");
+      let currentCount = parseInt(countElement.textContent || "0", 10);
+      if (currentCount > 0) {
+        currentCount -= 1;
+        countElement.textContent = currentCount;
+        if (currentCount === 0) {
+          countElement.style.display = "none";
+        }
+      }
 
-  if (currentCount > 0) {
-    currentCount -= 1;
-    countElement.textContent = currentCount;
-
-    if (currentCount === 0) {
-      countElement.style.display = "none";
-    }
-  }
-
-  const storedGeneral = parseInt(localStorage.getItem("unreadGeneralCount") || "0", 10);
-  localStorage.setItem("unreadGeneralCount", Math.max(storedGeneral - 1, 0));
-}
- else {
+      const storedGeneral = parseInt(localStorage.getItem("unreadGeneralCount") || "0", 10);
+      localStorage.setItem("unreadGeneralCount", Math.max(storedGeneral - 1, 0));
+    } else {
       console.error("Failed to mark notification as read:", data.error);
     }
   })
-  .catch(error => console.error("Error marking notification as read:", error));
+  .catch(error => {
+    console.error("Error marking notification as read:", error);
+  });
 }
+
 
   /* Friend search bars */
 document.addEventListener("DOMContentLoaded", () => {
@@ -1156,7 +1273,7 @@ function toggleBookmark(id, button, type) {
   const method = currentlyBookmarked ? 'DELETE' : 'POST';
   const url = type === 'message'
     ? `/messages/${id}/bookmark`
-    : `/replies/${id}/bookmark${method === 'DELETE' ? '' : ''}`; 
+    : `/replies/${id}/bookmark${method === 'DELETE' ? '' : ''}`;
 
   fetch(url, {
     method: method,
@@ -1175,18 +1292,25 @@ function toggleBookmark(id, button, type) {
   })
   .then(data => {
     const icon = button.querySelector('i');
+
     if (data.bookmarked) {
       icon.classList.remove('fa-regular');
       icon.classList.add('fa-solid');
-      button.dataset.bookmarked = 'true'; 
+      button.dataset.bookmarked = 'true';
     } else {
       icon.classList.remove('fa-solid');
       icon.classList.add('fa-regular');
       button.dataset.bookmarked = 'false';
     }
+
+    icon.classList.add('animate');
+    icon.addEventListener('animationend', () => {
+      icon.classList.remove('animate');
+    }, { once: true });
   })
   .catch(err => console.error('Error toggling bookmark:', err));
 }
+
 window.toggleBookmark = toggleBookmark;
 
 
@@ -1246,7 +1370,7 @@ function toggleFollow(userId, button) {
     const friendStatusContainer = document.getElementById(`friend-status-container-${userId}`);
     if (friendStatusContainer) {
       if (data.friends_with) {
-        friendStatusContainer.innerHTML = '<span class="friend-status">Friends</span>';
+        friendStatusContainer.innerHTML = '<span class="friend-status"><i class="fa-solid fa-user-group"></i></span>';
       } else {
         friendStatusContainer.innerHTML = ''; 
       }
@@ -1406,6 +1530,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
 // EXTRA OBLIGATI
 
 // Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
@@ -1417,6 +1543,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // OBLIGATI
 
+// chata pievienot ka texts iesutas uzreiz bet ja chat channela nav ieladejies tad vnk gray preview pasam lietotajam 
 // janonem aizmirsi paroli funkciju
 // admin history vajag uztaisit lai var sortot pec target
 // admini var noņemt lietotaja profila bildi

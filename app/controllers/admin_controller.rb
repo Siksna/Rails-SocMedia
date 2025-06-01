@@ -77,18 +77,19 @@ end
   end
   
   
-  def update
-    @user = User.find(params[:id])
-    previous_username = @user.username 
-    previous_email = @user.email  
-  
-    if request.patch?
+ def update
+  @user = User.find(params[:id])
+  previous_username = @user.username 
+  previous_email = @user.email  
+
+  if request.patch?
+    begin
       if @user.update(user_params)
         if @user.saved_changes.any?
           changes = @user.saved_changes.except("updated_at").map do |attribute, values|
             "#{attribute}: from #{values[0]} to #{values[1]}"
           end.join(", ")
-  
+
           unless changes.empty?
             AdminActivity.create(
               admin: current_user,
@@ -98,15 +99,20 @@ end
             )
           end
         end
-        redirect_to admin_personas_path, notice: 'Lietotāja konts veiksmīgi atjaunots.'
+        redirect_to admin_personas_path, notice: 'User account successfully updated.'
       else
         flash[:errors] = @user.errors.full_messages
         render :edit
       end
-    else
-      redirect_to edit_admin_path(@user)
+    rescue ActiveRecord::RecordNotUnique
+      flash[:errors] = ['Username or email is already taken.']
+      render :edit
     end
+  else
+    redirect_to edit_admin_path(@user)
   end
+end
+
   
   
   
@@ -188,69 +194,80 @@ end
     redirect_to admin_personas_path
   end
   
- def history
-  @admins = User.where(admin_type: ['admin', 'head_admin'])
-  @unique_actions = AdminActivity.distinct.pluck(:action)
-  @admin_activities = AdminActivity.includes(:admin).order(created_at: :desc).limit(20)
 
-  @admin_activities = @admin_activities.where(admin_id: params[:admin]) if params[:admin].present?
-  @admin_activities = @admin_activities.where(action: params[:activity_action]) if params[:activity_action].present?
+  def history
+    @admins          = User.where(admin_type: ['admin', 'head_admin'])
+    @unique_actions  = AdminActivity.distinct.pluck(:action)
+    @unique_targets  = AdminActivity.distinct.pluck(:target)
 
-  if params[:start_date].present? && params[:end_date].present?
-    start_date = Date.parse(params[:start_date]).beginning_of_day
-    end_date = Date.parse(params[:end_date]).end_of_day
-    @admin_activities = @admin_activities.where(created_at: start_date..end_date)
-  elsif params[:start_date].present?
-    start_date = Date.parse(params[:start_date]).beginning_of_day
-    @admin_activities = @admin_activities.where("created_at >= ?", start_date)
-  elsif params[:end_date].present?
-    end_date = Date.parse(params[:end_date]).end_of_day
-    @admin_activities = @admin_activities.where("created_at <= ?", end_date)
+    @admin_activities = AdminActivity.includes(:admin)
+                                     .order(created_at: :desc)
+                                     .limit(20)
+
+    @admin_activities = @admin_activities.where(admin_id: params[:admin]) if params[:admin].present?
+    @admin_activities = @admin_activities.where(action: params[:activity_action]) if params[:activity_action].present?
+
+    @admin_activities = @admin_activities.where(target: params[:target]) if params[:target].present?
+
+    if params[:start_date].present? && params[:end_date].present?
+      start_date = Date.parse(params[:start_date]).beginning_of_day
+      end_date   = Date.parse(params[:end_date]).end_of_day
+      @admin_activities = @admin_activities.where(created_at: start_date..end_date)
+    elsif params[:start_date].present?
+      start_date = Date.parse(params[:start_date]).beginning_of_day
+      @admin_activities = @admin_activities.where("created_at >= ?", start_date)
+    elsif params[:end_date].present?
+      end_date   = Date.parse(params[:end_date]).end_of_day
+      @admin_activities = @admin_activities.where("created_at <= ?", end_date)
+    end
+
+    render 'admin/history'
   end
 
-  render 'admin/history'
-end
+  def load_more_history
+    after_id         = params[:after]
+    @admins          = User.where(admin_type: ['admin', 'head_admin'])
+    @unique_actions  = AdminActivity.distinct.pluck(:action)
+    @unique_targets  = AdminActivity.distinct.pluck(:target)
 
-def load_more_history
-  after_id = params[:after]
-  @admins = User.where(admin_type: ['admin', 'head_admin'])
-  @unique_actions = AdminActivity.distinct.pluck(:action)
+    activities = AdminActivity.includes(:admin)
 
-  activities = AdminActivity.includes(:admin)
+    activities = activities.where(admin_id: params[:admin])            if params[:admin].present?
+    activities = activities.where(action: params[:activity_action])    if params[:activity_action].present?
+    activities = activities.where(target: params[:target])             if params[:target].present?
 
-  activities = activities.where(admin_id: params[:admin]) if params[:admin].present?
-  activities = activities.where(action: params[:activity_action]) if params[:activity_action].present?
+    if params[:start_date].present? && params[:end_date].present?
+      start_date = Date.parse(params[:start_date]).beginning_of_day
+      end_date   = Date.parse(params[:end_date]).end_of_day
+      activities = activities.where(created_at: start_date..end_date)
+    elsif params[:start_date].present?
+      start_date = Date.parse(params[:start_date]).beginning_of_day
+      activities = activities.where("created_at >= ?", start_date)
+    elsif params[:end_date].present?
+      end_date   = Date.parse(params[:end_date]).end_of_day
+      activities = activities.where("created_at <= ?", end_date)
+    end
 
-  if params[:start_date].present? && params[:end_date].present?
-    start_date = Date.parse(params[:start_date]).beginning_of_day
-    end_date = Date.parse(params[:end_date]).end_of_day
-    activities = activities.where(created_at: start_date..end_date)
-  elsif params[:start_date].present?
-    start_date = Date.parse(params[:start_date]).beginning_of_day
-    activities = activities.where("created_at >= ?", start_date)
-  elsif params[:end_date].present?
-    end_date = Date.parse(params[:end_date]).end_of_day
-    activities = activities.where("created_at <= ?", end_date)
+    activities = activities.order(created_at: :desc, id: :desc)
+
+    if after_id.present?
+      last = AdminActivity.find(after_id)
+      activities = activities.where(
+        "(created_at < ?) OR (created_at = ? AND id < ?)",
+        last.created_at, last.created_at, last.id
+      )
+    end
+
+    @admin_activities = activities.limit(20)
+
+    if @admin_activities.empty?
+      head :no_content
+    else
+      render partial: "admin/history_data", layout: false
+    end
   end
 
-  activities = activities.order(created_at: :desc, id: :desc)
 
-  if after_id.present?
-    last = AdminActivity.find(after_id)
-    activities = activities.where(
-      "(created_at < ?) OR (created_at = ? AND id < ?)",
-      last.created_at, last.created_at, last.id
-    )
-  end
-
-  @admin_activities = activities.limit(20)
-
-  if @admin_activities.empty?
-    head :no_content
-  else
-    render partial: "admin/history_data", layout: false
-  end
-end
 
 
 

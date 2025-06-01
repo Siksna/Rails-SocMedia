@@ -1,52 +1,85 @@
-
 <div class="mb-4" style="width:100%;">
-    <button class="btn btn-outline-dark mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse" style="width:100%;">Filtrs</button>
+  <div class="card card-body bg-dark border-secondary mb-4">
+    <form id="filterForm" method="get" action="<%= admin_history_path %>">
+      
+    <% formatted_start = params[:start_date].present? ? Time.parse(params[:start_date]).strftime('%Y-%m-%dT%H:%M') : '' %>
+<% formatted_end = params[:end_date].present? ? Time.parse(params[:end_date]).strftime('%Y-%m-%dT%H:%M') : '' %>
 
-
-  <div class="collapse" id="filterCollapse">
-    <div class="card card-body bg-dark border-secondary mb-4">
-      <form id="filterForm" method="get" action="<%= admin_history_path %>">
-        <div class="row mb-3">
-
-          <div class="col-md-4">
-            <label for="adminFilter" class="form-label">Izvēlies Adminu:</label>
-            <select id="adminFilter" name="admin" class="form-select">
-              <option value="">Visi</option>
-              <% @admins.each do |admin| %>
-                <option value="<%= admin.id %>" <%= params[:admin].to_s == admin.id.to_s ? 'selected' : '' %>><%= admin.username %></option>
-              <% end %>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label for="actionFilter" class="form-label">Darbība:</label>
-            <select id="actionFilter" name="activity_action" class="form-select">
-              <option value="">Visas</option>
-              <% @unique_actions.each do |action| %>
-                <option value="<%= action %>" <%= params[:activity_action] == action ? 'selected' : '' %>><%= action %></option>
-              <% end %>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Datumu Diapazons:</label>
-            <div class="input-group">
-              <input type="date" class="form-control" name="start_date" value="<%= params[:start_date] %>">
-              <span class="input-group-text">līdz</span>
-              <input type="date" class="form-control" name="end_date" value="<%= params[:end_date] %>">
-            </div>
-          </div>
-        </div>
-
-        <div class="text-center">
-          <button type="submit" class="btn btn-primary me-2">Filtrēt</button>
-          <a href="<%= admin_history_path %>" class="btn btn-outline-light">Notīrīt</a>
-        </div>
-      </form>
+<div class="row justify-content-center mb-4">
+  <div class="col-md-6">
+    <label class="form-label text-white text-center d-block">Date & Time Range</label>
+    <div class="input-group">
+      <input type="datetime-local"
+             class="form-control bg-light border-secondary"
+             name="start_date"
+             style="min-width: 150px;"
+             value="<%= formatted_start %>">
+      <span class="input-group-text bg-secondary text-white">to</span>
+      <input type="datetime-local"
+             class="form-control bg-light border-secondary"
+             name="end_date"
+             style="min-width: 150px;"
+             value="<%= formatted_end %>">
     </div>
   </div>
 </div>
 
+
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label for="adminFilter" class="form-label text-white">Admin</label>
+          <select id="adminFilter"
+                  name="admin"
+                  class="form-select bg-light border-secondary text-dark">
+            <option value="">All</option>
+            <% @admins.each do |admin| %>
+              <option value="<%= admin.id %>"
+                <%= 'selected' if params[:admin].to_s == admin.id.to_s %>>
+                <%= admin.username %>
+              </option>
+            <% end %>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label for="actionFilter" class="form-label text-white">Action</label>
+          <select id="actionFilter"
+                  name="activity_action"
+                  class="form-select bg-light border-secondary text-dark">
+            <option value="">All</option>
+            <% @unique_actions.each do |action| %>
+              <option value="<%= action %>"
+                <%= 'selected' if params[:activity_action] == action %>>
+                <%= action %>
+              </option>
+            <% end %>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label for="targetFilter" class="form-label text-white">Target</label>
+          <select id="targetFilter"
+                  name="target"
+                  class="form-select bg-light border-secondary text-dark">
+            <option value="">All</option>
+            <% @unique_targets.each do |target| %>
+              <option value="<%= target %>"
+                <%= 'selected' if params[:target] == target %>>
+                <%= target %>
+              </option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary me-2">Filter</button>
+        <a href="<%= admin_history_path %>" class="btn btn-outline-light">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
 
 <table class="table table-dark table-hover table-bordered border-secondary">
   <thead class="table-light">
@@ -58,15 +91,23 @@
       <th class="text-center fw-bold">Time</th>
     </tr>
   </thead>
-  <tbody class="admin-history" data-controller="pagination" data-pagination-direction-value="down" data-pagination-url-value="/admin/history/load_more_history" data-pagination-mode-value="admin" data-pagination-target="messages">
-  <%= render partial: "admin/history_data", locals: { admin_activities: @admin_activities } %>
+  <tbody class="admin-history"
+         data-controller="pagination"
+         data-pagination-direction-value="down"
+         data-pagination-url-value="/admin/history/load_more_history"
+         data-pagination-mode-value="admin"
+         data-pagination-target="messages">
+    <%= render partial: "admin/history_data", locals: { admin_activities: @admin_activities } %>
 
-  <% if @admin_activities.any? %>
-  <% last_id = @admin_activities.last.id %>
-  <tr id="load-more-trigger" data-message-id="<%= last_id %>" data-after-id="<%= last_id %>"></tr>
-<% else %>
-<p>No history recorded</p>
-<% end %>
-
-</tbody>
+    <% if @admin_activities.any? %>
+      <% last_id = @admin_activities.last.id %>
+      <tr id="load-more-trigger" data-message-id="<%= last_id %>" data-after-id="<%= last_id %>"></tr>
+    <% else %>
+      <tr>
+        <td colspan="5" class="text-center text-muted">
+          No history recorded
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>

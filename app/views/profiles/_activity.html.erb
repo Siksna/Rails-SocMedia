@@ -70,10 +70,18 @@
     <% content = actionable&.try(:content) || target.try(:content) %>
     <p class="messagetext"><%= content.presence || "" %></p>
       <div style="text-align:center;">
-    <% file_obj = actionable&.is_a?(Reply) && actionable.file.attached? ? actionable.file : target.try(:file) if target.try(:file)&.attached? %>
+<% file_obj = nil %>
+
+<% if actionable&.is_a?(Reply) && actionable.file.attached? %>
+  <% file_obj = actionable.file %>
+<% elsif actionable&.is_a?(Message) && actionable.file.attached? %>
+  <% file_obj = actionable.file %>
+<% elsif target.respond_to?(:file) && target.file.attached? && actionable.nil? %>
+  <% file_obj = target.file %>
+<% end %>
     <% if file_obj %>
         <% if file_obj.content_type.start_with?('image/') %>
-          <%= image_tag file_obj, class: 'attached-image', style: 'max-width: 80%; height: auto;' %>
+          <%= image_tag file_obj, class: 'attached-image', style: 'max-width: 70%; height: auto;' %>
         <% elsif file_obj.content_type.start_with?('video/') %>
           <video class="attached-video" controls>
             <source src="<%= url_for(file_obj) %>" type="<%= file_obj.content_type %>">
@@ -242,10 +250,7 @@
   <% end %>
 
   <div class="d-flex justify-content-start mt-2" style="justify-content: start;padding: 0 5.5rem;gap: 4rem; align-items: center;">
-    <div class="reply-counts">
-      <i class="fa-regular fa-message"></i>
-      <%= target.is_a?(Message) ? target.replies.count : target.is_a?(Reply) ? target.children.count : 0 %>
-    </div>
+    
 
     <div class="like-section d-flex align-items-center">
       <% if current_user %>
@@ -263,5 +268,10 @@
         <i class="<%= current_user.bookmarked_messages.exists?(target.id) ? 'fa-solid' : 'fa-regular' %> fa-bookmark text-warning"></i>
       </button>
     <% end %>
+
+    <div class="reply-counts">
+      <i class="fa-regular fa-message"></i>
+      <%= target.is_a?(Message) ? target.replies.count : target.is_a?(Reply) ? target.children.count : 0 %>
+    </div>
   </div>
 </div>

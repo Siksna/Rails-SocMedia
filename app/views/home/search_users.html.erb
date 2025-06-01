@@ -1,3 +1,10 @@
+<% if params[:query].present? %>
+  <div class="search-banner" style="font-weight: 800; margin-right: auto; font-size:2rem; border-bottom:3px solid;">
+    Searched “<%= h(params[:query]) %>”
+  </div>
+<% end %>
+
+
 <% if @users.present? %>
   <div class="users-container">
     <% @users.each do |user| %>

@@ -28,7 +28,7 @@ avatar_url =
         message_text: "replied to your message",
         notification_type: "reply",
         read: false,
-        notifiable: @message
+         notifiable: @reply
       )
 
       NotificationChannel.broadcast_to(
@@ -207,7 +207,8 @@ avatar_url =
           sender_id: current_user.id,
           message_text: "liked your reply",
           notification_type: "like",
-          read: false
+          read: false,
+          notifiable: @reply
         )
 
   

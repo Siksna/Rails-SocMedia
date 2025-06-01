@@ -1,29 +1,52 @@
-<div class="card border-light mb-3" style="max-width: 18rem;">
-<div class="card-header"><h2>Login</h2></div>
+<div class="login-card border-light mb-3 shadow" style="max-width: 22rem;">
+  <div class="login-header bg-dark text-white text-center fs-5 fw-bold">Login</div>
 
-<%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-  <div class="field form-group">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, class:"form-control", autocomplete: "email" %>
-  </div>
+ <div class="login-body p-3">
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "login-form", autocomplete: "off" }) do |f| %>
 
-  <div class="field form-group">
-    <%= f.label :password %><br />
-    <%= f.password_field :password, class:"form-control", autocomplete: "current-password" %>
-  </div>
+    <div class="mb-3">
+      <%= f.label :email, class: "form-label fw-semibold" %>
+      <%= f.email_field :email,
+            autofocus: true,
+            autocomplete: "email",
+            maxlength: 30,
+            class: "form-control" %>
+    </div>
 
-  <% if devise_mapping.rememberable? %>
-    <div class="field form-check ">
-      <%= f.check_box :remember_me, class:"form-check-input" %>
-      <%= f.label :remember_me %>
+    <div class="mb-3">
+      <%= f.label :password, class: "form-label fw-semibold" %>
+      <%= f.password_field :password,
+            autocomplete: "current-password",
+            class: "form-control" %>
+    </div>
+
+    <% if devise_mapping.rememberable? %>
+      <div class="form-check mb-3">
+        <%= f.check_box :remember_me, class: "form-check-input", id: "remember_me" %>
+        <%= f.label :remember_me, class: "form-check-label", for: "remember_me" %>
+      </div>
+    <% end %>
+
+    <div class="text-center">
+      <%= f.submit "Login",
+            class: "btn btn-dark border-0 rounded-pill shadow-sm px-4 py-2",
+            data: { disable_with: "Logging in..." } %>
     </div>
   <% end %>
 
-  <div class="actions">
-    <%= f.submit "Login", class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
+
+    <div class="separator my-3 text-center">
+      <span class="separator-line"></span>
+      <span class="separator-text px-2">or</span>
+      <span class="separator-line"></span>
+    </div>
+
+    <div class="text-center">
+      <%= render "devise/shared/links" %>
+    </div>
+
+    <div class="mt-2" style="color: red;">
+      <%= render "devise/shared/error_messages", resource: resource %>
+    </div>
   </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
-
 </div>

@@ -19,16 +19,19 @@
       <div class="nav-item dropdown ms-auto">
         <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
         <ul class="dropdown-menu">
-          <li>
-          <% parent_message = @message || reply.message %>
-        <%= link_to 'Edit', edit_message_reply_path(parent_message, reply), class: 'dropdown-item btn btn-primary' %>
-        </li>
-          <li>
-            <%= button_to 'Delete', message_reply_path(parent_message, reply), method: :delete,
-            data: { confirm: 'Are you sure you want to delete?' },
-            class: 'dropdown-item btn btn-danger', "data-turbolinks": false %>
-          </li>
-        </ul>
+  <li>
+    <%= link_to edit_message_reply_path(reply.message, reply), class: 'dropdown-item' do %>
+      <i class="fas fa-edit me-2"></i> Edit
+    <% end %>
+  </li>
+  <li><hr class="dropdown-divider"></li>
+  <li>
+    <%= button_to message_reply_path(reply.message, reply), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item text-danger' do %>
+      <i class="fas fa-trash me-2"></i> Delete
+    <% end %>
+  </li>
+</ul>
+
       </div>
     <% end %>
   </div>
@@ -61,15 +64,8 @@
 
  
 
-  <div class="ComAndLike d-flex align-items-center mt-2" id="ReplyReplyLikes" style="justify-content: start;padding: 0 2rem;gap: 4rem;">
-  <% if reply.parent_id.nil? %>
-      <button class="comment btn btn-sm btn-link text-decoration-none" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
-  <i class="fa-regular fa-message"></i>
-  <span id="comment-count-<%= reply.id %>">
-    <%= pluralize(reply.children.count, 'comment', 'comments') %>
-  </span>
-</button>
-  <% end %>
+  <div class="ComAndLike d-flex align-items-center mt-2" id="ReplyReplyLikes" style="justify-content: start;padding: 0 5rem;gap: 4rem;">
+ 
   <div class="like-section d-flex align-items-center">
   <% if current_user %>
 <% parent_message_id = @message&.id || reply.message&.id %>
@@ -100,12 +96,19 @@
   </button>
 <% end %>
 
-
+ <% if reply.parent_id.nil? %>
+      <button class="comment btn btn-sm btn-link text-decoration-none" data-bs-toggle="collapse" data-bs-target="#replyToReply<%= reply.id %>">
+  <i class="fa-regular fa-message"></i>
+  <span id="comment-count-<%= reply.id %>">
+    <%= pluralize(reply.children.count, 'comment', 'comments') %>
+  </span>
+</button>
+  <% end %>
 </div>
 
 
   
-  <div class="child-replies collapse mt-3" id="replyToReply<%= reply.id %>" style="padding: 0 20px;">
+  <div class="child-replies collapse mt-3" id="replyToReply<%= reply.id %>" style="padding: 0px 20px; border-left: 3px solid; border-radius: 5px;">
     <ul class="reply-list">
     <% reply.children.each do |child| %>
     <%= render partial: 'home/reply', locals: { reply: child } %>

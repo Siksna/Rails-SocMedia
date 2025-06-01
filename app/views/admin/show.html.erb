@@ -4,26 +4,124 @@
       <p class="text-danger"><%= message %></p>
     <% end %>
   <% end %>
+
   <div class="d-flex">
     <div class="m-5">
       <div class="card bg-light border-warning shadow">
         <div class="card-body">
+
           <div class="card-header">
-            <h2 class="text-center">Lietotāja dati</h2>
+            <h2 class="text-center">Userdata</h2>
           </div>
-          <div>
-            <h2> <i class="fa-solid fa-circle-dot"></i> ID: <%= @user.id %> </h2>
-            <h2> <i class="fa-solid fa-circle-dot"></i> Lietotājvārds: <%= @user.username %> </h2>
-            <h2> <i class="fa-solid fa-circle-dot"></i> E-pasts: <%= @user.email %> </h2>
+<div style="color:black;">
+          <div class="text-center mb-4">
+                                  <div style="background-color: <%= @user.profile_color %>; border-radius:0 0 5px 5px;">
+            <% if @user.profile_picture.attached? %>
+              <%= image_tag @user.profile_picture,
+                            class: "rounded-circle",
+                               style: "width:120px; height:120px; object-fit:cover;",
+                            alt: "#{@user.username}'s profile picture" %>
+            <% else %>
+              <%= image_tag "default_profile.png",
+                            class: "rounded-circle",
+                            style: "width:120px; height:120px; object-fit:cover;",
+                            alt: "Default profile picture" %>
+            <% end %>
           </div>
-          <div class="d-flex">
-            <%= button_to raw("<i class='fa-sharp fa-solid fa-arrow-left'></i>"), admin_personas_path, method: :get, class:"btn btn-warning border-0 rounded-pill shadow p-2 m-2" %>
-            <% unless @user.admin? || @user.head_admin? %>
-            <%= button_to raw("<i class='fa-sharp fa-solid fa-gear'></i>"), edit_admin_path(@user), method: :get, class:"btn btn-primary border-0 rounded-pill shadow p-2 m-2" %>
-            <%= button_to raw("<i class='fa-solid fa-trash'></i>"), admin_path(@user), method: :delete, data: { confirm: 'Parliecināts?' }, class:"btn btn-danger border-0 rounded-pill shadow p-2 m-2" %>
-            <% end %> 
-            </div>
+                                </div>
+          <div class="mb-3">
+            <h4 class="d-flex align-items-center mb-2">
+              <i class="fa-solid fa-circle-dot me-2" style="color: var(--primary);"></i>
+              ID: <%= @user.id %>
+            </h4>
+            <h4 class="d-flex align-items-center mb-2">
+              <i class="fa-solid fa-circle-dot me-2" style="color: var(--primary);"></i>
+              Username: <%= @user.username %>
+            </h4>
+            <h4 class="d-flex align-items-center mb-2">
+              <i class="fa-solid fa-circle-dot me-2" style="color: var(--primary);"></i>
+              Email: <%= @user.email %>
+            </h4>
+
+             <% if @user.deleted? %>
+            <p class="text-warning d-flex align-items-center">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            Blocked since <%= @user.deleted_at.strftime("%B %-d, %Y") %>
+            </p>
+            <% end %>
+          </div>
+
+          <div class="mb-3">
+            <h5 class="fw-bold mb-2">Statistics</h5>
+            <ul class="list-unstyled">
+              <li class="mb-1">
+                <i class="fa-solid fa-users me-2" style="color: #444;"></i>
+                Followers: <%= @user.followers.count %>
+              </li>
+              <li class="mb-1">
+                <i class="fa-solid fa-user-plus me-2" style="color: #444;"></i>
+                Following: <%= @user.following.count %>
+              </li>
+              <li class="mb-1">
+                <i class="fa-solid fa-user-group me-2" style="color: #444;"></i>
+                Friends: <%= @user.friends.count%>
+              </li>
+              <li class="mb-1">
+                <i class="fa-solid fa-calendar-plus me-2" style="color: #444;"></i>
+                Account Created: <%= @user.created_at.strftime("%B %-d, %Y") %>
+              </li>
+              <li class="mb-1">
+                <i class="fa-solid fa-paper-plane me-2" style="color: #444;"></i>
+                Published Messages: <%= @user.messages.count + @user.replies.count %>
+              </li>
+              <li class="mb-1">
+                <i class="fa-solid fa-id-badge me-2" style="color: #444;"></i>
+                Status:
+                <% if @user.head_admin? %>
+                  Head Admin
+                <% elsif @user.admin? %>
+                  Admin
+                <% else %>
+                  User
+                <% end %>
+              </li>
+            </ul>
+          </div>
+
+         <div class="d-flex justify-content-center">
+  <%= button_to raw("<i class='fa-sharp fa-solid fa-arrow-left'></i>"),
+                admin_personas_path,
+                method: :get,
+                class: "btn btn-warning border-0 rounded-pill shadow p-2 m-2" %>
+
+  <% if current_user.head_admin? %>
+    <!-- Head admin can edit/delete any user (including admins) -->
+    <%= button_to raw("<i class='fa-sharp fa-solid fa-gear'></i>"),
+                  edit_admin_path(@user),
+                  method: :get,
+                  class: "btn btn-primary border-0 rounded-pill shadow p-2 m-2" %>
+    <%= button_to raw("<i class='fa-solid fa-trash'></i>"),
+                  admin_path(@user),
+                  method: :delete,
+                  data: { confirm: 'Parliecināts?' },
+                  class: "btn btn-danger border-0 rounded-pill shadow p-2 m-2" %>
+
+  <% elsif !@user.admin? && !@user.head_admin? %>
+    <!-- Regular admin can edit/delete only non-admin users -->
+    <%= button_to raw("<i class='fa-sharp fa-solid fa-gear'></i>"),
+                  edit_admin_path(@user),
+                  method: :get,
+                  class: "btn btn-primary border-0 rounded-pill shadow p-2 m-2" %>
+    <%= button_to raw("<i class='fa-solid fa-trash'></i>"),
+                  admin_path(@user),
+                  method: :delete,
+                  data: { confirm: 'Parliecināts?' },
+                  class: "btn btn-danger border-0 rounded-pill shadow p-2 m-2" %>
+  <% end %>
+</div>
+
         </div>
+      </div>
       </div>
     </div>
   </div>

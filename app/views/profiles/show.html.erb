@@ -1,77 +1,92 @@
-<div style="display:flex;flex-direction: column-reverse; min-width:80%;">
-  <div class="profile-info">
-    <div class="profile-picture">
-      <%= link_to profile_path(@user) do %>
-                  <div class="default-profile-picture" style="background-color: <%= @user.profile_color %>; width:100px; height:auto;">
+<div class="profile-card">
+  <div class="profile-inner">
+    <div class="profile-info">
+      <div class="profile-picture-wrapper">
+        <div>
+                  <div class="default-profile-picture" style="background-color: <%= @user.profile_color %>; width:100%; height:100%;">
         <% if @user.profile_picture.attached? %>
-          <%= image_tag @user.profile_picture, alt: "#{@user.username}", class: "profile-picture", style: "height:100px; width:100px; object-fit:cover;" %>
+          <%= image_tag @user.profile_picture, alt: "#{@user.username}", class: "profile-picture", style: "height:100%; width:100%; object-fit:cover;" %>
         <% else %>
             <%= image_tag "default_profile.png", alt: "Default Profile Picture", class: "profile-picture" %>
         <% end %>
                   </div>
-      <% end %>
-    </div>
+      </div>
+      </div>
 
-    <h1 class="profile-username">
-      <p><%= @user.username %></p>
-    </h1>
+      <h1 class="profile-username">
+  <span class="username-text"><%= @user.username %></span>
 
-    <div class="user-details">
-      <p class="follow-links">
-  <%= link_to followers_profile_path(@user), class: "follow-link follower" do %>
-    <span class="follow-count"><%= @user.followers.count %></span>
-    <span class="follow-label">Followers</span>
+  <span id="friend-status-container-<%= @user.id %>" class="friend-status-container">
+  <% if current_user&.friends_with?(@user) %>
+    <span class="friend-status"><i class="fa-solid fa-user-group"></i></span>
   <% end %>
-  
-  <%= link_to following_profile_path(@user), class: "follow-link following" do %>
-    <span class="follow-count"><%= @user.following.count %></span>
-    <span class="follow-label">Following</span>
-  <% end %>
-</p>
+</span>
+
+</h1>
 
 
-      <% if current_user %>
-        <% if current_user != @user %>
-          <% if !@user.deleted? %>
-            <div id="friend-status-container-<%= @user.id %>">
-              <% if current_user.friends_with?(@user) %>
-                <span class="friend-status">Friends</span>
-              <% end %>
-            </div>
+      
 
-            <button type="button"
-                    class="follow-button <%= current_user.following?(@user) ? 'unfollow' : 'follow' %>"
-                    onclick="toggleFollow(<%= @user.id %>, this)"
-                    data-following="<%= current_user.following?(@user) %>"
-                    id="follow-button-<%= @user.id %>">
-              <%= current_user.following?(@user) ? 'Unfollow' : 'Follow' %>
-            </button>
+      <div class="user-details">
+        <p class="follow-links">
+          <%= link_to followers_profile_path(@user), class: "follow-link follower" do %>
+            <span class="follow-count" id="follower-count-<%= @user.id %>">
+              <%= @user.followers.count %>
+            </span>
+            <span class="follow-label">Followers</span>
           <% end %>
+
+          <%= link_to following_profile_path(@user), class: "follow-link following" do %>
+            <span class="follow-count"><%= @user.following.count %></span>
+            <span class="follow-label">Following</span>
+          <% end %>
+        </p>
+
+        <% if current_user && current_user != @user && !@user.deleted? %>
+          <button
+            type="button"
+            class="follow-button <%= current_user.following?(@user) ? 'unfollow' : 'follow' %>"
+            onclick="toggleFollow(<%= @user.id %>, this)"
+            data-following="<%= current_user.following?(@user) %>"
+            id="follow-button-<%= @user.id %>"
+          >
+            <%= current_user.following?(@user) ? 'Unfollow' : 'Follow' %>
+          </button>
+        <% elsif !current_user %>
+          <p>
+            <%= link_to 'Follow', new_user_registration_path, class: "follow-button follow" %>
+          </p>
         <% end %>
-      <% else %>
-        <p><%= link_to 'Follow', new_user_registration_path, class: "follow" %></p>
-      <% end %>
+      </div>
     </div>
+
+    <% if current_user == @user %>
+      <div class="settings-link">
+        <%= link_to raw("<i class='fa-solid fa-gear'></i>"),
+                    edit_user_registration_path,
+                    class: "settings-icon" %>
+      </div>
+    <% end %>
   </div>
-
-  <% if current_user == @user %>
-    <%= link_to raw("<i class='fa-solid fa-gear'></i>"), edit_user_registration_path, class: "dropdown-item", style: "display: flex; justify-content: flex-end; padding-top:1rem;" %>
-  <% end %>
 </div>
-<hr>
+ 
 
-<div class="profile-buttons" style="min-width:80%;">
-  <%= link_to profile_path(@user), class: "btn #{params[:liked].nil? ? 'active' : ''}" do %>
-    <i class="<%= params[:liked].nil? ? 'fa-solid fa-message' : 'fa-regular fa-message'%>"></i>
-  <% end %>
 
-  <%= link_to profile_path(@user, liked: true), class: "btn #{params[:liked] == 'true' ? 'active' : ''}" do %>
-    <i class="<%= params[:liked] == 'true' ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i>
-  <% end %>
-</div>
+<div class="ProfileActivities">
 
-<hr>
+ <div class="profile-buttons">
+    <%= link_to profile_path(@user),
+                class: "btn #{params[:liked].nil? ? 'active' : ''}" do %>
+      <i class="<%= params[:liked].nil? ? 'fa-solid fa-message' : 'fa-regular fa-message' %>"></i>
+      <span class="btn-label">Posts</span>
+    <% end %>
 
+    <%= link_to profile_path(@user, liked: true),
+                class: "btn #{params[:liked] == 'true' ? 'active' : ''}" do %>
+      <i class="<%= params[:liked] == 'true' ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i>
+      <span class="btn-label">Likes</span>
+    <% end %>
+  </div>
 <div class="user-activity"
      data-controller="pagination"
      data-pagination-mode-value="<%= params[:liked] == 'true' ? 'profile_liked_activities' : 'profile_activities' %>"
@@ -81,7 +96,7 @@
   <% if @user.deleted? %>
     <p>This profile is blocked.</p>
   <% elsif @activities.empty? %>
-    <p>No <%= params[:liked] == 'true' ? 'liked messages' : 'activity' %> here.</p>
+    <p style="text-align:center;">No <%= params[:liked] == 'true' ? 'liked messages' : 'activity' %> here.</p>
   <% else %>
     <%= render partial: 'profiles/activity',
                collection: @activities,
@@ -96,7 +111,7 @@
        data-liked-mode="<%= params[:liked] == 'true' %>">
   </div>
 <% end %>
-
+</div>
 
 
   <% end %>

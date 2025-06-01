@@ -27,9 +27,19 @@
       <div class="nav-item dropdown ms-auto">
         <a class="fa-solid fa-ellipsis nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="event.stopPropagation();"></a>
         <ul class="dropdown-menu">
-          <li><%= link_to 'Edit', edit_message_path(message), class: 'dropdown-item btn btn-primary' %></li>
-          <li><%= button_to 'Delete', message_path(message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item btn btn-danger', "data-turbolinks" => false %></li>
-        </ul>
+  <li>
+    <%= link_to edit_message_path(message), class: 'dropdown-item' do %>
+      <i class="fas fa-edit me-2"></i> Edit
+    <% end %>
+  </li>
+  <li><hr class="dropdown-divider"></li>
+  <li>
+    <%= button_to message_path(message), method: :delete, data: { confirm: 'Vai tiešām vēlaties dzēst?' }, class: 'dropdown-item text-danger', "data-turbolinks" => false do %>
+      <i class="fas fa-trash me-2"></i> Delete
+    <% end %>
+  </li>
+</ul>
+
       </div>
     <% end %>
   </div>
@@ -55,7 +65,6 @@
 
   
   <div class="d-flex" style="justify-content: start;padding: 0 5.5rem;gap: 4rem;">
-    <p style="margin:auto 0;"><i class="fa-regular fa-message"></i> <%= message.comment_count %></p>
     <div class="like-section d-flex align-items-center">
       <% if current_user %>
         <button class="heart me-2" method: :post, remote: true, onclick="toggleLike('<%= message.id %>', this); event.stopPropagation(); event.preventDefault();">
@@ -85,6 +94,7 @@
       </button>
   <% end %>
 </div>
+    <p style="margin:auto 0;"><i class="fa-regular fa-message"></i> <%= message.comment_count %></p>
 
   </div>
 </div>

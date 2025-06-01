@@ -33,29 +33,21 @@ class HomeController < ApplicationController
   end
 
   def load_more_notifications
-    last_notification_id = params[:after]
-    notifications_query = current_user.notifications.includes(:sender, :message, reply: [:message, file_attachment: :blob]).where.not(notification_type: 'chats').order(created_at: :desc, id: :desc)
+  last_notification_id = params[:after]
+  notifications_query = current_user.notifications
+                                    .includes(:sender, :message, reply: [:message, file_attachment: :blob])
+                                    .where.not(notification_type: 'chats')
+                                    .order(id: :desc)
 
-    if last_notification_id.present?
-      last_notification = Notification.find_by(id: last_notification_id)
-     if last_notification
-  notifications_query = notifications_query.where(
-    "(notifications.created_at < ?) OR (notifications.created_at = ? AND notifications.id < ?)",
-    last_notification.created_at, last_notification.created_at, last_notification.id
-  )
-
-      else
-      
-        @notifications = []
-        render partial: 'home/notification', collection: @notifications, as: :notification, layout: false
-        return
-      end
-    end
-
-    @notifications = notifications_query.limit(10)
-
-    render partial: 'home/notification', collection: @notifications, as: :notification, layout: false
+  if last_notification_id.present?
+    notifications_query = notifications_query.where('id < ?', last_notification_id)
   end
+
+  @notifications = notifications_query.limit(10)
+
+  render partial: 'home/notification', collection: @notifications, as: :notification, layout: false
+end
+
 
 
   def search_users

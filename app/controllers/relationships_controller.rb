@@ -45,16 +45,20 @@ avatar_url =
       end
     end
 
-    respond_to do |format|
-      format.json {
-        render json: {
-          following: true,
-          followers_count: @user.followers.count,
-          friends_with: current_user.friends_with?(@user)
-        }
-      }
-      format.html { redirect_to profile_path(@user) }
-    end
+    current_user.reload
+@user.reload
+
+respond_to do |format|
+  format.json {
+    render json: {
+      following: true,
+      followers_count: @user.followers.count,
+      friends_with: current_user.friends_with?(@user)
+    }
+  }
+  format.html { redirect_to profile_path(@user) }
+end
+
   end
 
   def destroy
@@ -63,16 +67,20 @@ avatar_url =
     Friendship.where(user: current_user, friend: @user).destroy_all
     Friendship.where(user: @user, friend: current_user).destroy_all
 
-    respond_to do |format|
-      format.json {
-        render json: {
-          following: false,
-          followers_count: @user.followers.count,
-          friends_with: current_user.friends_with?(@user)
-        }
-      }
-      format.html { redirect_to profile_path(@user) }
-    end
+    current_user.reload
+@user.reload
+
+respond_to do |format|
+  format.json {
+    render json: {
+      following: false,
+      followers_count: @user.followers.count,
+      friends_with: current_user.friends_with?(@user)
+    }
+  }
+  format.html { redirect_to profile_path(@user) }
+end
+
   end
 
   private

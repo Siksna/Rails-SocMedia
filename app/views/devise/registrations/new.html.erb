@@ -1,44 +1,58 @@
-<div class="card border-light mb-3" style="max-width: 18rem;">
-<div class="card-header">Register</div>
+<div class="register-card border-light mb-3 shadow" style="max-width: 22rem;">
+  <div class="register-header bg-dark text-white text-center fs-5 fw-bold">Register</div>
 
+  <div class="register-body p-3">
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "register-form", autocomplete: "off" }) do |f| %>
+    
+    <div class="mb-3">
+      <%= f.label :email, class: "form-label fw-semibold" %>
+      <%= f.email_field :email,
+            autofocus: true,
+            autocomplete: "email",
+            maxlength: 30,
+            class: "form-control" %>
+    </div>
 
-<div class="card-body">
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+    <div class="mb-3">
+      <%= f.label :username, class: "form-label fw-semibold" %>
+      <%= f.text_field :username,
+            maxlength: 30,
+            class: "form-control" %>
+    </div>
 
+    <div class="mb-3">
+      <%= f.label :password, class: "form-label fw-semibold" %>
+      <%= f.password_field :password,
+            autocomplete: "new-password",
+            placeholder: "#{@minimum_password_length} characters minimum",
+            class: "form-control" %>
+    </div>
 
-  <div class="field">
-  <h5 class="card-title"><%= f.label :email %></h5>
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-  </div>
+    <div class="mb-3">
+      <%= f.label :password_confirmation, class: "form-label fw-semibold" %>
+      <%= f.password_field :password_confirmation,
+            autocomplete: "new-password",
+            class: "form-control" %>
+    </div>
 
-
-  <div class="field">
-  <h5 class="card-title"><%= f.label :username %></h5>
-   <%= f.text_field :username %>
- </div>
- 
-  <div class="field">
-  <h5 class="card-title"><%= f.label :password %></h5>
-  <% if @minimum_password_length %>
-    <em><% @minimum_password_length %></em>
+    <div class="text-center">
+      <%= f.submit "Register",
+            class: "btn btn-dark border-0 rounded-pill shadow-sm px-4 py-2",
+            data: { disable_with: "Registering..." } %>
+    </div>
   <% end %>
-  <%= f.password_field :password, autocomplete: "new-password", placeholder: "#{@minimum_password_length} characters minimum" %>
-</div>
 
-
-  <div class="field">
-  <h5 class="card-title"><%= f.label :password_confirmation %></h5>
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+  <div class="separator my-3 text-center">
+    <span class="separator-line"></span>
+    <span class="separator-text px-2">or</span>
+    <span class="separator-line"></span>
   </div>
-
-  <div class="actions">
-    <%= f.submit "Register", class:"btn btn-dark border-0 rounded-pill shadow p-2 m-2" %>
+  
+  <div class="text-center">
+    <%= render "devise/shared/links" %>
   </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
-<%= render "devise/shared/error_messages", resource: resource %>
-
+  
+  <div class="mt-2" style="color: red;">
+    <%= render "devise/shared/error_messages", resource: resource %>
+  </div>
 </div>
-</div>
-

@@ -1,11 +1,9 @@
 
 <div data-controller="pagination" data-pagination-mode-value="notifications" data-pagination-direction-value="down" style="min-width:80%;">
-  <div data-pagination-target="messages">
+  <div data-pagination-target="messages" class="NotificationMessages">
   
     <% if @notifications.present? %>
-      <ul class="list-group" id="notifications-list">
         <%= render partial: 'home/notification', collection: @notifications, as: :notification %>
-      </ul>
       <div id="load-more-trigger"
            data-message-id="<%= @notifications.last.id %>"
            data-user-id="<%= current_user.id %>">

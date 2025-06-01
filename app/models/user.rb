@@ -23,7 +23,8 @@ end
 
   has_many :notifications, dependent: :destroy
 
-  validates :username, presence: true
+  validates :username, presence: true, uniqueness: { case_sensitive: false }, length: { maximum: 30 }
+validates :email, presence: true, uniqueness: { case_sensitive: false }, length: { maximum: 30 }, format: { with: URI::MailTo::EMAIL_REGEXP }
 
   enum :admin_type, [ :user, :admin, :head_admin ]
 

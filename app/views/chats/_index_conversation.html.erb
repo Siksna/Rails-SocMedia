@@ -1,46 +1,78 @@
 <% index_conversations.each do |conversation| %>
-  <% friend = conversation.sender == current_user ? conversation.receiver : conversation.sender %>
-  <% last_message_time = conversation.chat_conversations.maximum(:created_at)&.to_i || 0 %>
-  <div class="chat-card-users" data-convo-id="<%= conversation.id %>" data-last-message-at="<%= last_message_time %>">
-    <%= link_to chat_path(conversation), data: { turbo: false }, class: 'chat-link-to' do %>
-      <div class="username-pfp">
-              <div class="default-profile-picture" style="background-color: <%= friend.profile_color %>;">
-      <% if friend.profile_picture.attached? %>
-      <%= image_tag friend.profile_picture, class: 'chat-profile-picture' %>
-      <% else %>
-          <%= image_tag 'default_profile.png', class: 'w-20 h-20 rounded-full object-cover mb-2' %>
-      <% end %>
-              </div>
-        <p class="chat-username"><%= friend.username %></p>
+  <% friend = (conversation.sender == current_user) ? conversation.receiver : conversation.sender %>
+  <% last_message_time_int = conversation.chat_conversations.maximum(:created_at)&.to_i || 0 %>
+
+  <div class="chat-card-users"
+       data-convo-id="<%= conversation.id %>"
+       data-last-message-at="<%= last_message_time_int %>">
+
+    <%= link_to chat_path(conversation),
+                data: { turbo: false },
+                class: 'chat-link-to' do %>
+      <div class="chat-content">
+        <!-- • Avatar + Username placeholder (just HTML, no <a> here) -->
+        <div class="username-pfp-placeholder" style="max-width: 13%;">
+          <div class="default-profile-picture"
+               style="background-color: <%= friend.profile_color %>;">
+            <% if friend.profile_picture.attached? %>
+              <%= image_tag friend.profile_picture,
+                            class: 'chat-profile-picture',
+                            alt: "#{friend.username}’s profile picture" %>
+            <% else %>
+              <%= image_tag 'default_profile.png',
+                            class: 'chat-profile-picture',
+                            alt: "Default profile picture" %>
+            <% end %>
+          </div>
+          <p class="chat-username"><%= friend.username %></p>
+        </div>
+
+        <% last_message = @last_messages[conversation.id] %>
+        <% last_message_time = conversation.chat_conversations.maximum(:created_at) %>
+        <% if last_message.present? %>
+          <div class="last-message-info">
+            <p class="last-message-snippet">
+              <%= truncate(last_message, length: 30) %>
+            </p>
+            <% if last_message_time.present? %>
+              <p class="last-message-time text-muted text-sm">
+                <%= time_ago_in_words(last_message_time) %> ago
+              </p>
+            <% end %>
+          </div>
+        <% end %>
       </div>
-      <% other_user = conversation.sender == current_user ? conversation.receiver : conversation.sender %>
-      <% unless current_user.friends.include?(other_user) %>
-        <%= button_to 'Close Chat', hide_chat_path(conversation), method: :post, class: 'text-sm text-red-500' %>
-      <% end %>
-
-      <% last_message = @last_messages[conversation.id] %>
-    <% last_message_time = conversation.chat_conversations.maximum(:created_at) %>
-
-      <% if last_message.present? %>
-        <div class="last-message-info">
-        <p class="last-message-snippet">
-          <%= truncate(last_message, length: 30) %>
-        </p>
-          <% if last_message_time.present? %>
-        <p class="last-message-time text-muted text-sm">
-        <%= time_ago_in_words(last_message_time) %> ago
-      </p>
     <% end %>
+
+    <%= link_to profile_path(friend),
+                class: 'username-pfp-overlay',
+                title: friend.username do %>
+    <% end %>
+
+
+    <% other_user = (conversation.sender == current_user ? conversation.receiver : conversation.sender) %>
+    <% unless current_user.friends.include?(other_user) %>
+      <div class="close-chat-wrapper">
+        <%= button_to 'Close Chat',
+              hide_chat_path(conversation),
+              method: :post,
+              remote: true,
+              form: { "data-turbo" => false },
+              class: 'close-chat-button text-sm text-red-500',
+              data: { convo_id: conversation.id } %>
+
+      </div>
+    <% end %>
+
+
+    <div class="chat-unread-count-wrapper">
+      <span class="chat-unread-count badge bg-danger">0</span>
+    </div>
+
   </div>
 <% end %>
 
-<div class="chat-unread-count-wrapper">
-      <span class="chat-unread-count badge bg-danger" style="display: none;">0</span>
-      </div>
-    <% end %>
-  </div>
-<% end %>
 <% if index_conversations.any? %>
   <% last_time = index_conversations.last.chat_conversations.maximum(:created_at)&.to_i %>
-    <div id="load-more-trigger" data-message-id="<%= last_time %>"></div>
+  <div id="load-more-trigger" data-message-id="<%= last_time %>"></div>
 <% end %>

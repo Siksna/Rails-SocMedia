@@ -8,17 +8,24 @@
   <div class="ChatInputField text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
     <div id="fileInfo" class="file-info"></div>
     <div>
-    <div id="filePreview" class="file-preview"></div>
-  </div>
-    <div class="input-container d-flex">
-      <input id="inputField_chat" type="text" class="form-control" name="chat_conversation[content]" placeholder="Enter your message..." autocomplete="off", length: { maximum: 255 }>
+      <div id="filePreview" class="file-preview"></div>
+    </div>
+    <div class="chat-input-container gap-2">
+      <textarea id="inputField_chat"
+                class="form-control auto-resize-input"
+                name="chat_conversation[content]"
+                placeholder="Enter your message..."
+                rows="1"
+                maxlength="1000"
+                style="resize: none;"></textarea>
+
       <label class="file-upload">
         <i class="fas fa-paperclip"></i>
-        <input type="file" id="fileInput">
-        </label>
+        <input type="file" id="fileInput" hidden>
+      </label>
 
       <button id="postChat" class="mainbtn">
-      <i class="fas fa-paper-plane"></i>
+        <i class="fas fa-paper-plane"></i>
       </button>
     </div>
   </div>

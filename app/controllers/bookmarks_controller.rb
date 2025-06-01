@@ -2,12 +2,15 @@ class BookmarksController < ApplicationController
   before_action :authenticate_user!
 
  def index
-    @bookmarked_items = current_user.bookmarks
-      .includes(:bookmarkable)
-      .order(created_at: :desc)
-      .limit(10)
+    raw_bookmarks = current_user.bookmarks
+                                .includes(:bookmarkable)
+                                .order(created_at: :desc)
 
-     respond_to do |format|
+    valid_bookmarks = raw_bookmarks.select { |b| b.bookmarkable.present? }
+
+    @bookmarked_items = valid_bookmarks.first(10)
+
+    respond_to do |format|
       format.html { render 'home/bookmarks' }
     end
   end

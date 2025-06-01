@@ -1,6 +1,5 @@
 class ChatsController < ApplicationController
   before_action :authenticate_user!
-
   def index
     hidden_convo_ids = HiddenChat.where(user: current_user).pluck(:conversation_id)
   
@@ -175,14 +174,22 @@ end
   
 
   def hide
-    conversation = Conversation.find(params[:id])
-  
-    if [conversation.sender_id, conversation.receiver_id].include?(current_user.id)
-      HiddenChat.find_or_create_by(user: current_user, conversation: conversation)
-      redirect_to chats_path, notice: "Chat hidden."
-    else
-      redirect_to root_path, alert: "Unauthorized"
+  @conversation = Conversation.find(params[:id])
+
+  if [@conversation.sender_id, @conversation.receiver_id].include?(current_user.id)
+    HiddenChat.find_or_create_by(user: current_user, conversation: @conversation)
+
+    respond_to do |format|
+      format.js   { head :ok }
+      format.html { redirect_to chats_path, notice: "Chat hidden." }
+    end
+  else
+    respond_to do |format|
+      format.js   { head :unauthorized }
+      format.html { redirect_to root_path, alert: "Unauthorized" }
     end
   end
+end
+
   
 end

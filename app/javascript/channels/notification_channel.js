@@ -4,6 +4,7 @@ const currentUserId = parseInt(document.querySelector('meta[name="current-user-i
 
 
 const NotificationChannel = consumer.subscriptions.create("NotificationChannel", {
+  
   connected() {
     console.log("Connected to the NotificationChannel");
   },
@@ -11,8 +12,6 @@ const NotificationChannel = consumer.subscriptions.create("NotificationChannel",
    rejected() {
     console.error("Subscription to NotificationChannel was rejected.");
   },
-
-  
 
   received(data) {
     console.log("Received data:", data);
@@ -114,15 +113,20 @@ function addGeneralNotification(data) {
   const dot = document.createElement("span");
   dot.className = "blue-dot mt-1";
 
+ const profileImgLink = document.createElement("a");
+  profileImgLink.href = `/profiles/${data.sender_id}`;
+
+
   const profileImg = document.createElement("img");
   profileImg.src = data.sender_avatar_url;
   profileImg.style.backgroundColor = data.sender_avatar_color;
-
   profileImg.alt = "Avatar";
   profileImg.className = "rounded-circle";
   profileImg.style.width = "32px";
   profileImg.style.height = "32px";
   profileImg.style.objectFit = "cover";
+
+  profileImgLink.appendChild(profileImg);
 
   const usernameLink = document.createElement("a");
   usernameLink.href = `/profiles/${data.sender_id}`;
@@ -153,7 +157,7 @@ function addGeneralNotification(data) {
 
   const mediaWrapper = document.createElement("div");
   mediaWrapper.className = "d-flex gap-2";
-  mediaWrapper.appendChild(profileImg);
+  mediaWrapper.appendChild(profileImgLink);
   mediaWrapper.appendChild(textWrapper);
 
   li.appendChild(dot);
@@ -176,12 +180,7 @@ function addGeneralNotification(data) {
 
   notificationDropdown.prepend(li);
 
-  const allItems = notificationDropdown.querySelectorAll("li");
-  if (allItems.length > 10) {
-    for (let i = 10; i < allItems.length; i++) {
-      allItems[i].remove();
-    }
-  }
+ 
 
   let count = parseInt(notificationCount.textContent, 10) || 0;
   count += 1;
@@ -234,5 +233,6 @@ function markSingleNotificationAsRead(notificationId, dotElement) {
     })
     .catch(error => console.error("Error marking notification as read:", error));
 }
+
 
 export default NotificationChannel;

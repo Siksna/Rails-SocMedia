@@ -6,6 +6,16 @@ class Notification < ApplicationRecord
   belongs_to :reply, optional: true
   belongs_to :notifiable, polymorphic: true, optional: true
 
+
+def type_symbol
+  return :like if message_text&.include?('liked')
+  return :reply if notifiable.is_a?(Reply)
+  return :message if notifiable.is_a?(Message)
+  return :follow if notifiable.is_a?(Follow)
+  :unknown
+end
+
+
   def url
   Rails.logger.debug("Notification##{id} type: #{notification_type}, notifiable_type: #{notifiable_type}, notifiable_id: #{notifiable_id}")
   
