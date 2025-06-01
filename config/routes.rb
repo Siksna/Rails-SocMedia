@@ -2,6 +2,8 @@ Rails.application.routes.draw do
 
   mount ActionCable.server => '/cable'
 
+    devise_for :users, controllers: { sessions: "sessions" }
+
 
 get 'admin/history/load_more_history', to: 'admin#load_more_history', as: 'load_more_history'
 get 'admin/personas/load_more_personas', to: 'admin#load_more_personas', as: 'load_more_personas'
@@ -69,7 +71,6 @@ delete '/replies/:id/bookmark',   to: 'bookmarks#destroy', as: :delete_reply_boo
     get 'following', on: :member
   end
 
-  devise_for :users, controllers: { sessions: "sessions" }
 
   resources :notifications, only: [:destroy]  do
     collection do

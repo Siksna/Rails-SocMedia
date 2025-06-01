@@ -1,5 +1,6 @@
 class HomeController < ApplicationController
   def index
+  
     base_scope = Message.visible
 
     if params[:feed] == "following" && user_signed_in?
@@ -69,6 +70,7 @@ end
 
 
     private
+
 
   def relevance_score_sql_expression
     weights = ApplicationController::RELEVANCE_WEIGHTS

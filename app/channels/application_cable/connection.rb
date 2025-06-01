@@ -9,9 +9,11 @@ module ApplicationCable
     private
 
     def find_verified_user
-      if (user = User.find_by(id: cookies.signed[:user_id]))
+      if (user = env['warden'].user)
+        Rails.logger.info "✅ WebSocket authenticated as User #{user.id}"
         user
       else
+        Rails.logger.warn "❌ WebSocket rejected: no Devise session"
         reject_unauthorized_connection
       end
     end

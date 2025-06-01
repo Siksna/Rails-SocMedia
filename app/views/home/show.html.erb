@@ -29,7 +29,7 @@
   </li>
   <li><hr class="dropdown-divider"></li>
   <li>
-    <%= button_to message_path(@message), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item text-danger', "data-turbolinks" => false do %>
+    <%= button_to message_path(@message), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item', "data-turbolinks" => false do %>
       <i class="fas fa-trash me-2"></i> Delete
     <% end %>
   </li>

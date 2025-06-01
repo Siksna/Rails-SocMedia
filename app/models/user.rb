@@ -73,6 +73,8 @@ validates :email, presence: true, uniqueness: { case_sensitive: false }, length:
     create_friendship_if_mutual(other_user)
   end
 
+  
+
   def unfollow(other_user)
     following.delete(other_user)
     remove_friendship(other_user)
@@ -100,6 +102,9 @@ validates :email, presence: true, uniqueness: { case_sensitive: false }, length:
   
   
 
+
+
+
   def randomize_attributes
     self.username = "User #{SecureRandom.hex(4)}"
     save
@@ -110,6 +115,8 @@ validates :email, presence: true, uniqueness: { case_sensitive: false }, length:
     if other_user.following?(self)
       Friendship.find_or_create_by(user: self, friend: other_user)
       Friendship.find_or_create_by(user: other_user, friend: self)
+
+      find_or_create_conversation(other_user)
     end
   end
 

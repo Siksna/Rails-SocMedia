@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_29_135510) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_01_122239) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -93,11 +93,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_29_135510) do
 
   create_table "chat_read_statuses", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.integer "chat_id", null: false
+    t.integer "conversation_id", null: false
     t.datetime "last_read_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["chat_id"], name: "index_chat_read_statuses_on_chat_id"
+    t.index ["conversation_id"], name: "index_chat_read_statuses_on_conversation_id"
     t.index ["user_id"], name: "index_chat_read_statuses_on_user_id"
   end
 
@@ -246,7 +246,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_29_135510) do
   add_foreign_key "chat_conversations", "users", column: "sender_id"
   add_foreign_key "chat_messages", "chats"
   add_foreign_key "chat_messages", "users"
-  add_foreign_key "chat_read_statuses", "chats"
+  add_foreign_key "chat_read_statuses", "conversations"
   add_foreign_key "chat_read_statuses", "users"
   add_foreign_key "chat_users", "chats"
   add_foreign_key "chat_users", "users"

@@ -1536,11 +1536,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
 
-// register paga register nedrikst spamot
-// login un register page limits uz characteriem
 // confirmationi "Are you srue?" prieks lietam
-// reply lapa image display nesmuks
-
+// notifikacijas settingos var disabel, bvai uzlikt ka tikai no liek vai tikai no reply nak
 // OBLIGATI
 
 // chata pievienot ka texts iesutas uzreiz bet ja chat channela nav ieladejies tad vnk gray preview pasam lietotajam 

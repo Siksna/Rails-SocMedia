@@ -96,15 +96,18 @@ end
       @chat_conversations = @conversation.chat_conversations.order(created_at: :desc).limit(100)
     end
   
-    @chat_conversations = @chat_conversations.reverse
-  
-    @read_status = ChatReadStatus.find_by(user: current_user, chat: @conversation)
-  
-    if @read_status.nil?
-      @read_status = ChatReadStatus.create(user: current_user, chat: @conversation, last_read_at: Time.current)
-    elsif @read_status.last_read_at.nil?
-      @read_status.update(last_read_at: Time.current)
-    end
+    @conversation = Conversation.find(params[:id])
+
+@read_status = ChatReadStatus.find_by(user: current_user, conversation: @conversation)
+
+if @read_status.nil?
+  @read_status = ChatReadStatus.create(user: current_user, conversation: @conversation, last_read_at: Time.current)
+elsif @read_status.last_read_at.nil?
+  @read_status.update(last_read_at: Time.current)
+end
+
+
+
 
   end
   
@@ -146,7 +149,7 @@ end
   @chat_conversations = @chat_conversations.reverse
 
   # Tiek apskatīts vai lietotājs ir redzējis sūtītās ziņas no otras personas
-  @read_status = ChatReadStatus.find_by(user: current_user, chat: @conversation)
+  @read_status = ChatReadStatus.find_by(user: current_user, conversation: @conversation)
 
 # Atgriež tikai HTML fragmentu (_chat_conversation.html.erb), kas tiks ielādēts dinamiski ar JavaScript
 # Padod tam mainīgo `chat_conversations`, kas satur iepriekš atlasītās ziņas

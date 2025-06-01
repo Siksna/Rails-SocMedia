@@ -11,8 +11,6 @@ class MessagesController < ApplicationController
   end
   
 
-  
-
   def new
     @message = Message.new
     render 'home/new'

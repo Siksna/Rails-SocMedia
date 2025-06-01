@@ -1,6 +1,12 @@
 class SessionsController < Devise::SessionsController
     after_action :set_user_cookie, only: [:create]
   
+
+    def destroy
+    reset_session
+    super
+  end
+
     
     private
   

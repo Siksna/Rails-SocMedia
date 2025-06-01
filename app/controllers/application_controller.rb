@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :authenticate_user!, unless: :devise_controller?
- 
+
   before_action :restrict_deleted_user_access
 
 
@@ -11,6 +11,8 @@ RELEVANCE_WEIGHTS = {
     decay_updated_at: 0.05,
     decay_created_at: 0.005
   }.freeze
+
+
 
 
   protected

@@ -911,6 +911,25 @@ color:#c0c0c0;
   transform: none;
 }
 
+/* other sidebar */
+.otherSidebar {
+    width: 25%;
+    border-right: 5px solid #ccc;
+    background-color: #333333;
+    color: white;
+    padding: 20px 20px 20px 0;
+    height: 80%;
+    position: fixed;
+    top: 15%;
+    right: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem;
+    justify-content: space-between;
+    border: 5px inset;
+}
+
 /* bottom */
 .mobile-footer {
   height: 60px;
@@ -1249,7 +1268,6 @@ hr {
 .replies li {
   padding: 10px;
   border-bottom: 1px solid #ddd;
-  margin-bottom: 10px;
 }
 
 .replies li:last-child {
@@ -1858,7 +1876,6 @@ a.btn {
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: #333;
 }
 
 .profile-picture-container {
@@ -2057,7 +2074,6 @@ a.btn {
   height: 70px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid #444;
   background-color: #333;
   display: flex;
   justify-content: center;
@@ -2143,7 +2159,6 @@ margin-right:2rem;
   flex-shrink: 0;
   margin-right: auto;
   gap:1rem;
-  margin-top:5%;
 }
 
 .notification-read {
@@ -2183,7 +2198,8 @@ margin-right:2rem;
 
 .notification-like::before,
 .notification-reply::before,
-.notification-message::before {
+.notification-message::before,
+.notification-follow::before {
   content: '';
   position: absolute;
   top: 1rem;
@@ -3334,6 +3350,7 @@ button.text-red-500:hover {
   border-radius: 1rem;
   background-color: #f8f9fa;
   margin: 2rem auto;
+  color: black;
 }
 
 .login-header, .register-header {
