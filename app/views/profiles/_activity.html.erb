@@ -5,14 +5,21 @@
   <% actor      = target.user %>
   <% timestamp  = target.created_at %>
   <% kind       = target.is_a?(Reply) ? 'reply' : 'message' %>
+  <% render_main = true %>
 <% else %>
   <% actionable = activity.actionable %>
+  <% if actionable.nil? %>
+    <% render_main = false %>
+  <% else %>
   <% target     = actionable.is_a?(Message) ? actionable : actionable.message %>
   <% actor      = activity.user %>
   <% timestamp  = activity.created_at %>
   <% kind       = activity.actionable_type.underscore %>
+  <% render_main = true %>
+  <% end %>
 <% end %>
 
+<% if render_main %>
 <% message_for_link = target.is_a?(Reply) ? target.message : target %>
 <% link_url = message_for_link.present? ? message_path(message_for_link) : '#' %>
 
@@ -37,9 +44,10 @@
         <ul class="dropdown-menu">
   <% if actionable&.is_a?(Reply) %>
     <li>
-      <%= link_to edit_message_reply_path(target, actionable), class: 'dropdown-item' do %>
-        <i class="fas fa-edit me-2"></i> Edit
-      <% end %>
+      <%= link_to(edit_message_reply_path(target, actionable), class: 'dropdown-item') do %>
+  <i class="fas fa-edit me-2"></i> Edit
+<% end %>
+
     </li>
     <li><hr class="dropdown-divider"></li>
     <li>
@@ -275,3 +283,4 @@
     </div>
   </div>
 </div>
+<% end %>

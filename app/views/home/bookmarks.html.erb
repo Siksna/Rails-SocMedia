@@ -3,13 +3,16 @@
      data-pagination-mode-value="bookmarks" 
      data-pagination-direction-value="down" style="min-width:80%;">
   <div data-pagination-target="messages">
- 
+ <% if @bookmarked_items.any? %>
         <%= render partial: 'home/bookmark', collection: @bookmarked_items, as: :bookmark %>
-       <% if @bookmarked_items.any? %>
+       
   <div id="load-more-trigger"
        data-message-id="<%= @bookmarked_items.last.id %>"
        data-user-id="<%= current_user.id %>">
   </div>
+
+  <% else %>
+  You currently have no bookmarks.
 <% end %>
 
 </div>

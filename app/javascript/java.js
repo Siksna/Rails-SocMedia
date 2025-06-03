@@ -1552,9 +1552,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
 
 // confirmationi "Are you srue?" prieks lietam
-// notifikacijas settingos var disabel, bvai uzlikt ka tikai no liek vai tikai no reply nak
+// notifikacijas settingos var disabel, vai uzlikt ka tikai no liek vai tikai no reply nak
 // color switcherim identifikacija, sidebars prieks vairakam lietam
-
+// Kad lietotajs ir chata friends lapa un otrs atsut zinu bez parlades jauziet uz augsu tam user conversation lai rada ka jaunaks
+// Chata dati neparadas pareizi kad ieet no jauna
+// notificationos kad hover notification nepatem notifikacijas violetais punkts nepazud
+// forgot password mayeb jasalabo lai pa istam var nomainit
+// color switch vajag reset back to default body light ja ieiet cita acc
+// login lapa error message neradas
+ 
 // OBLIGATI
 
 // chata pievienot ka texts iesutas uzreiz bet ja chat channela nav ieladejies tad vnk gray preview pasam lietotajam 
@@ -1563,13 +1569,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // admini var noņemt lietotaja profila bildi
 // Biogrāfija priekš useriem profile lapā
 // suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
-
-//VIZUALI OBLIGATI
-
-// admin history dala tie kuri admin veic savu darbibu ir iekrasotas rindas lai var atskirt savus
-// default profile pic ir offcentered
-// profile bildes pozicija nesaglabajas kad to nomaina redigesanas lapa
-// kad raksta tekstu input fielda, vinam vajadzetu palikt lielakam ja ir daudz teksts
 
 // EXTRA
 
