@@ -59,7 +59,7 @@ end
 post   '/replies/:id/bookmark',   to: 'bookmarks#create',  as: :reply_bookmark
 delete '/replies/:id/bookmark',   to: 'bookmarks#destroy', as: :delete_reply_bookmark
   
-  resources :profiles, only: [:show] do
+  resources :profiles, only: [:show, :update] do
     member do
       post 'follow', to: 'relationships#create', as: 'follow'
       delete 'unfollow', to: 'relationships#destroy', as: 'unfollow'

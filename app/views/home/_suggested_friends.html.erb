@@ -1,0 +1,48 @@
+
+<% if @recommended.present? %>
+  <h5 class="text-white mb-3">Suggested for you</h5>
+
+
+  <ul class="list-unstyled">
+    <% @recommended.each do |entry| %>
+      <% user = entry[:user] %>
+      
+      <% reason = entry[:reason] %>
+      <% next unless user.is_a?(User) %>
+
+      <li class="d-flex align-items-center mb-3">
+        <div style="background-color: <%= user.profile_color %>;
+                    width: 40px; height: 40px; border-radius: 50%;
+                    overflow: hidden; margin-right: 0.75rem;">
+          <% if user.profile_picture.attached? %>
+            <%= image_tag user.profile_picture.variant(resize_to_fill: [40, 40]),
+                          alt: user.username,
+                          class: "rounded-circle",
+                          style: "object-fit: cover; width: 40px; height: 40px;" %>
+          <% else %>
+            <%= image_tag "default_profile.png",
+                          alt: "Default Profile",
+                          class: "rounded-circle",
+                          size: "40x40",
+                          style: "object-fit: cover;" %>
+          <% end %>
+        </div>
+
+        <div class="flex-grow-1">
+          <%= link_to user.username, profile_path(user),
+                      class: "text-white fw-semibold d-block mb-0" %>
+          <small class="text-muted">@<%= user.username.downcase %></small>
+
+          <% if reason == :you_might_know %>
+            <div class="small text-white-50">You might know them</div>
+          <% elsif reason == :popular %>
+            <div class="small text-white-50">Popular user</div>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+
+  <p class="text-white small text-center"><em>No suggestions.</em></p>
+<% end %>

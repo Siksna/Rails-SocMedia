@@ -68,6 +68,45 @@
       </div>
     <% end %>
   </div>
+
+ <% if current_user == @user %>
+  <div class="user-description-edit description">
+    
+    <div id="description-display" class="description-display">
+      <div class="edit-btn-container">
+        <button onclick="toggleDescriptionEdit(true)" class="icon-btn" title="Edit">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+      </div>
+      <% if @user.description.present? %>
+        <p><%= simple_format(@user.description) %></p>
+      <% else %>
+        <p class="text-muted">No description added yet.</p>
+      <% end %>
+    </div>
+
+    <div id="description-form" style="display:none;" class="description-form">
+      <%= form_with(model: @user, url: profile_path(@user), method: :patch, local: true) do |f| %>
+        <div class="edit-btn-container">
+          <button type="submit" class="icon-btn text-success" title="Save">
+            <i class="fa-solid fa-check"></i>
+          </button>
+          <button type="button" onclick="toggleDescriptionEdit(false)" class="icon-btn text-danger" title="Cancel" style="margin-bottom:0;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <%= f.text_area :description, rows: 4, class: "form-control", value: @user.description %>
+      <% end %>
+    </div>
+  </div>
+<% else %>
+  <% if @user.description.present? %>
+    <div class="user-description description">
+      <p><%= simple_format(@user.description) %></p>
+    </div>
+  <% end %>
+<% end %>
+
 </div>
  
 

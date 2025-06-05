@@ -1094,6 +1094,9 @@ const createdDate = typeof notification.created_at === "number"
       if (!li.dataset.markedRead) {
         markSingleNotificationAsRead(notification.id, dot);
         li.dataset.markedRead = "true";
+         if (dot && dot.parentNode) {
+      dot.remove();
+    }
       }
     });
 
@@ -1545,21 +1548,24 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+/* description */
+window.toggleDescriptionEdit = function(showForm) {
+  document.getElementById("description-display").style.display = showForm ? "none" : "flex";
+  document.getElementById("description-form").style.display = showForm ? "flex" : "none";
+};
+
 
 
 // EXTRA OBLIGATI
-
-// Application.css jaatliek atpakaļ assets/styleheets sekcija lai nebutu divaini vizuali kad ieladejas
 
 // confirmationi "Are you srue?" prieks lietam
 // notifikacijas settingos var disabel, vai uzlikt ka tikai no liek vai tikai no reply nak
 // color switcherim identifikacija, sidebars prieks vairakam lietam
 // Kad lietotajs ir chata friends lapa un otrs atsut zinu bez parlades jauziet uz augsu tam user conversation lai rada ka jaunaks
-// Chata dati neparadas pareizi kad ieet no jauna
-// notificationos kad hover notification nepatem notifikacijas violetais punkts nepazud
 // forgot password mayeb jasalabo lai pa istam var nomainit
 // color switch vajag reset back to default body light ja ieiet cita acc
 // login lapa error message neradas
+// chat notifikacija vizuali jauzliek taka notification notifkacijas sarkana zimite virs pasa <i>
  
 // OBLIGATI
 

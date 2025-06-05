@@ -50,6 +50,33 @@ def load_more_activities
 end
 
 
+def update
+  @user = User.find(params[:id])
+  if @user.update(user_params)
+    respond_to do |format|
+      format.html { redirect_to profile_path(@user), notice: "Profile updated." }
+      format.js
+    end
+  else
+    respond_to do |format|
+      format.html { render :edit }
+      format.js
+    end
+  end
+end
+
+private
+
+def user_params
+  params.require(:user).permit(:description)
+end
+
+
+private
+
+def profile_params
+  params.require(:user).permit(:description)
+end
 
 
 

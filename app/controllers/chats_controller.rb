@@ -88,12 +88,12 @@ end
     if params[:before]
       before_message = @conversation.chat_conversations.find_by(id: params[:before])
       @chat_conversations = if before_message
-        @conversation.chat_conversations.where("created_at < ?", before_message.created_at).order(created_at: :asc).limit(50)
+        @conversation.chat_conversations.where("created_at < ?", before_message.created_at).order(created_at: :desc).limit(50)
       else
         []
       end
     else
-      @chat_conversations = @conversation.chat_conversations.order(created_at: :asc).limit(100)
+      @chat_conversations = @conversation.chat_conversations.order(created_at: :desc).limit(100).reverse
     end
   
     @conversation = Conversation.find(params[:id])

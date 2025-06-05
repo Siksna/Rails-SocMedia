@@ -1,5 +1,8 @@
 class HomeController < ApplicationController
   def index
+
+      @recommended = current_user.suggested_with_reasons(limit: 8)
+
   
     base_scope = Message.visible
 
