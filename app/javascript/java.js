@@ -627,6 +627,17 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+     setTimeout(() => {
+      const isScrollable = chatBox.scrollHeight > chatBox.clientHeight;
+      const divider = document.querySelector(".unseen-divider");
+      const chatId = chatBox?.dataset.chatConversationId;
+      if (!isScrollable && divider) {
+        divider.remove();
+        updateLastReadAt(chatId);
+        clearUnseen();
+      }
+    }, 2000);
+
     setTimeout(() => {
     scrollToBottom();
   }, 0);
@@ -745,6 +756,7 @@ function ensureUnseenDivider() {
     chatMessages.insertBefore(divider, firstUnseen);
   }
 }
+
 
 
 
@@ -1553,38 +1565,3 @@ window.toggleDescriptionEdit = function(showForm) {
   document.getElementById("description-display").style.display = showForm ? "none" : "flex";
   document.getElementById("description-form").style.display = showForm ? "flex" : "none";
 };
-
-
-
-// EXTRA OBLIGATI
-
-// confirmationi "Are you srue?" prieks lietam
-// notifikacijas settingos var disabel, vai uzlikt ka tikai no liek vai tikai no reply nak
-// color switcherim identifikacija, sidebars prieks vairakam lietam
-// Kad lietotajs ir chata friends lapa un otrs atsut zinu bez parlades jauziet uz augsu tam user conversation lai rada ka jaunaks
-// forgot password mayeb jasalabo lai pa istam var nomainit
-// color switch vajag reset back to default body light ja ieiet cita acc
-// login lapa error message neradas
-// chat notifikacija vizuali jauzliek taka notification notifkacijas sarkana zimite virs pasa <i>
- 
-// OBLIGATI
-
-// chata pievienot ka texts iesutas uzreiz bet ja chat channela nav ieladejies tad vnk gray preview pasam lietotajam 
-// janonem aizmirsi paroli funkciju
-// admin history vajag uztaisit lai var sortot pec target
-// admini var noņemt lietotaja profila bildi
-// Biogrāfija priekš useriem profile lapā
-// suggested friends tabs laba puse, chata sekcija radas info par lietotaju, un admin paneli interesanta informacija
-
-// EXTRA
-
-// kad veic kadu izmaiņu augšā parādas popups ka veiksmigi izveidots
-// izmantot SLUGS hash lai neraditu url ids
-// Search bars kas atrod ziņas kuriem ir saistiti vardi, piemeram lietotajvards vai content vards un parada tas zinas uz ekran
-// display images var pievienot vairakus images un nospiest x uz jebkuru image
-// var pieslegties ar google kontu
-// Var čatot ar jebkuru personu
-// file poga visas lapas divains borders kad mouse hovero over
-// PAGINATION lietotāja profilā, follow un follower lista un lietotāju meklēšanas sekcijā, notifikacijas saraksta un save posts ari
-// tad kad nospiez notification un aiziet uz messagu, tad tas message ir at the top replijos un nedaudz iekrasots
-// Trigram search

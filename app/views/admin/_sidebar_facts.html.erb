@@ -1,0 +1,88 @@
+<div class="admin-facts">
+
+  <div class="admin-facts__section">
+    <h6 class="admin-facts__title">Global Stats</h6>
+    <ul class="admin-facts__list">
+      <li class="admin-facts__item">
+        Total Users: <span class="admin-facts__value"><%= User.count %></span>
+      </li>
+        <li class="admin-facts__item">
+        New Users Last 7d: <span class="admin-facts__value"><%= User.where("created_at >= ?", 7.days.ago).count %></span>
+      </li>
+
+      <li class="admin-facts__item">
+        Total Posts: <span class="admin-facts__value"><%= Message.count + Reply.count %></span>
+      </li>
+      <li class="admin-facts__item">
+        Total Likes: <span class="admin-facts__value"><%= Like.count %></span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="facts-divider"></div>
+
+  <div class="admin-facts__section">
+    <h6 class="admin-facts__title">Admin Stats</h6>
+    <ul class="admin-facts__list">
+
+      <li class="admin-facts__item">
+        Total Admins: <span class="admin-facts__value"><%= User.admin.count %></span>
+      </li>
+
+<% newest_promoted = User
+     .where(admin_type: [User.admin_types[:admin], User.admin_types[:head_admin]])
+     .order(updated_at: :desc)
+     .first %>
+
+<% if newest_promoted %>
+  <li class="admin-facts__item">
+    Newest:
+    <%= link_to newest_promoted.username, profile_path(newest_promoted), class: "admin-facts__link" %>
+    (<%= time_ago_in_words(newest_promoted.updated_at) %> ago)
+  </li>
+<% end %>
+
+
+
+
+      <% top_admin = AdminActivity
+           .group(:admin_id)
+           .order(Arel.sql("COUNT(*) DESC"))
+           .limit(1)
+           .pluck(:admin_id, Arel.sql("COUNT(*)"))
+           .first %>
+      <% if top_admin %>
+        <% top_user = User.find_by(id: top_admin[0]) %>
+        <li class="admin-facts__item">
+          Most Active:
+          <% if top_user %>
+            <%= link_to top_user.username, profile_path(top_user), class: "admin-facts__link" %>
+            <span class="admin-facts__value">(<%= top_admin[1] %> actions)</span>
+          <% else %>
+            Unknown <span class="admin-facts__value">(<%= top_admin[1] %> actions)</span>
+          <% end %>
+        </li>
+      <% end %>
+
+
+    </ul>
+  </div>
+
+  <div class="facts-divider"></div>
+
+  <div class="admin-facts__section">
+    <h6 class="admin-facts__title">Activity Stats</h6>
+    <ul class="admin-facts__list">
+      <li class="admin-facts__item">
+        Total Admin Actions: <span class="admin-facts__value"><%= AdminActivity.count %></span>
+      </li>
+      <li class="admin-facts__item">
+        Actions Last 7d: <span class="admin-facts__value"><%= AdminActivity.where("created_at >= ?", 7.days.ago).count %></span>
+      </li>
+      <li class="admin-facts__item">
+        Suspended Users: <span class="admin-facts__value"><%= User.where.not(deleted_at: nil).count %></span>
+        </li>
+    </ul>
+  </div>
+
+</div>

@@ -98,6 +98,8 @@ end
   
     @conversation = Conversation.find(params[:id])
 
+    @chat_user = (@conversation.sender == current_user) ? @conversation.receiver : @conversation.sender
+
 @read_status = ChatReadStatus.find_by(user: current_user, conversation: @conversation)
 
 if @read_status.nil?

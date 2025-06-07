@@ -5,7 +5,7 @@
     <%= form_with model: @message, local: true, html: { class: "ep-form" } do |f| %>
       <div class="ep-field ep-field-content">
         <%= f.label :content, 'Message content', class: 'ep-label-content' %>
-        <%= f.text_area :content, class: 'ep-textarea-content' %>
+        <%= f.text_area :content, class: 'ep-textarea-content', maxlength: 800 %>
       </div>
 
      <div class="ep-field ep-field-file">

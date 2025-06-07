@@ -19,7 +19,7 @@ class Reply < ApplicationRecord
 
   def validate_presence_of_content_or_file
     if content.blank? && file.blank?
-      errors.add(:base, 'Nevar publicēt ja nav pievienots teksts vai fails')
+      errors.add(:base, 'Cant publish if there isnt a message or a file')
     end
   end
 

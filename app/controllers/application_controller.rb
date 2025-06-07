@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :authenticate_user!, unless: :devise_controller?
+  before_action :set_recommended_users, if: :should_set_recommended_users?
 
   before_action :restrict_deleted_user_access
 
@@ -13,7 +14,17 @@ RELEVANCE_WEIGHTS = {
   }.freeze
 
 
-
+def set_recommended_users
+    if user_signed_in?
+      @recommended = current_user.suggested_with_reasons(limit: 8)
+    end
+  end
+  
+  def should_set_recommended_users?
+    return false if controller_path.start_with?('admin')
+    return false if controller_name == 'chats' && action_name == 'show'
+    true
+  end
 
   protected
 

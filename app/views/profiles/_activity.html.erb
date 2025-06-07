@@ -51,10 +51,14 @@
     </li>
     <li><hr class="dropdown-divider"></li>
     <li>
-      <%= button_to message_reply_path(target, actionable), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item' do %>
+    <%= form_with url: message_reply_path(target, actionable), method: :delete,
+                  data: { turbo: false, confirm: 'Are you sure?' },
+                  html: { onclick: "event.stopPropagation();" } do %>
+      <button type="submit" class="dropdown-item">
         <i class="fas fa-trash me-2"></i> Delete
-      <% end %>
-    </li>
+      </button>
+    <% end %>
+  </li>
   <% else %>
     <li>
       <%= link_to edit_message_path(target), class: 'dropdown-item' do %>
@@ -62,11 +66,15 @@
       <% end %>
     </li>
     <li><hr class="dropdown-divider"></li>
-    <li>
-      <%= button_to message_path(target), method: :delete, data: { confirm: 'Are you sure?' }, class: 'dropdown-item' do %>
+     <li>
+    <%= form_with url: message_path(target), method: :delete,
+                  data: { turbo: false, confirm: 'Are you sure?' },
+                  html: { onclick: "event.stopPropagation();" } do %>
+      <button type="submit" class="dropdown-item">
         <i class="fas fa-trash me-2"></i> Delete
-      <% end %>
-    </li>
+      </button>
+    <% end %>
+  </li>
   <% end %>
 </ul>
 

@@ -1,0 +1,53 @@
+<div class="chat-sidebar-info">
+  <%= link_to profile_path(user), class: "user-avatar-link" do %>
+         <div class="user-avatar-bg" style="background-color: <%= user.profile_color %>;
+              width: 80px; height: 80px; border-radius: 50%;
+              overflow: hidden; margin: 0 auto 1rem;">
+      <% if user.profile_picture.attached? %>
+        <%= image_tag user.profile_picture,
+                      alt: user.username,
+                      class: "user-avatar-img" %>
+      <% else %>
+        <%= image_tag 'default_profile.png',
+                      alt: "Default Profile",
+                      class: "user-avatar-img" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <h5 class="user-username">
+    <%= link_to user.username, profile_path(user), class: "user-username-link" %>
+  </h5>
+
+  <p class="user-follow-stats">
+    <%= link_to "#{user.followers.count} followers", followers_profile_path(user), class: "user-follow-link" %> |
+    <%= link_to "#{user.following.count} following", following_profile_path(user), class: "user-follow-link" %>
+  </p>
+
+   <p class="user-joined-since">
+    Joined <%= time_ago_in_words(user.created_at) %> ago
+  </p>
+
+  <% if defined?(current_user) && current_user && (friendship =
+       Friendship.find_by(user_id: current_user.id, friend_id: user.id) ||
+       Friendship.find_by(user_id: user.id, friend_id: current_user.id)
+     ) %>
+    <p class="user-friends-since">
+      <span class="friend-status-container">
+        <span class="friend-status"><i class="fa-solid fa-user-group"></i></span>
+      </span>
+      Friends since <%= friendship.created_at.strftime("%B %d, %Y") %>
+    </p>
+  <% end %>
+
+ <p class="user-description">
+    <%= user.description.present? ? user.description : "User has no description." %>
+  </p>
+
+  <% if user.deleted_at.present? %>
+    <p class="user-suspended-notice">
+      ⚠️ Account suspended on <%= user.deleted_at.strftime("%B %d, %Y") %><br>
+      Original username: <%= user.original_username || "—" %>
+    </p>
+  <% end %>
+</div>

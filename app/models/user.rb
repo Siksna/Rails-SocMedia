@@ -101,31 +101,36 @@ validates :email, presence: true, uniqueness: { case_sensitive: false }, length:
   end
   
   
-
 def suggested_with_reasons(limit: 8)
-  connected_ids = [id] + following.pluck(:id) + (friends.pluck(:id) + inverse_friends.pluck(:id))
+  connected_ids = [id] + following.pluck(:id) + friends.pluck(:id) + inverse_friends.pluck(:id)
   connected_ids.uniq!
 
   friend_ids = (friends.pluck(:id) + inverse_friends.pluck(:id)).uniq
   fof_ids = Friendship.where(user_id: friend_ids).pluck(:friend_id)
   friends_following_ids = Follow.where(follower_id: friend_ids).pluck(:followed_id)
-  popular_ids = User.joins(:passive_relationships)
-                    .group('users.id')
-                    .order('COUNT(follows.id) DESC')
-                    .limit(limit * 2)
-                    .pluck('users.id')
+
+  popularity_data = User
+    .where(deleted_at: nil)
+    .left_joins(:passive_relationships)
+    .group('users.id')
+    .select('users.id, COUNT(follows.id) AS followers_count')
+    .to_a
+
+  sorted_data = popularity_data.sort_by { |u| -u.followers_count.to_i }
+
+  top_30_percent_count = [(sorted_data.size * 0.30).ceil, 1].max
+  top_30_percent_ids = sorted_data.first(top_30_percent_count).map(&:id)
+
+  popular_ids = (top_30_percent_ids - connected_ids).shuffle
 
   fof_ids = (fof_ids - connected_ids).uniq
   friends_following_ids = (friends_following_ids - connected_ids).uniq
-  popular_ids = (popular_ids - connected_ids).uniq
-
-
 
   suggestions = []
   excluded_ids = connected_ids.dup
 
   if fof_ids.any?
-    User.unscoped.where(id: fof_ids).limit(limit).each do |u|
+    User.unscoped.where(id: fof_ids, deleted_at: nil).limit(limit).each do |u|
       suggestions << { user: u, reason: :you_might_know }
       excluded_ids << u.id
     end
@@ -133,7 +138,7 @@ def suggested_with_reasons(limit: 8)
 
   if suggestions.size < limit && friends_following_ids.any?
     needed = limit - suggestions.size
-    User.unscoped.where(id: friends_following_ids - excluded_ids).limit(needed).each do |u|
+    User.unscoped.where(id: friends_following_ids - excluded_ids, deleted_at: nil).limit(needed).each do |u|
       suggestions << { user: u, reason: :you_might_know }
       excluded_ids << u.id
     end
@@ -141,7 +146,8 @@ def suggested_with_reasons(limit: 8)
 
   if suggestions.size < limit && popular_ids.any?
     needed = limit - suggestions.size
-    User.unscoped.where(id: popular_ids - excluded_ids).limit(needed).each do |u|
+    remaining_popular_ids = (popular_ids - excluded_ids).shuffle.first(needed)
+    User.unscoped.where(id: remaining_popular_ids, deleted_at: nil).each do |u|
       suggestions << { user: u, reason: :popular }
       excluded_ids << u.id
     end
@@ -149,14 +155,14 @@ def suggested_with_reasons(limit: 8)
 
   if suggestions.size < limit
     needed = limit - suggestions.size
-    User.unscoped.where.not(id: excluded_ids).order(Arel.sql('RANDOM()')).limit(needed).each do |u|
+    User.unscoped.where.not(id: excluded_ids).where(deleted_at: nil).order(Arel.sql('RANDOM()')).limit(needed).each do |u|
       suggestions << { user: u, reason: :none }
     end
   end
 
   suggestions
-
 end
+
 
 
   def randomize_attributes

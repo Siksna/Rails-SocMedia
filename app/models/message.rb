@@ -8,7 +8,7 @@ class Message < ApplicationRecord
     has_many :likes, as: :likeable
     has_many :bookmarks, as: :bookmarkable, dependent: :destroy
     has_many :bookmarked_by, through: :bookmarks, source: :user
-    validates :content, presence: true, length: { maximum: 255 }, unless: -> { file.attached? }
+    validates :content, presence: true, length: { maximum: 800 }, unless: -> { file.attached? }
 
     scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
     scope :from_followed_users, ->(user) { where(user_id: user.following.select(:id)) }

@@ -6,7 +6,7 @@
 
 
 <head>
-
+<%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <%= action_cable_meta_tag %>
 
@@ -360,10 +360,22 @@
 </ul>
 </div>
 
-
 <div class="otherSidebar">
-  <%= render partial: 'home/suggested_friends', locals: { recommended: @recommended } %>
+  <%# Extract the namespace (first segment of controller_path) %>
+  <% namespace = controller_path.split("/").first %>
+
+  <% if namespace == "admin" %>
+    <%= render "admin/sidebar_facts" %>
+
+  <% elsif controller_name == "chats" && action_name == "show" && defined?(@chat_user) && @chat_user.present? %>
+    <%= render partial: "chats/user_info", locals: { user: @chat_user } %>
+
+  <% else %>
+    <%= render partial: "home/suggested_friends", locals: { recommended: @recommended } %>
+  <% end %>
 </div>
+
+
 
 
 </div>

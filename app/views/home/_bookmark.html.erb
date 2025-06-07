@@ -3,7 +3,7 @@
 <% if bookmarkable.is_a?(Message) %>
   <%= render partial: 'home/message', locals: { message: bookmarkable } %>
 <% elsif bookmarkable.is_a?(Reply) %>
-  <div class="bookmark-reply my-3" style="max-width:50rem;">
+  <div class="bookmark-reply my-3">
     <div class="post">
       <div class="d-flex align-items-center mb-2">
         <i class="fa-solid fa-reply me-2" style="padding-right:1rem;"></i>

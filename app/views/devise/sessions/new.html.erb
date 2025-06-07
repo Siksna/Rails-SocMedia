@@ -46,6 +46,13 @@
     </div>
 
     <div class="mt-2" style="color: red;">
+  <% if flash[:alert] %>
+    <div class="alert alert-danger text-center" role="alert">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+    <div class="mt-2" style="color: red;">
       <%= render "devise/shared/error_messages", resource: resource %>
     </div>
   </div>
