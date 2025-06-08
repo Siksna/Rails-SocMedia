@@ -328,6 +328,7 @@ let isReplying = false;
 let currentParentReplyId = null;
 
 function postReply(event) {
+
   event.preventDefault();
     if (isReplying) return;
     isReplying = true;

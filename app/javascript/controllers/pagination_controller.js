@@ -27,8 +27,6 @@ console.log("Pagination controller connected");
         } else if (this.directionValue === "down") {
           this.loadMoreDown();
         }
-      } else {
-        console.log("Trigger busy");
       }
     }, {
       threshold: 1,
@@ -102,18 +100,17 @@ console.log("Pagination controller connected");
 loadMoreDown() {
   const trigger = document.getElementById("load-more-trigger");
   if (!trigger) {
-    console.log("🚫 No trigger element found.");
+    console.log("No trigger found.");
   }
   if (!this.scrollContainer) {
-    console.log("🚫 Scroll container is missing.");
+    console.log("Scroll container missing.");
   }
 
   if (!trigger || !this.scrollContainer || this.loading) {
-    console.log("⏳ Exiting early: Missing trigger/scrollContainer or already loading.");
+    console.log("Exiting early");
     return;
   }
 
-  console.log("🚀 Starting loadMoreDown...");
 
   this.loading = true;
   this.observer.unobserve(trigger);
@@ -123,12 +120,7 @@ loadMoreDown() {
   const lastScore = trigger.dataset.messageScore;
   const afterIdForReplies = trigger.dataset.afterId;
 
-  console.log(`📌 Mode: ${this.modeValue}`);
-  if (lastScore) console.log(`⭐ lastScore: ${lastScore}`);
-  if (userId) console.log(`👤 userId: ${userId}`);
-
   function rebindReplyEvents(container) {
-    console.log("🔁 Rebinding reply events...");
     container.querySelectorAll('.clickable-reply').forEach(replyElement => {
       bindClickableReplyEvent(replyElement);
     });
@@ -170,25 +162,21 @@ loadMoreDown() {
       url = `/bookmarks/load_more?after=${lastId}`;
       break;
     default:
-      console.error("❌ Unknown mode:", this.modeValue);
       this.loading = false;
       return;
   }
 
-  console.log("🌐 Fetching URL:", url);
 
   fetch(url, {
     headers: { "X-Requested-With": "XMLHttpRequest" }
   })
     .then(response => {
-      console.log("✅ Response received");
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
       return response.text();
     })
     .then(html => {
-      console.log("📦 HTML content loaded");
       trigger.remove();
 
       this.messagesTarget.insertAdjacentHTML("beforeend", html);
@@ -208,16 +196,13 @@ loadMoreDown() {
       }
 
       if (!lastLoadedMessageElement) {
-        console.log("⚠️ No new messages loaded.");
         this.loading = false;
         return;
       }
 
       const newLastId = lastLoadedMessageElement.dataset.messageId || lastLoadedMessageElement.dataset.bookmarkId;
-      console.log("🆕 Last loaded message ID:", newLastId);
 
       if (newLastId === lastId) {
-        console.log("🔁 Last message ID is the same as previous – nothing new loaded.");
         this.loading = false;
         return;
       }
@@ -241,11 +226,10 @@ loadMoreDown() {
       this.messagesTarget.appendChild(newTrigger);
       this.observer.observe(newTrigger);
 
-      console.log("✅ New trigger added and observed.");
       this.loading = false;
     })
     .catch(err => {
-      console.error("❌ Pagination load error:", err);
+      console.error("Pagination error:", err);
       this.loading = false;
     });
 }

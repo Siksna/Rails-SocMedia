@@ -168,7 +168,7 @@ def destroy
       AdminActivity.create(
         admin: current_user,
         action: "Deleted reply",
-        description: "Content: #{@reply.content.truncate(100)}",
+        description: "Content: #{(@reply.content&.truncate(100).presence || 'No content')}",
         target: @reply.user.username
       )
     end

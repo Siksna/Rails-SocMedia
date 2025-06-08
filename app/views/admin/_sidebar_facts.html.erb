@@ -36,7 +36,7 @@
 
 <% if newest_promoted %>
   <li class="admin-facts__item">
-    Newest:
+    Recent changes to:
     <%= link_to newest_promoted.username, profile_path(newest_promoted), class: "admin-facts__link" %>
     (<%= time_ago_in_words(newest_promoted.updated_at) %> ago)
   </li>

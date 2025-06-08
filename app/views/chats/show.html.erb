@@ -4,8 +4,8 @@
 </div>
 </div>
 
-<%= form_with(model: [@conversation, @conversation.chat_conversations.build], url: chat_chat_conversations_path(@conversation), data: { remote: true }) do |form| %>
-  <div class="ChatInputField text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
+<%= form_with(model: [@conversation, @conversation.chat_conversations.build], url: chat_chat_conversations_path(@conversation), html: { data: { turbo: false, remote: false }, id: "post-chat-form", onsubmit: "postChat(event); return false;"}) do |form| %>
+    <div class="ChatInputField text-center p-4 position-fixed bottom-0 start-0 end-0 d-flex flex-column justify-content-center">
     <div id="fileInfo" class="file-info"></div>
     <div>
       <div id="filePreview" class="file-preview"></div>

@@ -4,6 +4,7 @@ class Reply < ApplicationRecord
   has_many :likes, as: :likeable
   after_create :log_activity
 
+validate :validate_presence_of_content_or_file
 
   scope :visible, -> { joins(:user).where(users: { deleted_at: nil }) }
   belongs_to :user
@@ -18,7 +19,7 @@ class Reply < ApplicationRecord
   end
 
   def validate_presence_of_content_or_file
-    if content.blank? && file.blank?
+    if content.blank? && !file.attached?
       errors.add(:base, 'Cant publish if there isnt a message or a file')
     end
   end

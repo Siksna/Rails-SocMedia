@@ -3287,6 +3287,7 @@ button.text-red-500:hover {
 .table tbody td .btn {
   font-size: 0.9rem;
   padding: 0.4rem 0.75rem;
+  margin-right: 1rem;
 }
 
 .table tbody td .btn + .btn {

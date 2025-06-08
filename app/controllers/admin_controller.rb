@@ -84,6 +84,7 @@ end
 
   if request.patch?
     begin
+       @user.profile_picture.purge if params[:user][:remove_profile_picture] == "1"
       if @user.update(user_params)
         if @user.saved_changes.any?
           changes = @user.saved_changes.except("updated_at").map do |attribute, values|
@@ -281,7 +282,7 @@ end
   end
 
   def user_params
-    params.require(:user).permit(:username, :email)
+    params.require(:user).permit(:username, :email, :remove_profile_picture)
   end
 
   def correct_user

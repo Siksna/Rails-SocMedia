@@ -155,6 +155,7 @@ function scrollToBottom() {
   }
 }
 
+
 document.addEventListener("DOMContentLoaded", () => {
   const scrollBtn = document.getElementById("scrollToLatestBtn");
 
@@ -173,8 +174,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatBox = document.querySelector(".chats-box");
   const chatId = chatBox?.dataset?.chatConversationId;
 
-  if (!chatId) return;
+  if (!chatId || window.chatChannel) return;
 
+  
   const chatChannel = consumer.subscriptions.create(
     { channel: "ChatChannel", chat_id: chatId },
     {

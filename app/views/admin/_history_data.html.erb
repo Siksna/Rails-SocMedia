@@ -4,7 +4,10 @@
 <tr data-message-id="<%= activity.id %>" class="<%= 'table-active bg-light text-dark' if is_current_user %>">
       <td class="text-center"><%= activity.admin&.username %></td>
       <td class="text-center"><%= activity.action %></td>
-      <td class="text-center"><%= activity.description %></td>
+      <td class="text-center" style="word-break: break-word;">
+  <%= activity.description %>
+</td>
+
       <td class="text-center"><%= activity.target %></td>
       <td class="text-center"><%= activity.created_at.strftime("%d-%m-%Y %H:%M:%S") %></td>
     </tr>

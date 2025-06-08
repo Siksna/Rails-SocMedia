@@ -124,7 +124,7 @@
     <button class="btn btn-sm btn-light ms-2" onclick="clearReplyTarget(); return false;">Cancel</button>
   </div>
 
-  <%= form_with model: [@message, @message.replies.build], local: false, html: { id: 'dynamic-reply-form', onsubmit: 'postReply(event); return false;' } do |form| %>
+<%= form_with model: [@message, @message.replies.build], html: { id: 'dynamic-reply-form', onsubmit: 'postReply(event); return false;', 'data-turbo'=> 'false','data-remote'=>'false'} do |form| %>
     <%= form.hidden_field :parent_id, id: 'dynamic-reply-parent-id' %>
     <%= form.hidden_field :mentioned_username, id: 'dynamic-reply-mentioned-username' %>
     <input type="hidden" id="replying-to-should-mention" value="0">
@@ -138,8 +138,9 @@
         <%= form.file_field :file, id: "replyFileInput", onchange: "displayReplyFileName()" %>
       </label>
 
-      <button class="mainbtn" id="replySubmitButton"><i class="fas fa-paper-plane"></i></button>
-    </div>
+<button type="button" class="mainbtn" id="replySubmitButton">
+      <i class="fas fa-paper-plane"></i>
+    </button>    </div>
   <% end %>
 </div>
 
